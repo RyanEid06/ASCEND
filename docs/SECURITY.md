@@ -1,6 +1,6 @@
 # ASCEND Security Architecture
 
-Version: 2.0 Architecture Freeze
+Version: 2.1 Architecture Freeze
 Status: Canonical implementation contract
 Owners: Ryan + Eddy
 
@@ -33,7 +33,7 @@ Trusted only for local computation, never for authorization:
 - encrypted local storage
 - UI
 
-A modified client can lie about its local state. Therefore server-side entitlements, rate limits, age-restricted server features, research submission eligibility, and account ownership must be independently enforced server-side.
+A modified client can lie about its local state. Therefore server-side entitlements, rate limits, research consent/eligibility, account ownership, and any persisted self-declared 13+ product-gate state used by server features must be independently checked server-side. This is still self-declaration, not age verification.
 
 ### Trusted server components
 - Supabase Auth
@@ -56,7 +56,7 @@ Treat all of these as hostile:
 - user-modified local state
 - client-submitted ownership IDs
 - client-submitted entitlement state
-- client-submitted age eligibility for privileged server actions
+- client-submitted self-declared age-gate / eligibility state
 
 ## 3. Secrets policy
 
@@ -167,7 +167,7 @@ Automated negative tests are mandatory:
 - client cannot grant premium
 - client cannot spoof another owner
 - client cannot directly write research tables
-- client cannot bypass server-only age/entitlement gates
+- client cannot bypass server-side entitlement, research-consent, or stored product-gate checks
 
 ## 8. AI security
 
@@ -191,7 +191,7 @@ AI may not:
 - alter category/overall scores
 - invent medical diagnoses
 - invent unsupported procedures
-- bypass age restrictions
+- bypass the configured product-gate, entitlement, or curated-content restrictions
 - create recommendation IDs outside the curated catalogue
 
 Provider keys are backend-only.
@@ -204,7 +204,7 @@ Protect expensive or privileged server routes using layered controls:
 - per-user/IP/device-appropriate rate controls
 - idempotency keys for retryable expensive operations
 - server-side entitlement verification
-- server-side age-band eligibility
+- server-side validation of stored self-declared 13+ state where an account/server feature requires it
 - global AI provider spending circuit breaker
 - future Play Integrity for production-distributed sensitive requests
 
