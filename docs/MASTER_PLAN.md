@@ -26,8 +26,8 @@ Before WP01 begins as permanent implementation work:
 
 1. production Android applicationId is frozen as `app.ascend.mobile`
 2. development/debug applicationId is frozen as `app.ascend.mobile.dev`
-3. generate a brand-new ASCEND signing key; do not reuse another app's key
-4. create and verify two encrypted/offline signing-key backups
+3. freeze the ASCEND-only signing/update policy; the permanent key is generated during Phase 0 before the first long-lived signed QA artifact and is never reused from another app
+4. require two verified encrypted/offline signing-key backups before the P0 sync gate closes
 5. verify the Windows/Android/Docker/Supabase development environment
 6. freeze local encryption, backup exclusion and session-storage contracts
 7. freeze Supabase schemas, grants, RLS ownership rules and negative-test requirements
