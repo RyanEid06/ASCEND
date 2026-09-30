@@ -28,7 +28,7 @@
   "coveragePolicyVersion": null,
   "extremaSelectionVersion": null,
   "provenance": {
-    "researchDatasetVersion": "2026.09.30-research-audit.1",
+    "researchDatasetVersion": "2026.09.30-research-audit.2",
     "reviewState": "UNREVIEWED_DRAFT_PLACEHOLDER",
     "approvedBy": [],
     "notes": "Intentionally non-scorable. Do not invent constants to populate this file."
