@@ -28,12 +28,14 @@ The product is based on standardized front + profile capture, deterministic faci
 - [Data Lifecycle](docs/DATA_LIFECYCLE.md)
 - [Release & Signing](docs/RELEASE_SIGNING.md)
 - [Development Environment](docs/DEVELOPMENT_ENVIRONMENT.md)
+- [Facial Reference Data v1](reference-data/v1/README.md)
+- [Facial Reference Integration](docs/research/FACIAL_REFERENCE_INTEGRATION.md)
 
 ## Current stage
 
 Architecture Freeze 2.0 is the current baseline. WP00 must be completed before permanent WP01 implementation begins. After WP00, both developers read the phase contracts, branch from the exact phase integration baseline, work in parallel, and stop at every mandatory sync/update gate before moving forward.
 
-The detailed T1-T5 ranges, metric weights, rank thresholds, and final reference-model constants are intentionally not guessed in this repository. Ryan/Eddy will supply them and they will be inserted as versioned data, not hard-coded throughout the app.
+Source-backed facial measurement/reference research is now stored under `reference-data/v1/`. Final ASCEND production T1-T5 curves, metric weights, rank thresholds, and runtime scoring constants still require an explicit scoring-model freeze and must remain versioned rather than hard-coded throughout the app.
 
 
 ## Implementation gate
