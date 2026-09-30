@@ -38,7 +38,7 @@ Before WP01 begins as permanent implementation work:
 12. freeze the pseudonymous opt-in research contribution contract
 13. freeze phase-by-phase signed APK update testing
 14. review the threat model
-15. prove and freeze the Room + supported SQLCipher integration path, Keystore key-envelope format, migration/reopen behavior and 16 KB native-library compatibility before WP06 depends on it
+15. freeze the Room/SQLCipher compatibility-spike acceptance criteria and Keystore key-envelope contract; execute the spike during Phase 0 before the P0 sync gate and before any later persistence work depends on it
 16. freeze the research-catalogue -> reviewed runtime-model boundary; research CSVs are never direct scoring inputs
 17. freeze durable sync scheduling with WorkManager plus server-issued revisions/tombstones/idempotency
 18. enable repository governance appropriate for implementation before secrets or code accumulate
