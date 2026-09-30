@@ -108,7 +108,7 @@ ASCEND V1 is not:
    - Hardmax only if 18+
 5. guest or account
 6. privacy/data notices
-7. optional anonymous-derived-data contribution consent
+7. optional pseudonymous derived-data contribution consent
 8. capture tutorial
 
 ### New scan
@@ -409,7 +409,7 @@ Hard rules:
 - sensitive data excluded from Android backup/device transfer
 - user deletion deletes associated local assets
 - cloud deletion flow must exist for account data
-- anonymous dataset contribution is separate explicit opt-in
+- pseudonymous dataset contribution is a separate explicit opt-in
 - under-18 dataset contribution disabled for V1
 
 ## 13. Misc feature strategy
