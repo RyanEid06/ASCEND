@@ -122,8 +122,8 @@ Release build must not expose unrestricted debug controls.
 
 ## 8. Environment verification checklist
 
-Before WP01 implementation:
-- Android Studio opens the skeleton/verification project once WP01 creates it
+Before WP01 starts:
+- Android Studio stable is installed and launches correctly
 - JDK 17 selected
 - SDK/platform tools available
 - adb sees physical device
@@ -136,7 +136,7 @@ Before WP01 implementation:
 - production applicationId is `app.ascend.mobile`
 - development/debug applicationId is `app.ascend.mobile.dev`
 - signing/update strategy completed
-- Room + supported SQLCipher compatibility spike documented: create/reopen/migrate/process death/wrong-key/missing-key behavior
+- Room + supported SQLCipher compatibility-spike acceptance criteria are frozen; the executable proof runs on the Phase 0 project before P0 closes
 - key-envelope format/version/rotation/deletion semantics frozen
 - 16 KB page-size test strategy frozen for every native dependency
 - GitHub main-branch governance actually enabled, not merely documented
