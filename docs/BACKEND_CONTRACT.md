@@ -1,6 +1,6 @@
 # ASCEND Backend and Authentication Contract
 
-Version: 2.1 Architecture Freeze
+Version: 2.2 Architecture Freeze
 Status: Canonical backend contract
 
 ## 1. Environment model
@@ -179,16 +179,25 @@ Every policy has positive and negative integration tests.
 ## 7. Sync contract
 
 IDs:
-- UUIDs to permit offline creation without collision
+- UUIDs permit offline creation without collision.
 
-Revisions:
-- track a server/monotonic revision or updated_at discipline sufficient for deterministic conflict resolution
+Authority/revisions:
+- The server assigns a monotonically increasing `sync_revision` (or an equivalent server-generated ordered revision token) to every accepted mutable sync transition.
+- Client wall-clock timestamps never decide conflicts.
+- Completed analyses are immutable except for server-controlled sync/deletion metadata.
+- A client update based on an older revision cannot overwrite a newer server state.
 
 Deletion:
 - deletion wins over stale offline updates
-- use tombstone/revision semantics as needed to prevent resurrection
+- server records a tombstone/deleted revision sufficient to prevent resurrection
 - raw local assets are deleted immediately on local delete
-- remote delete syncs when connectivity returns
+- remote delete is an idempotent mutation and retries until acknowledged
+- stale devices observing the tombstone remove/mark the local synced record rather than re-uploading it
+
+Durable client work:
+- Android schedules persistent sync/delete/research jobs through unique WorkManager work.
+- Retryable mutations carry stable idempotency keys so process death/network retry cannot duplicate side effects.
+- Worker names/operation identities are stable per entity/action (for example `analysis-sync:<id>` and `analysis-delete:<id>`).
 
 Completed historical results:
 - do not silently recompute or mutate them when reference/scoring models change
@@ -241,7 +250,7 @@ Endpoint receives:
 - authenticated account/session context where feature requires account
 - scan/result identifier or minimized structured result
 - requested explanation type
-- idempotency key
+- idempotency key for retryable/costly operations
 
 Server:
 1. validate JWT
