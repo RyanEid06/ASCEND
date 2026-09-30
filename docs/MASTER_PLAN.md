@@ -24,8 +24,8 @@ The product plan is now split into canonical contracts. These documents are mand
 
 Before WP01 begins as permanent implementation work:
 
-1. choose and freeze the production Android applicationId
-2. define the separate development/debug application identity
+1. production Android applicationId is frozen as `app.ascend.mobile`
+2. development/debug applicationId is frozen as `app.ascend.mobile.dev`
 3. generate a brand-new ASCEND signing key; do not reuse another app's key
 4. create and verify two encrypted/offline signing-key backups
 5. verify the Windows/Android/Docker/Supabase development environment
