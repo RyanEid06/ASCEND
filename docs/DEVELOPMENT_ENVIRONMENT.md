@@ -133,7 +133,8 @@ Before WP01 implementation:
 - Node/npm works
 - Supabase local stack can start
 - no secret files tracked by Git
-- final applicationId chosen
+- production applicationId is `app.ascend.mobile`
+- development/debug applicationId is `app.ascend.mobile.dev`
 - signing/update strategy completed
 - Room + supported SQLCipher compatibility spike documented: create/reopen/migrate/process death/wrong-key/missing-key behavior
 - key-envelope format/version/rotation/deletion semantics frozen
