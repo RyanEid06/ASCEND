@@ -1,6 +1,6 @@
 # ASCEND Frozen Product Decisions
 
-Version: Architecture Freeze 2.1
+Version: Architecture Freeze 2.2
 Status: baseline product decisions for implementation. A change to one of these items should be deliberate and documented.
 
 ## Identity and positioning
@@ -8,7 +8,7 @@ Status: baseline product decisions for implementation. A change to one of these 
 - Name: ASCEND.
 - Android first; Google Play is the first public-store target.
 - English first.
-- Portrait-only for V1.
+- Phone UX is portrait-first, but the app architecture is adaptive/resizable. Large screens, foldables, landscape, multi-window and desktop windowing must remain usable; do not make correctness depend on a portrait lock.
 - Initial visual direction: light, premium, clean white/blue/teal interface.
 - The current logo direction is an A / upward-ascent mark. Branding can be refined without blocking architecture.
 - FaceIQ Labs is a competitive UX reference, not a template to copy. ASCEND should learn from useful patterns such as measurement overlays, per-ratio pages, scoring curves, tutorials, and prev/next navigation while using original UI, wording, assets, and logic.
@@ -23,6 +23,7 @@ Status: baseline product decisions for implementation. A change to one of these 
 - If one view is bad, only that view is retaken.
 - Crop/center assistance is allowed.
 - Landmark correction is constrained: the app proposes an anatomically plausible point/path and the user can make limited correction inside a valid region. Users must not be able to drag landmarks arbitrarily to fake ratios.
+- Profile V1 has a guaranteed assisted fallback: automatic extraction may propose visible points, but critical profile points can require constrained user confirmation/correction before geometry is accepted. No profile metric may depend on an automatic extractor that has no validated fallback.
 
 ## Scoring model
 
@@ -45,6 +46,8 @@ Status: baseline product decisions for implementation. A change to one of these 
 - Metric weights exist inside categories and are configurable data.
 - Missing/unreliable required measurements should trigger a retake or be marked unavailable; the app must not invent values.
 - The runtime metric set is defined by versioned configuration (`enabledMetricIds` or equivalent), never by a hard-coded count. The current 34 geometry measurements are candidates, not an automatic V1 enabled set.
+- `reference-data/` is research inventory only. Production scoring may load only a validated model from `reference-models/`; it must never fall back to research/community rows when runtime configuration is missing.
+- Research benchmarks carry an explicit purpose (for example aesthetic preference, population norm, community convention, competitor reference, or measurement validation), definition compatibility, age applicability, and runtime-scoring eligibility. Population averages are not automatically attractiveness ideals.
 - Every completed category/result must satisfy configured coverage rules. If reliable coverage is insufficient, publish an explicit **Not enough reliable measurements** state rather than a partial score presented as complete.
 - Metric-specific hidden 0-100 scores may be compared across metrics for Strongest/Weakest selection only when those metrics are explicitly calibrated to the same cross-metric score semantics/version. Deterministic scores alone do not make unlike metric curves comparable.
 
@@ -99,7 +102,7 @@ Rank thresholds are TBD and must be stored as configuration, not scattered throu
 
 ## Misc category
 
-Misc is intentionally retained because it is community terminology.
+Misc is intentionally retained as the internal/community category name. Normal user-facing copy should prefer **Appearance Details** (with “Misc” as secondary/context copy where useful) so the category is understandable without community jargon.
 
 Candidate V1 visual-feature inputs include:
 - hairline
@@ -133,8 +136,8 @@ ASCEND must not diagnose disease, hormone levels, vitamin deficiency, or other m
 
 ## Softmax / Hardmax
 
-- Onboarding asks the user's intent.
 - Softmax can include grooming, hairstyle, skincare/presentation, sleep, fitness/presentation, and similar non-procedure guidance.
+- Do not ask Softmax/Hardmax intent during first-run onboarding. Ask when the user first opens Advice/Recommendations, then remember the preference.
 - Hardmax/procedure content is available within the same 13+ product experience.
 - Hardmax is based on a curated recommendation database; AI may explain approved content but must not invent treatment, diagnosis, dosage, or unsupported procedures.
 - Procedure content is informational and educational, not individualized medical advice. The app must clearly encourage consultation with a qualified clinician for decisions involving medical or surgical care.
@@ -144,26 +147,26 @@ ASCEND must not diagnose disease, hormone levels, vitamin deficiency, or other m
 - Product is 13+ for the full V1 feature set.
 - V1 uses a simple self-declared **I am 13 or older** confirmation. No DOB collection, ID verification, or additional age-assurance system is required by the product architecture.
 - This confirmation is a product gate, not proof of a user's true age.
-- Initial wizard includes:
+- First-run path is deliberately short:
   - 13+ confirmation
   - selected Male/Female reference model
-  - Softmax/Hardmax intent
-  - guest vs account path
-  - privacy/consent notices
-  - capture tutorial
+  - concise essential privacy/data notice
+  - capture guidance when the user starts the scan
+- Guest is the automatic default. Sign-in, research contribution consent, and advice intent are deferred until the user reaches the feature that needs them.
 
 ## Guest and account behavior
 
 - Guest:
   - one scan
   - one result
+  - limit is best-effort per installation; clearing app data/reinstall may reset it and V1 must not use invasive device fingerprinting to prevent this
 - Account:
   - Google sign-in through Android Credential Manager + Supabase Auth in V1
   - multiple scans
   - saved history
   - result restoration/sync of allowed numeric data
   - future premium entitlement support
-- Guest -> account migration is explicit: offer to save the guest result after authentication; never silently upload it.
+- Guest -> account migration is explicit: after the user sees value, offer **Save my results** / Google sign-in and then offer to save the guest result; never silently upload it.
 - Local data is ownership-scoped so account switching cannot expose another account's scans.
 
 ## Local-first data
@@ -184,11 +187,19 @@ ASCEND must not diagnose disease, hormone levels, vitamin deficiency, or other m
 ## Pseudonymous dataset contribution
 
 - Explicit one-time opt-in is required.
+- Research contribution consent is not part of the mandatory first-run path. Offer it after the first completed result or from Settings/Research, where the user can understand what they are contributing.
 - “Not now” must remain a valid path.
 - V1 dataset contribution should use only an approved derived numeric/geometry subset, not raw photos.
 - V1 research/reference contribution eligibility follows the same self-declared 13+ product gate, subject to the published consent flow and any release-time legal/store requirements that the team must satisfy.
 - Consent state is auditable and revocable. A private account-to-random-contribution linkage may exist solely so withdrawal/deletion can be honored; therefore V1 contribution data is described as pseudonymous rather than truly anonymous while that linkage exists.
 - This consent is separate from Terms acceptance.
+
+## Result UX
+
+- The phone result screen uses progressive disclosure rather than dumping every metric at once.
+- Default hierarchy: Overall + community rank -> Strongest measured feature / Largest improvement opportunity -> four category cards -> a small set of relevant insights -> **See all measurements**.
+- Category screens reveal metric lists; metric detail screens carry the technical depth (measured value, tier, overlay, reference, how measured, scoring/reference visualization, explanation, recommendations).
+- Every screen must preserve state and remain usable under resizing/orientation/window changes.
 
 ## History and sharing
 
