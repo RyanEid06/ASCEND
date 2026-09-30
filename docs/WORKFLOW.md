@@ -10,10 +10,16 @@ WP00 is planning/setup work, not a facial-scoring implementation phase. It exist
 Mandatory WP00 workstreams:
 
 ### WP00A — Repository + governance
-- decide whether the implementation repository remains public or becomes private
-- protect main against force-push/deletion
-- require PR + required CI for implementation merges where repository settings permit
-- define emergency bypass ownership
+- repository may remain public; public-repo hygiene rules in MASTER_PLAN/SECURITY are mandatory
+- `main` protection target:
+  - require a pull request before merge
+  - require at least one approval from the other developer for implementation PRs
+  - require conversation resolution
+  - block force pushes
+  - block branch deletion
+  - do not permit routine direct pushes to `main`
+  - make WP02 build/unit-test/lint checks required as soon as those checks exist
+- emergency bypass is limited to repository administrators and is for recovery only; every bypass must be documented afterward
 - establish dependency/security scanning plan
 - never store private face fixtures or secrets in Git
 
