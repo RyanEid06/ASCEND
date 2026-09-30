@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0.0",
+  "dataset_version": "2026.09.30-research-audit.1",
+  "name": "ASCEND Facial Measurement & Benchmark Reference",
+  "counts": {
+    "measurements": 147,
+    "benchmarks": 200,
+    "sources": 34
+  },
+  "canonical_files": [
+    "measurements.csv",
+    "benchmarks.csv",
+    "sources.csv"
+  ],
+  "provenance_values": [
+    "FACEIQ_DIRECT",
+    "RESEARCH_DIRECT",
+    "COMMUNITY_DIRECT",
+    "DERIVED_FROM_PUBLISHED_DATA",
+    "UNAVAILABLE_OR_UNCERTAIN"
+  ],
+  "policy": {
+    "never_infer_faceiq_private_values": true,
+    "never_present_community_values_as_scientific_consensus": true,
+    "preserve_population_and_method_context": true,
+    "derived_thresholds_must_be_labeled": true
+  }
+}
