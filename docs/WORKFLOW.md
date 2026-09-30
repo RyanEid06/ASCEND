@@ -18,8 +18,8 @@ Mandatory WP00 workstreams:
 - never store private face fixtures or secrets in Git
 
 ### WP00B — Android identity + signing
-- freeze production applicationId
-- create separate dev/debug identity
+- production applicationId: `app.ascend.mobile`
+- development/debug applicationId: `app.ascend.mobile.dev`
 - generate ASCEND-only signing key
 - make two encrypted/offline backups
 - document certificate fingerprints
