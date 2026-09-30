@@ -1,6 +1,6 @@
 # ASCEND Security Architecture
 
-Version: 2.1 Architecture Freeze
+Version: 2.2 Architecture Freeze
 Status: Canonical implementation contract
 Owners: Ryan + Eddy
 
@@ -97,8 +97,17 @@ Pipeline:
 
 Encryption key material must be generated/protected with Android Keystore. Plaintext face assets should exist only in memory or narrowly scoped temporary processing where unavoidable.
 
+Encrypted asset format is versioned. Persist enough non-secret metadata to migrate safely:
+- formatVersion
+- keyVersion
+- nonce/IV
+- ciphertext + authentication tag
+- algorithm identifier only if the format ever supports more than one algorithm
+
+Use a random content/data key or passphrase where the storage library requires one, wrapped/protected by a Keystore key. Define atomic write, rotation, missing/invalid key, logout, Delete All and uninstall/reinstall behavior before implementation. Never treat a raw Keystore alias string as the database secret itself.
+
 ### Structured local data
-Sensitive structured state uses Room with encrypted-at-rest storage (SQLCipher integration where technically compatible with the chosen Room version) and keys protected through Android Keystore.
+Sensitive structured state uses Room with a **supported** SQLCipher-for-Android integration proven compatible with the chosen Room version in WP00. The deprecated `android-database-sqlcipher` package is forbidden. Database passphrase/key-envelope handling follows the versioned Keystore contract above.
 
 ### Session storage
 Do not use deprecated Android Security Crypto wrappers as the permanent design. Store Supabase session material in an AES-GCM encrypted blob with a Keystore-protected key.
@@ -256,6 +265,7 @@ Share flow must render a dedicated share asset and use a temporary content URI/F
 
 CI hardening target:
 - dependency update monitoring
+- native-library inventory and 16 KB page-size/alignment validation whenever the APK/AAB contains native libraries
 - CodeQL/static analysis where supported
 - secret scanning
 - Gradle dependency verification/locking where practical
