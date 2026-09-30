@@ -1,6 +1,6 @@
 # ASCEND Release, Signing and Update Contract
 
-Version: 2.0 Architecture Freeze
+Version: 2.2 Architecture Freeze
 Status: Must be completed before the first implementation APK becomes the long-lived test install
 
 ## 1. Permanent application identity
@@ -73,6 +73,7 @@ Release/QA candidate must verify:
 - no test credentials
 - no server secrets
 - correct signing certificate
+- every packaged native library is inventoried and passes the project's current 16 KB page-size compatibility/alignment gate
 - backup policy correct
 - logs appropriately stripped/redacted
 
@@ -116,6 +117,7 @@ For each candidate retain:
 - versionCode/versionName
 - signing certificate fingerprint
 - dependency lock/report
+- native-library inventory / 16 KB compatibility result
 - reference config hash
 - CV model hashes
 - CI run/artifact identity
