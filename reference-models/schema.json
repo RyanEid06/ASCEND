@@ -187,6 +187,7 @@
       "required": [
         "id",
         "category",
+        "valueType",
         "formulaOrExtractorId",
         "measurementMode",
         "calibrationRequired",
@@ -197,8 +198,8 @@
         "extremaEligible",
         "ageApplicability",
         "benchmarkIds",
-        "tierBoundaries",
-        "scoreAnchors"
+        "tierRules",
+        "scoreCurve"
       ],
       "properties": {
         "id": {
@@ -265,32 +266,6 @@
             "minLength": 1
           }
         },
-        "tierBoundaries": {
-          "type": "object",
-          "minProperties": 5
-        },
-        "scoreAnchors": {
-          "type": "array",
-          "minItems": 2,
-          "items": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-              "value",
-              "score"
-            ],
-            "properties": {
-              "value": {
-                "type": "number"
-              },
-              "score": {
-                "type": "number",
-                "minimum": 0,
-                "maximum": 100
-              }
-            }
-          }
-        },
         "formulaOrExtractorId": {
           "type": "string",
           "minLength": 1
@@ -320,6 +295,71 @@
             "null"
           ],
           "minimum": 0
+        },
+        "valueType": {
+          "enum": [
+            "RATIO",
+            "DEGREE",
+            "NORMALIZED_DISTANCE",
+            "CATEGORICAL",
+            "CONTINUOUS_VISUAL"
+          ]
+        },
+        "tierRules": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "tier",
+              "ruleType",
+              "params"
+            ],
+            "properties": {
+              "tier": {
+                "enum": [
+                  "T1",
+                  "T2",
+                  "T3",
+                  "T4",
+                  "T5"
+                ]
+              },
+              "ruleType": {
+                "enum": [
+                  "VALUE_RANGE",
+                  "SCORE_RANGE",
+                  "CATEGORICAL",
+                  "CUSTOM_VERSIONED"
+                ]
+              },
+              "params": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "scoreCurve": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "type",
+            "params"
+          ],
+          "properties": {
+            "type": {
+              "enum": [
+                "PIECEWISE_LINEAR",
+                "CATEGORICAL_MAP",
+                "CUSTOM_VERSIONED"
+              ]
+            },
+            "params": {
+              "type": "object"
+            }
+          }
         }
       }
     },
@@ -342,5 +382,6 @@
         }
       }
     }
-  }
+  },
+  "$comment": "JSON Schema validates shape. WP04 semantic validation must additionally enforce: category weights sum to 1; tierRules contain exactly one T1..T5; enabledMetricIds match metric IDs exactly; benchmark IDs exist and are reviewed; validated-release ranks are complete; no unsupported/calibration-required metric is enabled without its validated path."
 }
