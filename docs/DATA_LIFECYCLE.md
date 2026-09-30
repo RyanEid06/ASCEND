@@ -1,6 +1,6 @@
 # ASCEND Data Lifecycle
 
-Version: 2.0 Architecture Freeze
+Version: 2.1 Architecture Freeze
 Status: Canonical privacy/data contract
 
 ## 1. Data classes
@@ -31,6 +31,10 @@ Examples:
 - overall
 - rank
 - confidence
+- coverage state
+- enabled metric-set/config identity
+- deterministic strongest/weakest metric ID tie sets where available
+- score/comparability/extrema-selection versions
 - version hashes
 
 Guest: local only.
@@ -39,7 +43,7 @@ Account: eligible for cloud numeric-history sync.
 ### D. Account/profile data
 Examples:
 - Supabase user ID
-- age band
+- self-declared 13+ confirmation state/policy version
 - selected reference model
 - intent
 - consent states
@@ -48,7 +52,7 @@ Examples:
 Cloud: yes as required for account operation.
 
 ### E. Research contribution
-Adults only, separate consent, derived subset only.
+Same self-declared 13+ product gate, separate explicit consent, derived subset only.
 Pseudonymous while an account-to-contribution deletion link exists.
 
 ### F. AI context
@@ -219,7 +223,12 @@ Each completed analysis stores enough provenance to explain/reproduce the result
 - front landmark model + artifact hash/version
 - profile model/extractor version
 - reference model version
+- scoring model version
 - metric config hash
+- exact enabled metric-set/config snapshot identity
+- coverage policy version + stored coverage state
+- score-scale/cross-metric-comparability version
+- extrema selection version + strongest/weakest metric ID tie sets
 - recommendation version
 
 Historical records retain their original provenance even after app/config updates.
