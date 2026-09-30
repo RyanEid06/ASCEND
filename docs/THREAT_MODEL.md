@@ -1,6 +1,6 @@
 # ASCEND Threat Model
 
-Version: 2.0 Architecture Freeze
+Version: 2.1 Architecture Freeze
 Status: Required before implementation and revisited before release
 
 ## 1. Protected assets
@@ -14,7 +14,7 @@ Highest sensitivity:
 High sensitivity:
 - face-derived metric results
 - normalized geometry/landmarks
-- age band and selected reference model
+- self-declared 13+ product-gate state and selected reference model
 - history tied to an account
 - research contribution linkage
 
@@ -36,7 +36,7 @@ Control: nothing security-critical depends on APK secrecy. Secrets remain server
 ### Modified client
 Attacker changes local entitlement/age/score state or scripts API requests.
 
-Control: backend re-validates ownership, entitlement, age eligibility, quotas and schemas. Local checks are UX, not authorization.
+Control: backend re-validates ownership, entitlement, stored self-declared product-gate state where relevant, research consent/eligibility, quotas and schemas. The 13+ state is self-declared and is not treated as verified age.
 
 ### Stolen session token
 Control:
@@ -74,7 +74,7 @@ Control:
 - structured response schema
 - recommendation ID validation
 - no scoring authority
-- hardmax age gate server-side
+- Hardmax/procedure output limited to the curated approved catalogue and structured informational wording
 - fail closed to static deterministic explanations
 
 ### Malicious/corrupt media
@@ -164,7 +164,7 @@ Control:
 - separate account→contribution linkage in private schema
 - call the data pseudonymous while revocation remains possible
 - do not promise true anonymity when a deletion link exists
-- no under-18 research contributions in V1
+- research contribution follows the same self-declared 13+ product gate plus separate explicit consent and release-time legal/store review
 
 ### Unauthorized scoring-config changes
 Control:
