@@ -187,6 +187,10 @@
       "required": [
         "id",
         "category",
+        "formulaOrExtractorId",
+        "measurementMode",
+        "calibrationRequired",
+        "reliabilityStatus",
         "metricWeight",
         "minimumConfidence",
         "requiredForCompletion",
@@ -286,6 +290,36 @@
               }
             }
           }
+        },
+        "formulaOrExtractorId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "measurementMode": {
+          "enum": [
+            "AUTOMATIC",
+            "ASSISTED",
+            "MANUAL",
+            "UNSUPPORTED"
+          ]
+        },
+        "calibrationRequired": {
+          "type": "boolean"
+        },
+        "reliabilityStatus": {
+          "enum": [
+            "VALIDATED",
+            "LIMITED",
+            "UNVALIDATED",
+            "UNSUPPORTED"
+          ]
+        },
+        "reliabilityTolerance": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
         }
       }
     },
