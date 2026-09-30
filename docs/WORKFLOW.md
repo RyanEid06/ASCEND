@@ -20,8 +20,8 @@ Mandatory WP00 workstreams:
 ### WP00B — Android identity + signing
 - production applicationId: `app.ascend.mobile`
 - development/debug applicationId: `app.ascend.mobile.dev`
-- generate ASCEND-only signing key
-- make two encrypted/offline backups
+- freeze ASCEND-only signing-key policy; generate the permanent key during Phase 0 before the first signed QA artifact
+- create and verify two encrypted/offline backups before P0 closes
 - document certificate fingerprints
 - establish monotonic versionCode policy
 - establish signed QA APK update chain
@@ -241,6 +241,7 @@ Eddy — WP02 Core Contracts + CI
 - consume SECURITY/BACKEND/DATA lifecycle contracts rather than inventing new security rules
 
 Sync Gate P0:
+- permanent ASCEND signing key has been generated, certificate fingerprints recorded, and two encrypted/offline backups verified
 - clean clone builds
 - CI green
 - both lanes compile against same core contracts
