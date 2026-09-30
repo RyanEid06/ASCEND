@@ -1,0 +1,5000 @@
+{
+  "schema_version": "1.0.0",
+  "dataset_version": "2026.09.30-research-audit.1",
+  "name": "ASCEND Facial Measurement & Benchmark Reference",
+  "purpose": "Versioned source-backed reference data for deterministic facial measurement analysis. Raw measurement calculation remains code; benchmarks remain data.",
+  "non_goals": [
+    "This dataset does not claim universal human ideals.",
+    "Research-normality tiers are not attractiveness tiers.",
+    "FaceIQ proprietary scoring curves are not reconstructed."
+  ],
+  "provenance_enum": [
+    "directly published by FaceIQ",
+    "directly supported by research",
+    "published by BP/community system",
+    "derived by assistant from published data",
+    "unavailable / uncertain"
+  ],
+  "selection_policy": {
+    "default": "Prefer exact-definition, photo-compatible research for descriptive reference. Never substitute approximate landmark definitions silently.",
+    "faceiq": "Use public FaceIQ formulas/definitions where useful; numeric FaceIQ scoring curve remains unavailable unless officially published.",
+    "community": "Keep available as a separately selectable convention; never label as research or FaceIQ.",
+    "derived": "May be used only when UI/metadata explicitly labels the derivation and its meaning."
+  },
+  "capture_protocol": {
+    "distance": "~2 m / 6 ft recommended by FaceIQ; avoid arm-length selfies",
+    "camera": "rear camera; longer focal length / 2× framing; eye-level",
+    "expression": "neutral, relaxed jaw, lips in repose",
+    "front": "true frontal; no yaw/roll/pitch",
+    "profile": "true 90° profile; Frankfort orientation standardized",
+    "lighting": "soft, even, no beauty filters",
+    "scale": "do not report physical mm without calibration; FaceIQ public docs describe 190 mm assumed face-height scaling for estimates"
+  },
+  "counts": {
+    "measurements": 147,
+    "benchmarks": 200,
+    "sources": 34
+  },
+  "measurements": [
+    {
+      "id": "FQ_H_001",
+      "category": "Harmony — Front",
+      "name": "Top Third",
+      "definition": "Forehead height as a percentage of full face height.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "trichion/hairline; brow-level reference; menton/chin",
+      "landmark_groups": [
+        "trichion/hairline",
+        "brow-level reference",
+        "menton/chin"
+      ],
+      "formula_display": "distance(hairline,brow level) / distance(hairline,chin) × 100",
+      "views": [
+        "front"
+      ],
+      "unit": "percent",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY",
+          "COMM-PDF-2026",
+          "COMM-FRONT-2026"
+        ]
+      },
+      "notes": "FaceIQ per-analysis numerical reference range/scoring curve is not publicly enumerated. Tier bands shown are community-published, not FaceIQ and not scientific consensus.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_002",
+      "category": "Harmony — Front",
+      "name": "Middle Third",
+      "definition": "Brow-to-nasal-base height as a percentage of full face height.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "brow-level reference; subnasale/nose bottom; trichion; chin",
+      "landmark_groups": [
+        "brow-level reference",
+        "subnasale/nose bottom",
+        "trichion",
+        "chin"
+      ],
+      "formula_display": "distance(brow level,nose bottom) / distance(hairline,chin) × 100",
+      "views": [
+        "front"
+      ],
+      "unit": "percent",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY",
+          "COMM-PDF-2026",
+          "COMM-FRONT-2026"
+        ]
+      },
+      "notes": "FaceIQ per-analysis numerical reference range/scoring curve is not publicly enumerated. Tier bands shown are community-published, not FaceIQ and not scientific consensus.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_003",
+      "category": "Harmony — Front",
+      "name": "Lower Third",
+      "definition": "Nasal-base-to-chin height as a percentage of full face height.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "subnasale/nose bottom; chin; trichion",
+      "landmark_groups": [
+        "subnasale/nose bottom",
+        "chin",
+        "trichion"
+      ],
+      "formula_display": "distance(nose bottom,chin) / distance(hairline,chin) × 100",
+      "views": [
+        "front"
+      ],
+      "unit": "percent",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY",
+          "COMM-PDF-2026",
+          "COMM-FRONT-2026"
+        ]
+      },
+      "notes": "FaceIQ per-analysis numerical reference range/scoring curve is not publicly enumerated. Tier bands shown are community-published, not FaceIQ and not scientific consensus.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_004",
+      "category": "Harmony — Front",
+      "name": "Face Width to Height Ratio",
+      "definition": "FaceIQ upper-face width/height adaptation.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "bilateral zygion/cheekbone extremes; brow-level; upper lip",
+      "landmark_groups": [
+        "bilateral zygion/cheekbone extremes",
+        "brow-level",
+        "upper lip"
+      ],
+      "formula_display": "cheekbone width / vertical distance(brow level,upper lip)",
+      "views": [
+        "front"
+      ],
+      "unit": "ratio",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY",
+          "COMM-PDF-2026",
+          "COMM-FRONT-2026"
+        ]
+      },
+      "notes": "FaceIQ per-analysis numerical reference range/scoring curve is not publicly enumerated. Tier bands shown are community-published, not FaceIQ and not scientific consensus.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_005",
+      "category": "Harmony — Front",
+      "name": "Total Facial Width to Height Ratio",
+      "definition": "Full-face height relative to cheekbone width (FaceIQ calculation direction).",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "trichion; chin; bilateral zygion",
+      "landmark_groups": [
+        "trichion",
+        "chin",
+        "bilateral zygion"
+      ],
+      "formula_display": "face height / cheekbone width",
+      "views": [
+        "front"
+      ],
+      "unit": "ratio",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY",
+          "COMM-PDF-2026",
+          "COMM-FRONT-2026"
+        ]
+      },
+      "notes": "FaceIQ per-analysis numerical reference range/scoring curve is not publicly enumerated. Tier bands shown are community-published, not FaceIQ and not scientific consensus.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_006",
+      "category": "Harmony — Front",
+      "name": "Midface Ratio",
+      "definition": "Interpupillary width relative to pupil-level-to-upper-lip height.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "pupil centers; Cupid’s bow/upper lip",
+      "landmark_groups": [
+        "pupil centers",
+        "Cupid’s bow/upper lip"
+      ],
+      "formula_display": "interpupillary distance / vertical distance(pupil level,upper lip)",
+      "views": [
+        "front"
+      ],
+      "unit": "ratio",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY",
+          "COMM-PDF-2026",
+          "COMM-FRONT-2026"
+        ]
+      },
+      "notes": "FaceIQ per-analysis numerical reference range/scoring curve is not publicly enumerated. Tier bands shown are community-published, not FaceIQ and not scientific consensus.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_007",
+      "category": "Harmony — Front",
+      "name": "Bitemporal Width",
+      "definition": "Temple width relative to cheekbone width.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "bilateral temple extremes; bilateral zygion",
+      "landmark_groups": [
+        "bilateral temple extremes",
+        "bilateral zygion"
+      ],
+      "formula_display": "temple width / cheekbone width × 100",
+      "views": [
+        "front"
+      ],
+      "unit": "percent",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY",
+          "COMM-PDF-2026",
+          "COMM-FRONT-2026"
+        ]
+      },
+      "notes": "FaceIQ per-analysis numerical reference range/scoring curve is not publicly enumerated. Tier bands shown are community-published, not FaceIQ and not scientific consensus.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_008",
+      "category": "Harmony — Front",
+      "name": "Cheekbone Height",
+      "definition": "Vertical cheekbone setness relative to pupil-to-lip height.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "cheekbone height reference; upper lip; pupil level",
+      "landmark_groups": [
+        "cheekbone height reference",
+        "upper lip",
+        "pupil level"
+      ],
+      "formula_display": "vertical distance(upper lip,cheekbone level) / vertical distance(upper lip,pupil level) × 100",
+      "views": [
+        "front"
+      ],
+      "unit": "percent",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY",
+          "COMM-PDF-2026",
+          "COMM-FRONT-2026"
+        ]
+      },
+      "notes": "FaceIQ per-analysis numerical reference range/scoring curve is not publicly enumerated. Tier bands shown are community-published, not FaceIQ and not scientific consensus.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_009",
+      "category": "Harmony — Front",
+      "name": "Eye Separation Ratio",
+      "definition": "Interpupillary distance relative to cheekbone width.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "pupil centers; bilateral zygion",
+      "landmark_groups": [
+        "pupil centers",
+        "bilateral zygion"
+      ],
+      "formula_display": "interpupillary distance / cheekbone width × 100",
+      "views": [
+        "front"
+      ],
+      "unit": "percent",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY",
+          "COMM-PDF-2026",
+          "COMM-FRONT-2026"
+        ]
+      },
+      "notes": "FaceIQ per-analysis numerical reference range/scoring curve is not publicly enumerated. Tier bands shown are community-published, not FaceIQ and not scientific consensus.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_010",
+      "category": "Harmony — Front",
+      "name": "Eye Aspect Ratio",
+      "definition": "Average palpebral fissure width relative to eye opening height.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "medial/lateral canthi; upper/lower eyelid margins",
+      "landmark_groups": [
+        "medial/lateral canthi",
+        "upper/lower eyelid margins"
+      ],
+      "formula_display": "mean eye fissure width / eye opening height",
+      "views": [
+        "front"
+      ],
+      "unit": "ratio",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY",
+          "COMM-PDF-2026",
+          "COMM-FRONT-2026"
+        ]
+      },
+      "notes": "FaceIQ per-analysis numerical reference range/scoring curve is not publicly enumerated. Tier bands shown are community-published, not FaceIQ and not scientific consensus.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_011",
+      "category": "Harmony — Front",
+      "name": "One Eye Apart Test",
+      "definition": "Inner-canthus gap relative to an eye-region span.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "medial canthi; lateral/outer eye hood landmarks",
+      "landmark_groups": [
+        "medial canthi",
+        "lateral/outer eye hood landmarks"
+      ],
+      "formula_display": "inner-corner gap / mean eye-region span",
+      "views": [
+        "front"
+      ],
+      "unit": "ratio",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY",
+          "COMM-PDF-2026",
+          "COMM-FRONT-2026"
+        ]
+      },
+      "notes": "FaceIQ per-analysis numerical reference range/scoring curve is not publicly enumerated. Tier bands shown are community-published, not FaceIQ and not scientific consensus.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_012",
+      "category": "Harmony — Front",
+      "name": "Lateral Canthal Tilt",
+      "definition": "Average inner-to-outer canthus inclination relative to horizontal.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "medial and lateral canthi both eyes",
+      "landmark_groups": [
+        "medial and lateral canthi both eyes"
+      ],
+      "formula_display": "mean signed angle(inner canthus→outer canthus, horizontal)",
+      "views": [
+        "front"
+      ],
+      "unit": "degree",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY",
+          "COMM-PDF-2026",
+          "COMM-FRONT-2026"
+        ]
+      },
+      "notes": "FaceIQ per-analysis numerical reference range/scoring curve is not publicly enumerated. Tier bands shown are community-published, not FaceIQ and not scientific consensus.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_013",
+      "category": "Harmony — Front",
+      "name": "Eyebrow Tilt",
+      "definition": "Average inner-brow-to-arch inclination relative to horizontal.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "inner brow midpoint; brow arch both sides",
+      "landmark_groups": [
+        "inner brow midpoint",
+        "brow arch both sides"
+      ],
+      "formula_display": "mean angle(inner brow→arch, horizontal)",
+      "views": [
+        "front"
+      ],
+      "unit": "degree",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY",
+          "COMM-PDF-2026",
+          "COMM-FRONT-2026"
+        ]
+      },
+      "notes": "FaceIQ per-analysis numerical reference range/scoring curve is not publicly enumerated. Tier bands shown are community-published, not FaceIQ and not scientific consensus.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_014",
+      "category": "Harmony — Front",
+      "name": "Eyebrow Low-Setness",
+      "definition": "Pupil-to-inner-brow height relative to eye opening height.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "pupil centers; inner brow; eyelid margins",
+      "landmark_groups": [
+        "pupil centers",
+        "inner brow",
+        "eyelid margins"
+      ],
+      "formula_display": "abs vertical(pupil,inner brow) / mean eye opening height",
+      "views": [
+        "front"
+      ],
+      "unit": "ratio",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY",
+          "COMM-PDF-2026",
+          "COMM-FRONT-2026"
+        ]
+      },
+      "notes": "FaceIQ per-analysis numerical reference range/scoring curve is not publicly enumerated. Tier bands shown are community-published, not FaceIQ and not scientific consensus.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_015",
+      "category": "Harmony — Front",
+      "name": "Brow Thickness",
+      "definition": "Supporting measurement of brow thickness relative to brow/eye-region width.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "brow peak/arch boundaries; inner brow; outer hood",
+      "landmark_groups": [
+        "brow peak/arch boundaries",
+        "inner brow",
+        "outer hood"
+      ],
+      "formula_display": "mean brow thickness / inner-brow-to-outer-hood width × 100",
+      "views": [
+        "front"
+      ],
+      "unit": "percent",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY"
+        ]
+      },
+      "notes": "FaceIQ supporting guide; no Harmony score weight. FaceIQ per-analysis numerical reference range/scoring curve is not publicly enumerated.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_016",
+      "category": "Harmony — Front",
+      "name": "Brow Length to Face Width Ratio",
+      "definition": "Combined brow span relative to cheekbone width.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "inner/outer brow endpoints; bilateral zygion",
+      "landmark_groups": [
+        "inner/outer brow endpoints",
+        "bilateral zygion"
+      ],
+      "formula_display": "(left brow span + right brow span) / cheekbone width",
+      "views": [
+        "front"
+      ],
+      "unit": "ratio",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY"
+        ]
+      },
+      "notes": "FaceIQ per-analysis numerical reference range/scoring curve is not publicly enumerated.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_017",
+      "category": "Harmony — Front",
+      "name": "Upper Eyelid Exposure",
+      "definition": "Supporting measurement of visible upper lid relative to eye opening.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "upper lid margin; lid crease; eyelid opening",
+      "landmark_groups": [
+        "upper lid margin",
+        "lid crease",
+        "eyelid opening"
+      ],
+      "formula_display": "mean lid-margin-to-crease / eye-opening height",
+      "views": [
+        "front"
+      ],
+      "unit": "ratio",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY"
+        ]
+      },
+      "notes": "FaceIQ supporting guide; no Harmony score weight. FaceIQ per-analysis numerical reference range/scoring curve is not publicly enumerated.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_018",
+      "category": "Harmony — Front",
+      "name": "Nose Tip Position",
+      "definition": "Vertical position of nasal tip/bottom relative to nasal-base reference, scaled by assumed face height.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "nose bottom/tip reference; nasal base; face-height scale",
+      "landmark_groups": [
+        "nose bottom/tip reference",
+        "nasal base",
+        "face-height scale"
+      ],
+      "formula_display": "(nose-bottom y − nasal-base y) × photo scale",
+      "views": [
+        "front"
+      ],
+      "unit": "mm",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": true,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY"
+        ]
+      },
+      "notes": "FaceIQ per-analysis numerical reference range/scoring curve is not publicly enumerated.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_019",
+      "category": "Harmony — Front",
+      "name": "Intercanthal-Nasal Width Ratio",
+      "definition": "Alar width relative to inner-canthal distance.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "bilateral alare; bilateral medial canthi",
+      "landmark_groups": [
+        "bilateral alare",
+        "bilateral medial canthi"
+      ],
+      "formula_display": "alar width / inner-canthal distance",
+      "views": [
+        "front"
+      ],
+      "unit": "ratio",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY"
+        ]
+      },
+      "notes": "FaceIQ per-analysis numerical reference range/scoring curve is not publicly enumerated.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_020",
+      "category": "Harmony — Front",
+      "name": "Nose Bridge to Nose Width",
+      "definition": "Nasal-base width relative to bridge width.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "bilateral alare/nasal base; bridge-width landmarks",
+      "landmark_groups": [
+        "bilateral alare/nasal base",
+        "bridge-width landmarks"
+      ],
+      "formula_display": "alar-base width / nose-bridge width",
+      "views": [
+        "front"
+      ],
+      "unit": "ratio",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY"
+        ]
+      },
+      "notes": "FaceIQ per-analysis numerical reference range/scoring curve is not publicly enumerated.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_021",
+      "category": "Harmony — Front",
+      "name": "Ipsilateral Alar Angle",
+      "definition": "Frontal angle centered at nasal base/bottom toward bilateral outer eye/hood landmarks.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "nose bottom; left/right outer eyelid/hood",
+      "landmark_groups": [
+        "nose bottom",
+        "left/right outer eyelid/hood"
+      ],
+      "formula_display": "angle(left outer eye/hood → nose bottom → right outer eye/hood)",
+      "views": [
+        "front"
+      ],
+      "unit": "degree",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY",
+          "COMM-PDF-2026",
+          "COMM-FRONT-2026"
+        ]
+      },
+      "notes": "FaceIQ per-analysis numerical reference range/scoring curve is not publicly enumerated. Tier bands shown are community-published, not FaceIQ and not scientific consensus.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_022",
+      "category": "Harmony — Front",
+      "name": "Midface–Jaw Angle Difference",
+      "definition": "Absolute difference between ipsilateral alar angle and jaw frontal angle.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "landmarks for IAA and JFA",
+      "landmark_groups": [
+        "landmarks for IAA and JFA"
+      ],
+      "formula_display": "abs(Ipsilateral Alar Angle − Jaw Frontal Angle)",
+      "views": [
+        "front"
+      ],
+      "unit": "degree",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY",
+          "COMM-PDF-2026",
+          "COMM-FRONT-2026"
+        ]
+      },
+      "notes": "FaceIQ per-analysis numerical reference range/scoring curve is not publicly enumerated. Tier bands shown are community-published, not FaceIQ and not scientific consensus.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_023",
+      "category": "Harmony — Front",
+      "name": "Lip Thickness",
+      "definition": "Supporting total lip height relative to lower-face height.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Cupid’s bow; lower lip; nasal base; chin",
+      "landmark_groups": [
+        "Cupid’s bow",
+        "lower lip",
+        "nasal base",
+        "chin"
+      ],
+      "formula_display": "lip height / nasal-base-to-chin height × 100",
+      "views": [
+        "front"
+      ],
+      "unit": "percent",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY"
+        ]
+      },
+      "notes": "FaceIQ supporting guide; no Harmony score weight. FaceIQ per-analysis numerical reference range/scoring curve is not publicly enumerated.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_024",
+      "category": "Harmony — Front",
+      "name": "Lower Lip to Upper Lip Ratio",
+      "definition": "Lower vermilion height relative to upper vermilion height.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "mouth seam; lower lip border; Cupid’s bow",
+      "landmark_groups": [
+        "mouth seam",
+        "lower lip border",
+        "Cupid’s bow"
+      ],
+      "formula_display": "mouth-seam-to-lower-lip / Cupid’s-bow-to-mouth-seam",
+      "views": [
+        "front"
+      ],
+      "unit": "ratio",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY",
+          "COMM-PDF-2026",
+          "COMM-FRONT-2026"
+        ]
+      },
+      "notes": "FaceIQ per-analysis numerical reference range/scoring curve is not publicly enumerated. Tier bands shown are community-published, not FaceIQ and not scientific consensus.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_025",
+      "category": "Harmony — Front",
+      "name": "Cupid’s Bow Depth",
+      "definition": "Vertical depth from upper-lip peaks to central dip, photo-scaled.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Cupid’s bow central dip and peaks; face-height scale",
+      "landmark_groups": [
+        "Cupid’s bow central dip and peaks",
+        "face-height scale"
+      ],
+      "formula_display": "(central-dip y − peak y) × photo scale",
+      "views": [
+        "front"
+      ],
+      "unit": "mm",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": true,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY"
+        ]
+      },
+      "notes": "FaceIQ per-analysis numerical reference range/scoring curve is not publicly enumerated.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_026",
+      "category": "Harmony — Front",
+      "name": "Mouth-to-Nose Width Ratio",
+      "definition": "Mouth width relative to alar width.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "mouth corners; bilateral alare",
+      "landmark_groups": [
+        "mouth corners",
+        "bilateral alare"
+      ],
+      "formula_display": "mouth-corner width / alar width",
+      "views": [
+        "front"
+      ],
+      "unit": "ratio",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY",
+          "COMM-PDF-2026",
+          "COMM-FRONT-2026"
+        ]
+      },
+      "notes": "FaceIQ per-analysis numerical reference range/scoring curve is not publicly enumerated. Tier bands shown are community-published, not FaceIQ and not scientific consensus.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_027",
+      "category": "Harmony — Front",
+      "name": "Interpupillary-Mouth Width Ratio",
+      "definition": "Mouth width relative to interpupillary distance.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "mouth corners; pupil centers",
+      "landmark_groups": [
+        "mouth corners",
+        "pupil centers"
+      ],
+      "formula_display": "mouth width / interpupillary distance",
+      "views": [
+        "front"
+      ],
+      "unit": "ratio",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY"
+        ]
+      },
+      "notes": "FaceIQ per-analysis numerical reference range/scoring curve is not publicly enumerated.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_028",
+      "category": "Harmony — Front",
+      "name": "Mouth Corner Position",
+      "definition": "Vertical position of mouth corners relative to mouth center, photo-scaled.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "mouth center; mouth corners; face-height scale",
+      "landmark_groups": [
+        "mouth center",
+        "mouth corners",
+        "face-height scale"
+      ],
+      "formula_display": "mean(mouth-center y − corner y) × photo scale",
+      "views": [
+        "front"
+      ],
+      "unit": "mm",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": true,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY"
+        ]
+      },
+      "notes": "FaceIQ per-analysis numerical reference range/scoring curve is not publicly enumerated.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_029",
+      "category": "Harmony — Front",
+      "name": "Chin-to-Philtrum Ratio",
+      "definition": "Lower-lip-to-chin distance relative to philtrum height.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "lower lip; chin; nasal base; Cupid’s bow",
+      "landmark_groups": [
+        "lower lip",
+        "chin",
+        "nasal base",
+        "Cupid’s bow"
+      ],
+      "formula_display": "distance(lower lip,chin) / distance(nasal base,Cupid’s bow)",
+      "views": [
+        "front"
+      ],
+      "unit": "ratio",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY",
+          "COMM-PDF-2026",
+          "COMM-FRONT-2026"
+        ]
+      },
+      "notes": "FaceIQ per-analysis numerical reference range/scoring curve is not publicly enumerated. Tier bands shown are community-published, not FaceIQ and not scientific consensus.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_030",
+      "category": "Harmony — Front",
+      "name": "Jaw Frontal Angle",
+      "definition": "Frontal mandibular taper angle constructed from gonion/chin-border directions.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "bilateral gonion; chin-border directions",
+      "landmark_groups": [
+        "bilateral gonion",
+        "chin-border directions"
+      ],
+      "formula_display": "180° − angle(left gonion/chin direction, right gonion/chin direction)",
+      "views": [
+        "front"
+      ],
+      "unit": "degree",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY",
+          "COMM-PDF-2026",
+          "COMM-FRONT-2026"
+        ]
+      },
+      "notes": "FaceIQ per-analysis numerical reference range/scoring curve is not publicly enumerated. Tier bands shown are community-published, not FaceIQ and not scientific consensus.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_031",
+      "category": "Harmony — Front",
+      "name": "Jaw Slope",
+      "definition": "Average interior angle formed by cheek–gonion and gonion–chin segments.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "cheek point; gonion; chin point both sides",
+      "landmark_groups": [
+        "cheek point",
+        "gonion",
+        "chin point both sides"
+      ],
+      "formula_display": "mean interior angle(cheek→gonion, gonion→chin)",
+      "views": [
+        "front"
+      ],
+      "unit": "degree",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY"
+        ]
+      },
+      "notes": "FaceIQ per-analysis numerical reference range/scoring curve is not publicly enumerated.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_032",
+      "category": "Harmony — Front",
+      "name": "Bigonial Width",
+      "definition": "Jaw-angle width relative to cheekbone width.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "bilateral gonion; bilateral zygion",
+      "landmark_groups": [
+        "bilateral gonion",
+        "bilateral zygion"
+      ],
+      "formula_display": "bigonial width / bizygomatic width × 100",
+      "views": [
+        "front"
+      ],
+      "unit": "percent",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY",
+          "COMM-PDF-2026",
+          "COMM-FRONT-2026"
+        ]
+      },
+      "notes": "FaceIQ per-analysis numerical reference range/scoring curve is not publicly enumerated. Tier bands shown are community-published, not FaceIQ and not scientific consensus.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_033",
+      "category": "Harmony — Front",
+      "name": "Lower Third Proportion",
+      "definition": "Upper segment of lower third relative to nasal-base-to-chin height.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "nose bottom/subnasale; mouth seam; chin",
+      "landmark_groups": [
+        "nose bottom/subnasale",
+        "mouth seam",
+        "chin"
+      ],
+      "formula_display": "distance(nose bottom,mouth seam) / distance(nose bottom,chin) × 100",
+      "views": [
+        "front"
+      ],
+      "unit": "percent",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY",
+          "COMM-PDF-2026",
+          "COMM-FRONT-2026"
+        ]
+      },
+      "notes": "FaceIQ per-analysis numerical reference range/scoring curve is not publicly enumerated. Tier bands shown are community-published, not FaceIQ and not scientific consensus.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_034",
+      "category": "Harmony — Front",
+      "name": "Ear Protrusion Ratio",
+      "definition": "Horizontal ear-to-cheek separation relative to cheekbone width.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "outer ear; adjacent cheek reference; zygion",
+      "landmark_groups": [
+        "outer ear",
+        "adjacent cheek reference",
+        "zygion"
+      ],
+      "formula_display": "mean horizontal ear-cheek gap / cheekbone width × 100",
+      "views": [
+        "front"
+      ],
+      "unit": "percent",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY"
+        ]
+      },
+      "notes": "FaceIQ per-analysis numerical reference range/scoring curve is not publicly enumerated.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_035",
+      "category": "Harmony — Front",
+      "name": "Ear Protrusion Angle",
+      "definition": "Ear protrusion direction relative to vertical.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "outer ear; cheek/mouth-level reference",
+      "landmark_groups": [
+        "outer ear",
+        "cheek/mouth-level reference"
+      ],
+      "formula_display": "mean angle(outer ear→cheek reference, vertical)",
+      "views": [
+        "front"
+      ],
+      "unit": "degree",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY"
+        ]
+      },
+      "notes": "FaceIQ per-analysis numerical reference range/scoring curve is not publicly enumerated.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_036",
+      "category": "Harmony — Front",
+      "name": "Neck Width",
+      "definition": "Visible neck width relative to jaw width.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "lateral neck edges; jaw-width landmarks",
+      "landmark_groups": [
+        "lateral neck edges",
+        "jaw-width landmarks"
+      ],
+      "formula_display": "neck width / jaw width × 100",
+      "views": [
+        "front"
+      ],
+      "unit": "percent",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY",
+          "COMM-PDF-2026",
+          "COMM-FRONT-2026"
+        ]
+      },
+      "notes": "FaceIQ per-analysis numerical reference range/scoring curve is not publicly enumerated. Tier bands shown are community-published, not FaceIQ and not scientific consensus.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_037",
+      "category": "Harmony — Profile",
+      "name": "Browridge Inclination Angle",
+      "definition": "Browridge/upper-forehead inclination relative to image vertical.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "hairline; glabella; vertical reference",
+      "landmark_groups": [
+        "hairline",
+        "glabella",
+        "vertical reference"
+      ],
+      "formula_display": "acute angle(hairline→glabella, photo vertical)",
+      "views": [
+        "profile"
+      ],
+      "unit": "degree",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY",
+          "COMM-PDF-2026"
+        ]
+      },
+      "notes": "Definition/convention must match exactly before importing external clinical norms; per-analysis FaceIQ numerical reference settings are not public. Tier bands shown are community-published, not FaceIQ and not scientific consensus.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_038",
+      "category": "Harmony — Profile",
+      "name": "Nasofrontal Angle",
+      "definition": "Profile angle at nasion connecting glabella and supratip.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "glabella; nasion; supratip",
+      "landmark_groups": [
+        "glabella",
+        "nasion",
+        "supratip"
+      ],
+      "formula_display": "angle(glabella→nasion→supratip)",
+      "views": [
+        "profile"
+      ],
+      "unit": "degree",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Moderate",
+        "source_ids": [
+          "FQ-HARMONY",
+          "COMM-PDF-2026",
+          "NFA-2016"
+        ]
+      },
+      "notes": "Definition/convention must match exactly before importing external clinical norms; per-analysis FaceIQ numerical reference settings are not public. Tier bands shown are community-published, not FaceIQ and not scientific consensus.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_039",
+      "category": "Harmony — Profile",
+      "name": "Upper Forehead Slope",
+      "definition": "Upper forehead contour angle.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "hairline; glabella; forehead landmark",
+      "landmark_groups": [
+        "hairline",
+        "glabella",
+        "forehead landmark"
+      ],
+      "formula_display": "angle(hairline→glabella→forehead landmark)",
+      "views": [
+        "profile"
+      ],
+      "unit": "degree",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY"
+        ]
+      },
+      "notes": "Definition/convention must match exactly before importing external clinical norms; per-analysis FaceIQ numerical reference settings are not public.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_040",
+      "category": "Harmony — Profile",
+      "name": "Facial Convexity (Nasion)",
+      "definition": "Profile convexity using nasion, subnasale and pogonion.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "nasion; subnasale; soft-tissue pogonion",
+      "landmark_groups": [
+        "nasion",
+        "subnasale",
+        "soft-tissue pogonion"
+      ],
+      "formula_display": "oriented angle(nasion→subnasale→pogonion)",
+      "views": [
+        "profile"
+      ],
+      "unit": "degree",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY",
+          "COMM-PDF-2026"
+        ]
+      },
+      "notes": "Definition/convention must match exactly before importing external clinical norms; per-analysis FaceIQ numerical reference settings are not public. Tier bands shown are community-published, not FaceIQ and not scientific consensus.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_041",
+      "category": "Harmony — Profile",
+      "name": "Facial Convexity (Glabella)",
+      "definition": "Profile convexity using glabella, subnasale and pogonion.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "glabella; subnasale; soft-tissue pogonion",
+      "landmark_groups": [
+        "glabella",
+        "subnasale",
+        "soft-tissue pogonion"
+      ],
+      "formula_display": "oriented angle(glabella→subnasale→pogonion)",
+      "views": [
+        "profile"
+      ],
+      "unit": "degree",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY",
+          "COMM-PDF-2026"
+        ]
+      },
+      "notes": "Definition/convention must match exactly before importing external clinical norms; per-analysis FaceIQ numerical reference settings are not public. Tier bands shown are community-published, not FaceIQ and not scientific consensus.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_042",
+      "category": "Harmony — Profile",
+      "name": "Total Facial Convexity",
+      "definition": "Overall profile convexity using glabella, nasal tip and pogonion.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "glabella; pronasale; soft-tissue pogonion",
+      "landmark_groups": [
+        "glabella",
+        "pronasale",
+        "soft-tissue pogonion"
+      ],
+      "formula_display": "oriented angle(glabella→pronasale→pogonion)",
+      "views": [
+        "profile"
+      ],
+      "unit": "degree",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY",
+          "COMM-PDF-2026"
+        ]
+      },
+      "notes": "Definition/convention must match exactly before importing external clinical norms; per-analysis FaceIQ numerical reference settings are not public. Tier bands shown are community-published, not FaceIQ and not scientific consensus.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_043",
+      "category": "Harmony — Profile",
+      "name": "Facial Depth to Height Ratio",
+      "definition": "Profile facial depth relative to selected vertical facial height.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "tragus; subnasale; nasion; sublabiale",
+      "landmark_groups": [
+        "tragus",
+        "subnasale",
+        "nasion",
+        "sublabiale"
+      ],
+      "formula_display": "distance(tragus,subnasale) / distance(nasion,sublabiale)",
+      "views": [
+        "profile"
+      ],
+      "unit": "ratio",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY"
+        ]
+      },
+      "notes": "Definition/convention must match exactly before importing external clinical norms; per-analysis FaceIQ numerical reference settings are not public.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_044",
+      "category": "Harmony — Profile",
+      "name": "Orbital Vector",
+      "definition": "Horizontal relation of infraorbital/lower-eyelid point to corneal apex, photo-scaled.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "orbitale/lower eyelid; corneal apex",
+      "landmark_groups": [
+        "orbitale/lower eyelid",
+        "corneal apex"
+      ],
+      "formula_display": "(orbitale x − corneal-apex x) × photo scale",
+      "views": [
+        "profile"
+      ],
+      "unit": "mm",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": true,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY",
+          "COMM-PDF-2026"
+        ]
+      },
+      "notes": "Definition/convention must match exactly before importing external clinical norms; per-analysis FaceIQ numerical reference settings are not public. Tier bands shown are community-published, not FaceIQ and not scientific consensus.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_045",
+      "category": "Harmony — Profile",
+      "name": "Interior Midface Projection Angle",
+      "definition": "Profile midface projection angle from lower eyelid to subalare.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "lower eyelid; subalare",
+      "landmark_groups": [
+        "lower eyelid",
+        "subalare"
+      ],
+      "formula_display": "atan(vertical separation / abs(horizontal separation))",
+      "views": [
+        "profile"
+      ],
+      "unit": "degree",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY"
+        ]
+      },
+      "notes": "Definition/convention must match exactly before importing external clinical norms; per-analysis FaceIQ numerical reference settings are not public.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_046",
+      "category": "Harmony — Profile",
+      "name": "Z Angle",
+      "definition": "FaceIQ soft-tissue Z-angle adaptation using pogonion, upper lip and Frankfort direction.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "pogonion; upper lip; porion; orbitale",
+      "landmark_groups": [
+        "pogonion",
+        "upper lip",
+        "porion",
+        "orbitale"
+      ],
+      "formula_display": "angle(pogonion–upper-lip direction, porion–orbitale direction)",
+      "views": [
+        "profile"
+      ],
+      "unit": "degree",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY"
+        ]
+      },
+      "notes": "Definition/convention must match exactly before importing external clinical norms; per-analysis FaceIQ numerical reference settings are not public.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_047",
+      "category": "Harmony — Profile",
+      "name": "Anterior Facial Depth",
+      "definition": "Angle describing anterior midface depth from tragus/subalare/lower eyelid.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "tragus; subalare; lower eyelid",
+      "landmark_groups": [
+        "tragus",
+        "subalare",
+        "lower eyelid"
+      ],
+      "formula_display": "angle(tragus→subalare→lower eyelid)",
+      "views": [
+        "profile"
+      ],
+      "unit": "degree",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY"
+        ]
+      },
+      "notes": "Definition/convention must match exactly before importing external clinical norms; per-analysis FaceIQ numerical reference settings are not public.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_048",
+      "category": "Harmony — Profile",
+      "name": "Nasal Projection",
+      "definition": "Profile nasal tip projection relative to dorsum/tip length.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "subalare; pronasale; extended dorsum reference",
+      "landmark_groups": [
+        "subalare",
+        "pronasale",
+        "extended dorsum reference"
+      ],
+      "formula_display": "horizontal projection(subalare→tip) / tip-to-dorsum-reference length",
+      "views": [
+        "profile"
+      ],
+      "unit": "ratio",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY",
+          "COMM-PDF-2026"
+        ]
+      },
+      "notes": "Definition/convention must match exactly before importing external clinical norms; per-analysis FaceIQ numerical reference settings are not public. Tier bands shown are community-published, not FaceIQ and not scientific consensus.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_049",
+      "category": "Harmony — Profile",
+      "name": "Nasal Tip Angle",
+      "definition": "Angle at pronasale between supratip and infratip.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "supratip; pronasale; infratip",
+      "landmark_groups": [
+        "supratip",
+        "pronasale",
+        "infratip"
+      ],
+      "formula_display": "angle(supratip→pronasale→infratip)",
+      "views": [
+        "profile"
+      ],
+      "unit": "degree",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY",
+          "COMM-PDF-2026"
+        ]
+      },
+      "notes": "Definition/convention must match exactly before importing external clinical norms; per-analysis FaceIQ numerical reference settings are not public. Tier bands shown are community-published, not FaceIQ and not scientific consensus.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_050",
+      "category": "Harmony — Profile",
+      "name": "Nose Tip Rotation Angle",
+      "definition": "Columellar/nasal-base inclination relative to Frankfort horizontal.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "subnasale; columella; porion; orbitale",
+      "landmark_groups": [
+        "subnasale",
+        "columella",
+        "porion",
+        "orbitale"
+      ],
+      "formula_display": "signed angle(subnasale–columella, porion–orbitale)",
+      "views": [
+        "profile"
+      ],
+      "unit": "degree",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY"
+        ]
+      },
+      "notes": "Definition/convention must match exactly before importing external clinical norms; per-analysis FaceIQ numerical reference settings are not public.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_051",
+      "category": "Harmony — Profile",
+      "name": "Nasolabial Angle",
+      "definition": "Angle between columellar direction and upper-lip direction at subnasale.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "columella; subnasale; upper lip/labrale superius",
+      "landmark_groups": [
+        "columella",
+        "subnasale",
+        "upper lip/labrale superius"
+      ],
+      "formula_display": "angle(columella→subnasale→upper lip)",
+      "views": [
+        "profile"
+      ],
+      "unit": "degree",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Moderate",
+        "source_ids": [
+          "FQ-HARMONY",
+          "COMM-PDF-2026",
+          "NLA-2012",
+          "NLA-2013",
+          "NLA-2014",
+          "NLA-2023",
+          "WEN-2015"
+        ]
+      },
+      "notes": "Definition/convention must match exactly before importing external clinical norms; per-analysis FaceIQ numerical reference settings are not public. Tier bands shown are community-published, not FaceIQ and not scientific consensus.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_052",
+      "category": "Harmony — Profile",
+      "name": "Nasofacial Angle",
+      "definition": "Acute angle describing nasal prominence relative to facial profile direction.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "pronasale; nasion; pogonion",
+      "landmark_groups": [
+        "pronasale",
+        "nasion",
+        "pogonion"
+      ],
+      "formula_display": "acute angle(pronasale→nasion→pogonion)",
+      "views": [
+        "profile"
+      ],
+      "unit": "degree",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Moderate",
+        "source_ids": [
+          "FQ-HARMONY",
+          "COMM-PDF-2026",
+          "NASOFACIAL-2016",
+          "WEN-2015"
+        ]
+      },
+      "notes": "Definition/convention must match exactly before importing external clinical norms; per-analysis FaceIQ numerical reference settings are not public. Tier bands shown are community-published, not FaceIQ and not scientific consensus.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_053",
+      "category": "Harmony — Profile",
+      "name": "Nasomental Angle",
+      "definition": "Angle formed by nasion, nasal tip and pogonion.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "nasion; pronasale; pogonion",
+      "landmark_groups": [
+        "nasion",
+        "pronasale",
+        "pogonion"
+      ],
+      "formula_display": "angle(nasion→pronasale→pogonion)",
+      "views": [
+        "profile"
+      ],
+      "unit": "degree",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY",
+          "COMM-PDF-2026"
+        ]
+      },
+      "notes": "Definition/convention must match exactly before importing external clinical norms; per-analysis FaceIQ numerical reference settings are not public. Tier bands shown are community-published, not FaceIQ and not scientific consensus.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_054",
+      "category": "Harmony — Profile",
+      "name": "Nasal Width-to-Height Ratio",
+      "definition": "FaceIQ profile nasal projection/reach divided by vertical nasal height.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "pronasale; subalare; corneal-apex level",
+      "landmark_groups": [
+        "pronasale",
+        "subalare",
+        "corneal-apex level"
+      ],
+      "formula_display": "abs(tip x−subalare x) / abs(corneal-apex y−tip y)",
+      "views": [
+        "profile"
+      ],
+      "unit": "ratio",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY",
+          "COMM-PDF-2026"
+        ]
+      },
+      "notes": "Definition/convention must match exactly before importing external clinical norms; per-analysis FaceIQ numerical reference settings are not public. Tier bands shown are community-published, not FaceIQ and not scientific consensus.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_055",
+      "category": "Harmony — Profile",
+      "name": "Frankfort-tip Angle",
+      "definition": "Angle of nasal-base-to-tip line relative to Frankfort horizontal.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "subnasale; pronasale; porion; orbitale",
+      "landmark_groups": [
+        "subnasale",
+        "pronasale",
+        "porion",
+        "orbitale"
+      ],
+      "formula_display": "abs angle(subnasale–pronasale, porion–orbitale)",
+      "views": [
+        "profile"
+      ],
+      "unit": "degree",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY"
+        ]
+      },
+      "notes": "Definition/convention must match exactly before importing external clinical norms; per-analysis FaceIQ numerical reference settings are not public.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_056",
+      "category": "Harmony — Profile",
+      "name": "Lower Lip S-Line Position",
+      "definition": "Signed perpendicular lower-lip position relative to Steiner S-line, photo-scaled.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "lower lip; S-line endpoints (nasal-base/tip midpoint and soft chin)",
+      "landmark_groups": [
+        "lower lip",
+        "S-line endpoints (nasal-base/tip midpoint and soft chin)"
+      ],
+      "formula_display": "signed perpendicular distance(lower lip,S-line) × scale",
+      "views": [
+        "profile"
+      ],
+      "unit": "mm",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": true,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY",
+          "COMM-PDF-2026"
+        ]
+      },
+      "notes": "Definition/convention must match exactly before importing external clinical norms; per-analysis FaceIQ numerical reference settings are not public. Tier bands shown are community-published, not FaceIQ and not scientific consensus.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_057",
+      "category": "Harmony — Profile",
+      "name": "Upper Lip S-Line Position",
+      "definition": "Signed perpendicular upper-lip position relative to Steiner S-line, photo-scaled.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "upper lip; S-line endpoints",
+      "landmark_groups": [
+        "upper lip",
+        "S-line endpoints"
+      ],
+      "formula_display": "signed perpendicular distance(upper lip,S-line) × scale",
+      "views": [
+        "profile"
+      ],
+      "unit": "mm",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": true,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY",
+          "COMM-PDF-2026"
+        ]
+      },
+      "notes": "Definition/convention must match exactly before importing external clinical norms; per-analysis FaceIQ numerical reference settings are not public. Tier bands shown are community-published, not FaceIQ and not scientific consensus.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_058",
+      "category": "Harmony — Profile",
+      "name": "Lower Lip E-Line",
+      "definition": "Signed perpendicular lower-lip position relative to Ricketts E-line, photo-scaled.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "lower lip; pronasale; soft-tissue pogonion",
+      "landmark_groups": [
+        "lower lip",
+        "pronasale",
+        "soft-tissue pogonion"
+      ],
+      "formula_display": "signed perpendicular distance(lower lip,pronasale→pogonion) × scale",
+      "views": [
+        "profile"
+      ],
+      "unit": "mm",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": true,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY",
+          "COMM-PDF-2026"
+        ]
+      },
+      "notes": "Definition/convention must match exactly before importing external clinical norms; per-analysis FaceIQ numerical reference settings are not public. Tier bands shown are community-published, not FaceIQ and not scientific consensus.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_059",
+      "category": "Harmony — Profile",
+      "name": "Upper Lip E-Line",
+      "definition": "Signed perpendicular upper-lip position relative to Ricketts E-line, photo-scaled.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "upper lip; pronasale; soft-tissue pogonion",
+      "landmark_groups": [
+        "upper lip",
+        "pronasale",
+        "soft-tissue pogonion"
+      ],
+      "formula_display": "signed perpendicular distance(upper lip,pronasale→pogonion) × scale",
+      "views": [
+        "profile"
+      ],
+      "unit": "mm",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": true,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY",
+          "COMM-PDF-2026"
+        ]
+      },
+      "notes": "Definition/convention must match exactly before importing external clinical norms; per-analysis FaceIQ numerical reference settings are not public. Tier bands shown are community-published, not FaceIQ and not scientific consensus.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_060",
+      "category": "Harmony — Profile",
+      "name": "Lower Lip Burstone Line",
+      "definition": "Signed perpendicular lower-lip position relative to Burstone line, photo-scaled.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "lower lip; subnasale; soft-tissue pogonion",
+      "landmark_groups": [
+        "lower lip",
+        "subnasale",
+        "soft-tissue pogonion"
+      ],
+      "formula_display": "signed perpendicular distance(lower lip,subnasale→pogonion) × scale",
+      "views": [
+        "profile"
+      ],
+      "unit": "mm",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": true,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY",
+          "COMM-PDF-2026"
+        ]
+      },
+      "notes": "Definition/convention must match exactly before importing external clinical norms; per-analysis FaceIQ numerical reference settings are not public. Tier bands shown are community-published, not FaceIQ and not scientific consensus.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_061",
+      "category": "Harmony — Profile",
+      "name": "Upper Lip Burstone Line",
+      "definition": "Signed perpendicular upper-lip position relative to Burstone line, photo-scaled.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "upper lip; subnasale; soft-tissue pogonion",
+      "landmark_groups": [
+        "upper lip",
+        "subnasale",
+        "soft-tissue pogonion"
+      ],
+      "formula_display": "signed perpendicular distance(upper lip,subnasale→pogonion) × scale",
+      "views": [
+        "profile"
+      ],
+      "unit": "mm",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": true,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY",
+          "COMM-PDF-2026"
+        ]
+      },
+      "notes": "Definition/convention must match exactly before importing external clinical norms; per-analysis FaceIQ numerical reference settings are not public. Tier bands shown are community-published, not FaceIQ and not scientific consensus.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_062",
+      "category": "Harmony — Profile",
+      "name": "Holdaway H Line",
+      "definition": "Lower-lip position relative to H-line joining upper lip and pogonion.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "lower lip; upper lip; pogonion",
+      "landmark_groups": [
+        "lower lip",
+        "upper lip",
+        "pogonion"
+      ],
+      "formula_display": "signed perpendicular distance(lower lip,upper-lip→pogonion) × scale",
+      "views": [
+        "profile"
+      ],
+      "unit": "mm",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": true,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY",
+          "COMM-PDF-2026"
+        ]
+      },
+      "notes": "Definition/convention must match exactly before importing external clinical norms; per-analysis FaceIQ numerical reference settings are not public. Tier bands shown are community-published, not FaceIQ and not scientific consensus.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_063",
+      "category": "Harmony — Profile",
+      "name": "Mentolabial Angle",
+      "definition": "Angle of labiomental fold between lower lip, sublabiale and pogonion.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "lower lip; sublabiale; pogonion",
+      "landmark_groups": [
+        "lower lip",
+        "sublabiale",
+        "pogonion"
+      ],
+      "formula_display": "angle(lower lip→sublabiale→pogonion)",
+      "views": [
+        "profile"
+      ],
+      "unit": "degree",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Moderate",
+        "source_ids": [
+          "FQ-HARMONY",
+          "COMM-PDF-2026",
+          "MENTOLABIAL-2017"
+        ]
+      },
+      "notes": "Definition/convention must match exactly before importing external clinical norms; per-analysis FaceIQ numerical reference settings are not public. Tier bands shown are community-published, not FaceIQ and not scientific consensus.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_064",
+      "category": "Harmony — Profile",
+      "name": "Gonial Angle",
+      "definition": "Soft-tissue/profile gonial angle constructed from ramus and mandibular border directions.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "ear/ramus reference; gonion; chin-border reference",
+      "landmark_groups": [
+        "ear/ramus reference",
+        "gonion",
+        "chin-border reference"
+      ],
+      "formula_display": "angle(ramus direction at gonion, mandibular-border direction)",
+      "views": [
+        "profile"
+      ],
+      "unit": "degree",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY",
+          "COMM-PDF-2026"
+        ]
+      },
+      "notes": "Definition/convention must match exactly before importing external clinical norms; per-analysis FaceIQ numerical reference settings are not public. Tier bands shown are community-published, not FaceIQ and not scientific consensus.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_065",
+      "category": "Harmony — Profile",
+      "name": "Mandibular Plane Angle",
+      "definition": "Mandibular border inclination relative to image horizontal.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "constructed posterior/anterior mandibular-border points; horizontal",
+      "landmark_groups": [
+        "constructed posterior/anterior mandibular-border points",
+        "horizontal"
+      ],
+      "formula_display": "acute angle(mandibular plane, image horizontal)",
+      "views": [
+        "profile"
+      ],
+      "unit": "degree",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY",
+          "COMM-PDF-2026"
+        ]
+      },
+      "notes": "Definition/convention must match exactly before importing external clinical norms; per-analysis FaceIQ numerical reference settings are not public. Tier bands shown are community-published, not FaceIQ and not scientific consensus.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_066",
+      "category": "Harmony — Profile",
+      "name": "Ramus to Mandible Ratio",
+      "definition": "Profile ramus length relative to mandibular body length.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "tragus; jaw-line intersection/gonial reference; chin-vertical reference",
+      "landmark_groups": [
+        "tragus",
+        "jaw-line intersection/gonial reference",
+        "chin-vertical reference"
+      ],
+      "formula_display": "distance(tragus,jaw intersection) / distance(jaw intersection,chin reference)",
+      "views": [
+        "profile"
+      ],
+      "unit": "ratio",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY",
+          "COMM-PDF-2026"
+        ]
+      },
+      "notes": "Definition/convention must match exactly before importing external clinical norms; per-analysis FaceIQ numerical reference settings are not public. Tier bands shown are community-published, not FaceIQ and not scientific consensus.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_067",
+      "category": "Harmony — Profile",
+      "name": "Gonion-to-Mouth Line",
+      "definition": "Vertical position of constructed gonion relative to mouth-corner level, photo-scaled.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "constructed gonion; mouth corner; face-height scale",
+      "landmark_groups": [
+        "constructed gonion",
+        "mouth corner",
+        "face-height scale"
+      ],
+      "formula_display": "(gonion y − mouth-corner y) × scale",
+      "views": [
+        "profile"
+      ],
+      "unit": "mm",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": true,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY",
+          "COMM-PDF-2026"
+        ]
+      },
+      "notes": "Definition/convention must match exactly before importing external clinical norms; per-analysis FaceIQ numerical reference settings are not public. Tier bands shown are community-published, not FaceIQ and not scientific consensus.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_068",
+      "category": "Harmony — Profile",
+      "name": "Chin Position Relative to Frankfort Plane",
+      "definition": "Horizontal pogonion position relative to nasion after Frankfort orientation, photo-scaled.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "pogonion; nasion; porion; orbitale",
+      "landmark_groups": [
+        "pogonion",
+        "nasion",
+        "porion",
+        "orbitale"
+      ],
+      "formula_display": "(pogonion x − nasion x) × scale after Frankfort orientation",
+      "views": [
+        "profile"
+      ],
+      "unit": "mm",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": true,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY",
+          "COMM-PDF-2026"
+        ]
+      },
+      "notes": "Definition/convention must match exactly before importing external clinical norms; per-analysis FaceIQ numerical reference settings are not public. Tier bands shown are community-published, not FaceIQ and not scientific consensus.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_069",
+      "category": "Harmony — Profile",
+      "name": "Submental Cervical Angle",
+      "definition": "Angle at cervical point between submental and neck directions.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "menton; cervical point; neck point",
+      "landmark_groups": [
+        "menton",
+        "cervical point",
+        "neck point"
+      ],
+      "formula_display": "angle(menton→cervical point→neck point)",
+      "views": [
+        "profile"
+      ],
+      "unit": "degree",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Moderate",
+        "source_ids": [
+          "FQ-HARMONY",
+          "COMM-PDF-2026",
+          "SUBMENTAL-2016"
+        ]
+      },
+      "notes": "Definition/convention must match exactly before importing external clinical norms; per-analysis FaceIQ numerical reference settings are not public. Tier bands shown are community-published, not FaceIQ and not scientific consensus.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_070",
+      "category": "Harmony — Profile",
+      "name": "Eye Protrusion",
+      "definition": "Supporting profile corneal protrusion relative to lower-eyelid reference, photo-scaled.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "corneal apex; lower eyelid; face-height scale",
+      "landmark_groups": [
+        "corneal apex",
+        "lower eyelid",
+        "face-height scale"
+      ],
+      "formula_display": "(corneal apex x − lower-eyelid x) × scale",
+      "views": [
+        "profile"
+      ],
+      "unit": "mm",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": true,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY"
+        ]
+      },
+      "notes": "FaceIQ supporting guide; no Harmony score weight. Definition/convention must match exactly before importing external clinical norms; per-analysis FaceIQ numerical reference settings are not public.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_H_071",
+      "category": "Harmony — Profile",
+      "name": "Brow Bossing Angle",
+      "definition": "Supporting brow projection angle at nasion/glabella.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "vertical point above nasion; nasion; glabella",
+      "landmark_groups": [
+        "vertical point above nasion",
+        "nasion",
+        "glabella"
+      ],
+      "formula_display": "angle(vertical-above-nasion→nasion→glabella)",
+      "views": [
+        "profile"
+      ],
+      "unit": "degree",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-HARMONY"
+        ]
+      },
+      "notes": "FaceIQ supporting guide; no Harmony score weight. Definition/convention must match exactly before importing external clinical norms; per-analysis FaceIQ numerical reference settings are not public.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_A_01",
+      "category": "Angularity",
+      "name": "Cheekbone Prominence",
+      "definition": "Vision-model estimate of prominence/visibility of cheekbones.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; no public landmark formula",
+      "landmark_groups": [
+        "Image region",
+        "no public landmark formula"
+      ],
+      "formula_display": "Vision morph placement",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-ANG"
+        ]
+      },
+      "notes": "FaceIQ public scoring construct; vision-model validity/calibration against independent human ratings is not publicly documented.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_A_02",
+      "category": "Angularity",
+      "name": "Jaw Definition",
+      "definition": "Vision-model estimate of sharpness/definition of jawline.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; no public landmark formula",
+      "landmark_groups": [
+        "Image region",
+        "no public landmark formula"
+      ],
+      "formula_display": "Vision morph placement",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-ANG"
+        ]
+      },
+      "notes": "FaceIQ public scoring construct; vision-model validity/calibration against independent human ratings is not publicly documented.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_A_03",
+      "category": "Angularity",
+      "name": "Cheek Leanness",
+      "definition": "Vision-model estimate of leanness/definition of cheek region.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; no public landmark formula",
+      "landmark_groups": [
+        "Image region",
+        "no public landmark formula"
+      ],
+      "formula_display": "Vision morph placement",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-ANG"
+        ]
+      },
+      "notes": "FaceIQ public scoring construct; vision-model validity/calibration against independent human ratings is not publicly documented.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_A_04",
+      "category": "Angularity",
+      "name": "Chin Definition",
+      "definition": "Vision-model estimate of definition/shape of chin.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; no public landmark formula",
+      "landmark_groups": [
+        "Image region",
+        "no public landmark formula"
+      ],
+      "formula_display": "Vision morph placement",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-ANG"
+        ]
+      },
+      "notes": "FaceIQ public scoring construct; vision-model validity/calibration against independent human ratings is not publicly documented.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_A_05",
+      "category": "Angularity",
+      "name": "Submental Definition",
+      "definition": "Vision-model estimate of under-chin/neck definition.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; no public landmark formula",
+      "landmark_groups": [
+        "Image region",
+        "no public landmark formula"
+      ],
+      "formula_display": "Vision morph placement",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-ANG"
+        ]
+      },
+      "notes": "FaceIQ public scoring construct; vision-model validity/calibration against independent human ratings is not publicly documented.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_D_01",
+      "category": "Sexual Dimorphism",
+      "name": "Jaw",
+      "definition": "Vision-morph assessment of how jaw reads along opposite-sex-typical to same-sex-typical continuum.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; no public landmark formula",
+      "landmark_groups": [
+        "Image region",
+        "no public landmark formula"
+      ],
+      "formula_display": "Vision morph placement",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-DIM"
+        ]
+      },
+      "notes": "Not an attractiveness measure by itself. FaceIQ detailed page publicly lists 11 traits while scores page says 10 assessments; preserve this documentation mismatch.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_D_02",
+      "category": "Sexual Dimorphism",
+      "name": "Brow Ridge",
+      "definition": "Vision-morph assessment of how brow ridge reads along opposite-sex-typical to same-sex-typical continuum.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; no public landmark formula",
+      "landmark_groups": [
+        "Image region",
+        "no public landmark formula"
+      ],
+      "formula_display": "Vision morph placement",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-DIM"
+        ]
+      },
+      "notes": "Not an attractiveness measure by itself. FaceIQ detailed page publicly lists 11 traits while scores page says 10 assessments; preserve this documentation mismatch.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_D_03",
+      "category": "Sexual Dimorphism",
+      "name": "Face Shape",
+      "definition": "Vision-morph assessment of how face shape reads along opposite-sex-typical to same-sex-typical continuum.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; no public landmark formula",
+      "landmark_groups": [
+        "Image region",
+        "no public landmark formula"
+      ],
+      "formula_display": "Vision morph placement",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-DIM"
+        ]
+      },
+      "notes": "Not an attractiveness measure by itself. FaceIQ detailed page publicly lists 11 traits while scores page says 10 assessments; preserve this documentation mismatch.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_D_04",
+      "category": "Sexual Dimorphism",
+      "name": "Eyes",
+      "definition": "Vision-morph assessment of how eyes reads along opposite-sex-typical to same-sex-typical continuum.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; no public landmark formula",
+      "landmark_groups": [
+        "Image region",
+        "no public landmark formula"
+      ],
+      "formula_display": "Vision morph placement",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-DIM"
+        ]
+      },
+      "notes": "Not an attractiveness measure by itself. FaceIQ detailed page publicly lists 11 traits while scores page says 10 assessments; preserve this documentation mismatch.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_D_05",
+      "category": "Sexual Dimorphism",
+      "name": "Eyebrow Thickness",
+      "definition": "Vision-morph assessment of how eyebrow thickness reads along opposite-sex-typical to same-sex-typical continuum.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; no public landmark formula",
+      "landmark_groups": [
+        "Image region",
+        "no public landmark formula"
+      ],
+      "formula_display": "Vision morph placement",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-DIM"
+        ]
+      },
+      "notes": "Not an attractiveness measure by itself. FaceIQ detailed page publicly lists 11 traits while scores page says 10 assessments; preserve this documentation mismatch.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_D_06",
+      "category": "Sexual Dimorphism",
+      "name": "Nose",
+      "definition": "Vision-morph assessment of how nose reads along opposite-sex-typical to same-sex-typical continuum.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; no public landmark formula",
+      "landmark_groups": [
+        "Image region",
+        "no public landmark formula"
+      ],
+      "formula_display": "Vision morph placement",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-DIM"
+        ]
+      },
+      "notes": "Not an attractiveness measure by itself. FaceIQ detailed page publicly lists 11 traits while scores page says 10 assessments; preserve this documentation mismatch.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_D_07",
+      "category": "Sexual Dimorphism",
+      "name": "Hairline",
+      "definition": "Vision-morph assessment of how hairline reads along opposite-sex-typical to same-sex-typical continuum.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; no public landmark formula",
+      "landmark_groups": [
+        "Image region",
+        "no public landmark formula"
+      ],
+      "formula_display": "Vision morph placement",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-DIM"
+        ]
+      },
+      "notes": "Not an attractiveness measure by itself. FaceIQ detailed page publicly lists 11 traits while scores page says 10 assessments; preserve this documentation mismatch.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_D_08",
+      "category": "Sexual Dimorphism",
+      "name": "Hair Length",
+      "definition": "Vision-morph assessment of how hair length reads along opposite-sex-typical to same-sex-typical continuum.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; no public landmark formula",
+      "landmark_groups": [
+        "Image region",
+        "no public landmark formula"
+      ],
+      "formula_display": "Vision morph placement",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-DIM"
+        ]
+      },
+      "notes": "Not an attractiveness measure by itself. FaceIQ detailed page publicly lists 11 traits while scores page says 10 assessments; preserve this documentation mismatch.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_D_09",
+      "category": "Sexual Dimorphism",
+      "name": "Facial Hair",
+      "definition": "Vision-morph assessment of how facial hair reads along opposite-sex-typical to same-sex-typical continuum.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; no public landmark formula",
+      "landmark_groups": [
+        "Image region",
+        "no public landmark formula"
+      ],
+      "formula_display": "Vision morph placement",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-DIM"
+        ]
+      },
+      "notes": "Not an attractiveness measure by itself. FaceIQ detailed page publicly lists 11 traits while scores page says 10 assessments; preserve this documentation mismatch.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_D_10",
+      "category": "Sexual Dimorphism",
+      "name": "Lips",
+      "definition": "Vision-morph assessment of how lips reads along opposite-sex-typical to same-sex-typical continuum.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; no public landmark formula",
+      "landmark_groups": [
+        "Image region",
+        "no public landmark formula"
+      ],
+      "formula_display": "Vision morph placement",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-DIM"
+        ]
+      },
+      "notes": "Not an attractiveness measure by itself. FaceIQ detailed page publicly lists 11 traits while scores page says 10 assessments; preserve this documentation mismatch.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_D_11",
+      "category": "Sexual Dimorphism",
+      "name": "Neck",
+      "definition": "Vision-morph assessment of how neck reads along opposite-sex-typical to same-sex-typical continuum.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; no public landmark formula",
+      "landmark_groups": [
+        "Image region",
+        "no public landmark formula"
+      ],
+      "formula_display": "Vision morph placement",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-DIM"
+        ]
+      },
+      "notes": "Not an attractiveness measure by itself. FaceIQ detailed page publicly lists 11 traits while scores page says 10 assessments; preserve this documentation mismatch.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_F_01",
+      "category": "Features — Skin",
+      "name": "Acne",
+      "definition": "FaceIQ vision assessment of acne severity/quality.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; model-assessed",
+      "landmark_groups": [
+        "Image region",
+        "model-assessed"
+      ],
+      "formula_display": "Vision rating; no public deterministic formula",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-FEAT"
+        ]
+      },
+      "notes": "Highly photo-sensitive; lighting, compression and filters can change the apparent condition. FaceIQ category-level deduction caps are public, exact learned calibration is not.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_F_02",
+      "category": "Features — Skin",
+      "name": "Acne Scars",
+      "definition": "FaceIQ vision assessment of acne scars severity/quality.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; model-assessed",
+      "landmark_groups": [
+        "Image region",
+        "model-assessed"
+      ],
+      "formula_display": "Vision rating; no public deterministic formula",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-FEAT"
+        ]
+      },
+      "notes": "Highly photo-sensitive; lighting, compression and filters can change the apparent condition. FaceIQ category-level deduction caps are public, exact learned calibration is not.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_F_03",
+      "category": "Features — Skin",
+      "name": "Eczema",
+      "definition": "FaceIQ vision assessment of eczema severity/quality.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; model-assessed",
+      "landmark_groups": [
+        "Image region",
+        "model-assessed"
+      ],
+      "formula_display": "Vision rating; no public deterministic formula",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-FEAT"
+        ]
+      },
+      "notes": "Highly photo-sensitive; lighting, compression and filters can change the apparent condition. FaceIQ category-level deduction caps are public, exact learned calibration is not.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_F_04",
+      "category": "Features — Skin",
+      "name": "Hyperpigmentation",
+      "definition": "FaceIQ vision assessment of hyperpigmentation severity/quality.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; model-assessed",
+      "landmark_groups": [
+        "Image region",
+        "model-assessed"
+      ],
+      "formula_display": "Vision rating; no public deterministic formula",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-FEAT"
+        ]
+      },
+      "notes": "Highly photo-sensitive; lighting, compression and filters can change the apparent condition. FaceIQ category-level deduction caps are public, exact learned calibration is not.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_F_05",
+      "category": "Features — Skin",
+      "name": "Hypopigmentation",
+      "definition": "FaceIQ vision assessment of hypopigmentation severity/quality.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; model-assessed",
+      "landmark_groups": [
+        "Image region",
+        "model-assessed"
+      ],
+      "formula_display": "Vision rating; no public deterministic formula",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-FEAT"
+        ]
+      },
+      "notes": "Highly photo-sensitive; lighting, compression and filters can change the apparent condition. FaceIQ category-level deduction caps are public, exact learned calibration is not.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_F_06",
+      "category": "Features — Skin",
+      "name": "Rosacea",
+      "definition": "FaceIQ vision assessment of rosacea severity/quality.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; model-assessed",
+      "landmark_groups": [
+        "Image region",
+        "model-assessed"
+      ],
+      "formula_display": "Vision rating; no public deterministic formula",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-FEAT"
+        ]
+      },
+      "notes": "Highly photo-sensitive; lighting, compression and filters can change the apparent condition. FaceIQ category-level deduction caps are public, exact learned calibration is not.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_F_07",
+      "category": "Features — Hair",
+      "name": "Hair Loss",
+      "definition": "FaceIQ vision assessment of hair loss severity/quality.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; model-assessed",
+      "landmark_groups": [
+        "Image region",
+        "model-assessed"
+      ],
+      "formula_display": "Vision rating; no public deterministic formula",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-FEAT"
+        ]
+      },
+      "notes": "Highly photo-sensitive; lighting, compression and filters can change the apparent condition. FaceIQ category-level deduction caps are public, exact learned calibration is not.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_F_08",
+      "category": "Features — Hair",
+      "name": "Thinning Hair",
+      "definition": "FaceIQ vision assessment of thinning hair severity/quality.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; model-assessed",
+      "landmark_groups": [
+        "Image region",
+        "model-assessed"
+      ],
+      "formula_display": "Vision rating; no public deterministic formula",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-FEAT"
+        ]
+      },
+      "notes": "Highly photo-sensitive; lighting, compression and filters can change the apparent condition. FaceIQ category-level deduction caps are public, exact learned calibration is not.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_F_09",
+      "category": "Features — Hair",
+      "name": "Dry Hair",
+      "definition": "FaceIQ vision assessment of dry hair severity/quality.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; model-assessed",
+      "landmark_groups": [
+        "Image region",
+        "model-assessed"
+      ],
+      "formula_display": "Vision rating; no public deterministic formula",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-FEAT"
+        ]
+      },
+      "notes": "Highly photo-sensitive; lighting, compression and filters can change the apparent condition. FaceIQ category-level deduction caps are public, exact learned calibration is not.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_F_10",
+      "category": "Features — Facial Creasing",
+      "name": "Nasolabial Folds",
+      "definition": "FaceIQ vision assessment of nasolabial folds severity/quality.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; model-assessed",
+      "landmark_groups": [
+        "Image region",
+        "model-assessed"
+      ],
+      "formula_display": "Vision rating; no public deterministic formula",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-FEAT"
+        ]
+      },
+      "notes": "Highly photo-sensitive; lighting, compression and filters can change the apparent condition. FaceIQ category-level deduction caps are public, exact learned calibration is not.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_F_11",
+      "category": "Features — Facial Creasing",
+      "name": "Forehead Lines",
+      "definition": "FaceIQ vision assessment of forehead lines severity/quality.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; model-assessed",
+      "landmark_groups": [
+        "Image region",
+        "model-assessed"
+      ],
+      "formula_display": "Vision rating; no public deterministic formula",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-FEAT"
+        ]
+      },
+      "notes": "Highly photo-sensitive; lighting, compression and filters can change the apparent condition. FaceIQ category-level deduction caps are public, exact learned calibration is not.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_F_12",
+      "category": "Features — Facial Creasing",
+      "name": "Frown Lines",
+      "definition": "FaceIQ vision assessment of frown lines severity/quality.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; model-assessed",
+      "landmark_groups": [
+        "Image region",
+        "model-assessed"
+      ],
+      "formula_display": "Vision rating; no public deterministic formula",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-FEAT"
+        ]
+      },
+      "notes": "Highly photo-sensitive; lighting, compression and filters can change the apparent condition. FaceIQ category-level deduction caps are public, exact learned calibration is not.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_F_13",
+      "category": "Features — Facial Creasing",
+      "name": "Crow’s Feet",
+      "definition": "FaceIQ vision assessment of crow’s feet severity/quality.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; model-assessed",
+      "landmark_groups": [
+        "Image region",
+        "model-assessed"
+      ],
+      "formula_display": "Vision rating; no public deterministic formula",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-FEAT"
+        ]
+      },
+      "notes": "Highly photo-sensitive; lighting, compression and filters can change the apparent condition. FaceIQ category-level deduction caps are public, exact learned calibration is not.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_F_14",
+      "category": "Features — Facial Creasing",
+      "name": "Mentolabial Creasing",
+      "definition": "FaceIQ vision assessment of mentolabial creasing severity/quality.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; model-assessed",
+      "landmark_groups": [
+        "Image region",
+        "model-assessed"
+      ],
+      "formula_display": "Vision rating; no public deterministic formula",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-FEAT"
+        ]
+      },
+      "notes": "Highly photo-sensitive; lighting, compression and filters can change the apparent condition. FaceIQ category-level deduction caps are public, exact learned calibration is not.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_F_15",
+      "category": "Features — Facial Creasing",
+      "name": "Platysmal Bands",
+      "definition": "FaceIQ vision assessment of platysmal bands severity/quality.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; model-assessed",
+      "landmark_groups": [
+        "Image region",
+        "model-assessed"
+      ],
+      "formula_display": "Vision rating; no public deterministic formula",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-FEAT"
+        ]
+      },
+      "notes": "Highly photo-sensitive; lighting, compression and filters can change the apparent condition. FaceIQ category-level deduction caps are public, exact learned calibration is not.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_F_16",
+      "category": "Features — Facial Creasing",
+      "name": "Under-eye Wrinkles",
+      "definition": "FaceIQ vision assessment of under-eye wrinkles severity/quality.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; model-assessed",
+      "landmark_groups": [
+        "Image region",
+        "model-assessed"
+      ],
+      "formula_display": "Vision rating; no public deterministic formula",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-FEAT"
+        ]
+      },
+      "notes": "Highly photo-sensitive; lighting, compression and filters can change the apparent condition. FaceIQ category-level deduction caps are public, exact learned calibration is not.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_F_17",
+      "category": "Features — Under-eye",
+      "name": "Dark Circles",
+      "definition": "FaceIQ vision assessment of dark circles severity/quality.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; model-assessed",
+      "landmark_groups": [
+        "Image region",
+        "model-assessed"
+      ],
+      "formula_display": "Vision rating; no public deterministic formula",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-FEAT"
+        ]
+      },
+      "notes": "Highly photo-sensitive; lighting, compression and filters can change the apparent condition. FaceIQ category-level deduction caps are public, exact learned calibration is not.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_F_18",
+      "category": "Features — Under-eye",
+      "name": "Eye Bags",
+      "definition": "FaceIQ vision assessment of eye bags severity/quality.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; model-assessed",
+      "landmark_groups": [
+        "Image region",
+        "model-assessed"
+      ],
+      "formula_display": "Vision rating; no public deterministic formula",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-FEAT"
+        ]
+      },
+      "notes": "Highly photo-sensitive; lighting, compression and filters can change the apparent condition. FaceIQ category-level deduction caps are public, exact learned calibration is not.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_F_19",
+      "category": "Features — Under-eye",
+      "name": "Eye Protrusion (visual)",
+      "definition": "FaceIQ vision assessment of eye protrusion (visual) severity/quality.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; model-assessed",
+      "landmark_groups": [
+        "Image region",
+        "model-assessed"
+      ],
+      "formula_display": "Vision rating; no public deterministic formula",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-FEAT"
+        ]
+      },
+      "notes": "Highly photo-sensitive; lighting, compression and filters can change the apparent condition. FaceIQ category-level deduction caps are public, exact learned calibration is not.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_F_20",
+      "category": "Features — Under-eye",
+      "name": "Under-eye Redness",
+      "definition": "FaceIQ vision assessment of under-eye redness severity/quality.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; model-assessed",
+      "landmark_groups": [
+        "Image region",
+        "model-assessed"
+      ],
+      "formula_display": "Vision rating; no public deterministic formula",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-FEAT"
+        ]
+      },
+      "notes": "Highly photo-sensitive; lighting, compression and filters can change the apparent condition. FaceIQ category-level deduction caps are public, exact learned calibration is not.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_F_21",
+      "category": "Features — Sclera",
+      "name": "Scleral Show",
+      "definition": "FaceIQ vision assessment of scleral show severity/quality.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; model-assessed",
+      "landmark_groups": [
+        "Image region",
+        "model-assessed"
+      ],
+      "formula_display": "Vision rating; no public deterministic formula",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-FEAT"
+        ]
+      },
+      "notes": "Highly photo-sensitive; lighting, compression and filters can change the apparent condition. FaceIQ category-level deduction caps are public, exact learned calibration is not.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_F_22",
+      "category": "Features — Sclera",
+      "name": "Sclera Reddening",
+      "definition": "FaceIQ vision assessment of sclera reddening severity/quality.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; model-assessed",
+      "landmark_groups": [
+        "Image region",
+        "model-assessed"
+      ],
+      "formula_display": "Vision rating; no public deterministic formula",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-FEAT"
+        ]
+      },
+      "notes": "Highly photo-sensitive; lighting, compression and filters can change the apparent condition. FaceIQ category-level deduction caps are public, exact learned calibration is not.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_F_23",
+      "category": "Features — Sclera",
+      "name": "Sclera Yellowing",
+      "definition": "FaceIQ vision assessment of sclera yellowing severity/quality.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; model-assessed",
+      "landmark_groups": [
+        "Image region",
+        "model-assessed"
+      ],
+      "formula_display": "Vision rating; no public deterministic formula",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-FEAT"
+        ]
+      },
+      "notes": "Highly photo-sensitive; lighting, compression and filters can change the apparent condition. FaceIQ category-level deduction caps are public, exact learned calibration is not.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_F_24",
+      "category": "Features — Brows & Lashes",
+      "name": "Eyebrow Density",
+      "definition": "FaceIQ vision assessment of eyebrow density severity/quality.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; model-assessed",
+      "landmark_groups": [
+        "Image region",
+        "model-assessed"
+      ],
+      "formula_display": "Vision rating; no public deterministic formula",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-FEAT"
+        ]
+      },
+      "notes": "Highly photo-sensitive; lighting, compression and filters can change the apparent condition. FaceIQ category-level deduction caps are public, exact learned calibration is not.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_F_25",
+      "category": "Features — Brows & Lashes",
+      "name": "Eyelashes",
+      "definition": "FaceIQ vision assessment of eyelashes severity/quality.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; model-assessed",
+      "landmark_groups": [
+        "Image region",
+        "model-assessed"
+      ],
+      "formula_display": "Vision rating; no public deterministic formula",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-FEAT"
+        ]
+      },
+      "notes": "Highly photo-sensitive; lighting, compression and filters can change the apparent condition. FaceIQ category-level deduction caps are public, exact learned calibration is not.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_F_26",
+      "category": "Features — Brows & Lashes",
+      "name": "Eyebrow Color",
+      "definition": "FaceIQ vision assessment of eyebrow color severity/quality.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; model-assessed",
+      "landmark_groups": [
+        "Image region",
+        "model-assessed"
+      ],
+      "formula_display": "Vision rating; no public deterministic formula",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-FEAT"
+        ]
+      },
+      "notes": "Highly photo-sensitive; lighting, compression and filters can change the apparent condition. FaceIQ category-level deduction caps are public, exact learned calibration is not.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_F_27",
+      "category": "Features — Upper Eyelid",
+      "name": "Droopy Eyelid",
+      "definition": "FaceIQ vision assessment of droopy eyelid severity/quality.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; model-assessed",
+      "landmark_groups": [
+        "Image region",
+        "model-assessed"
+      ],
+      "formula_display": "Vision rating; no public deterministic formula",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-FEAT"
+        ]
+      },
+      "notes": "Highly photo-sensitive; lighting, compression and filters can change the apparent condition. FaceIQ category-level deduction caps are public, exact learned calibration is not.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_F_28",
+      "category": "Features — Upper Eyelid",
+      "name": "Upper Eyelid Exposure (visual)",
+      "definition": "FaceIQ vision assessment of upper eyelid exposure (visual) severity/quality.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; model-assessed",
+      "landmark_groups": [
+        "Image region",
+        "model-assessed"
+      ],
+      "formula_display": "Vision rating; no public deterministic formula",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-FEAT"
+        ]
+      },
+      "notes": "Highly photo-sensitive; lighting, compression and filters can change the apparent condition. FaceIQ category-level deduction caps are public, exact learned calibration is not.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_F_29",
+      "category": "Features — Nose Shape",
+      "name": "Bulbous Nasal Tip",
+      "definition": "FaceIQ vision assessment of bulbous nasal tip severity/quality.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; model-assessed",
+      "landmark_groups": [
+        "Image region",
+        "model-assessed"
+      ],
+      "formula_display": "Vision rating; no public deterministic formula",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-FEAT"
+        ]
+      },
+      "notes": "Highly photo-sensitive; lighting, compression and filters can change the apparent condition. FaceIQ category-level deduction caps are public, exact learned calibration is not.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_F_30",
+      "category": "Features — Nose Shape",
+      "name": "Bloated Nasal Bridge",
+      "definition": "FaceIQ vision assessment of bloated nasal bridge severity/quality.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; model-assessed",
+      "landmark_groups": [
+        "Image region",
+        "model-assessed"
+      ],
+      "formula_display": "Vision rating; no public deterministic formula",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-FEAT"
+        ]
+      },
+      "notes": "Highly photo-sensitive; lighting, compression and filters can change the apparent condition. FaceIQ category-level deduction caps are public, exact learned calibration is not.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_F_31",
+      "category": "Features — Nose Shape",
+      "name": "Nostril Exposure",
+      "definition": "FaceIQ vision assessment of nostril exposure severity/quality.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; model-assessed",
+      "landmark_groups": [
+        "Image region",
+        "model-assessed"
+      ],
+      "formula_display": "Vision rating; no public deterministic formula",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-FEAT"
+        ]
+      },
+      "notes": "Highly photo-sensitive; lighting, compression and filters can change the apparent condition. FaceIQ category-level deduction caps are public, exact learned calibration is not.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_F_32",
+      "category": "Features — Symmetry",
+      "name": "Jaw Symmetry",
+      "definition": "FaceIQ vision assessment of jaw symmetry severity/quality.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; model-assessed",
+      "landmark_groups": [
+        "Image region",
+        "model-assessed"
+      ],
+      "formula_display": "Vision rating; no public deterministic formula",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-FEAT"
+        ]
+      },
+      "notes": "Highly photo-sensitive; lighting, compression and filters can change the apparent condition. FaceIQ category-level deduction caps are public, exact learned calibration is not.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_F_33",
+      "category": "Features — Symmetry",
+      "name": "Eye Symmetry",
+      "definition": "FaceIQ vision assessment of eye symmetry severity/quality.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; model-assessed",
+      "landmark_groups": [
+        "Image region",
+        "model-assessed"
+      ],
+      "formula_display": "Vision rating; no public deterministic formula",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-FEAT"
+        ]
+      },
+      "notes": "Highly photo-sensitive; lighting, compression and filters can change the apparent condition. FaceIQ category-level deduction caps are public, exact learned calibration is not.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_F_34",
+      "category": "Features — Symmetry",
+      "name": "Eyebrow Symmetry",
+      "definition": "FaceIQ vision assessment of eyebrow symmetry severity/quality.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; model-assessed",
+      "landmark_groups": [
+        "Image region",
+        "model-assessed"
+      ],
+      "formula_display": "Vision rating; no public deterministic formula",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-FEAT"
+        ]
+      },
+      "notes": "Highly photo-sensitive; lighting, compression and filters can change the apparent condition. FaceIQ category-level deduction caps are public, exact learned calibration is not.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_F_35",
+      "category": "Features — Symmetry",
+      "name": "Cheekbone Symmetry",
+      "definition": "FaceIQ vision assessment of cheekbone symmetry severity/quality.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; model-assessed",
+      "landmark_groups": [
+        "Image region",
+        "model-assessed"
+      ],
+      "formula_display": "Vision rating; no public deterministic formula",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-FEAT"
+        ]
+      },
+      "notes": "Highly photo-sensitive; lighting, compression and filters can change the apparent condition. FaceIQ category-level deduction caps are public, exact learned calibration is not.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_F_36",
+      "category": "Features — Symmetry",
+      "name": "Nose Bridge Symmetry",
+      "definition": "FaceIQ vision assessment of nose bridge symmetry severity/quality.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; model-assessed",
+      "landmark_groups": [
+        "Image region",
+        "model-assessed"
+      ],
+      "formula_display": "Vision rating; no public deterministic formula",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-FEAT"
+        ]
+      },
+      "notes": "Highly photo-sensitive; lighting, compression and filters can change the apparent condition. FaceIQ category-level deduction caps are public, exact learned calibration is not.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_F_37",
+      "category": "Features — Symmetry",
+      "name": "Nose Wing Symmetry",
+      "definition": "FaceIQ vision assessment of nose wing symmetry severity/quality.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; model-assessed",
+      "landmark_groups": [
+        "Image region",
+        "model-assessed"
+      ],
+      "formula_display": "Vision rating; no public deterministic formula",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-FEAT"
+        ]
+      },
+      "notes": "Highly photo-sensitive; lighting, compression and filters can change the apparent condition. FaceIQ category-level deduction caps are public, exact learned calibration is not.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_F_38",
+      "category": "Features — Symmetry",
+      "name": "Mouth Symmetry",
+      "definition": "FaceIQ vision assessment of mouth symmetry severity/quality.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; model-assessed",
+      "landmark_groups": [
+        "Image region",
+        "model-assessed"
+      ],
+      "formula_display": "Vision rating; no public deterministic formula",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-FEAT"
+        ]
+      },
+      "notes": "Highly photo-sensitive; lighting, compression and filters can change the apparent condition. FaceIQ category-level deduction caps are public, exact learned calibration is not.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_F_39",
+      "category": "Features — Symmetry",
+      "name": "Ear Symmetry",
+      "definition": "FaceIQ vision assessment of ear symmetry severity/quality.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; model-assessed",
+      "landmark_groups": [
+        "Image region",
+        "model-assessed"
+      ],
+      "formula_display": "Vision rating; no public deterministic formula",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-FEAT"
+        ]
+      },
+      "notes": "Highly photo-sensitive; lighting, compression and filters can change the apparent condition. FaceIQ category-level deduction caps are public, exact learned calibration is not.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_F_40",
+      "category": "Features — Symmetry",
+      "name": "Temple Symmetry",
+      "definition": "FaceIQ vision assessment of temple symmetry severity/quality.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; model-assessed",
+      "landmark_groups": [
+        "Image region",
+        "model-assessed"
+      ],
+      "formula_display": "Vision rating; no public deterministic formula",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-FEAT"
+        ]
+      },
+      "notes": "Highly photo-sensitive; lighting, compression and filters can change the apparent condition. FaceIQ category-level deduction caps are public, exact learned calibration is not.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_F_41",
+      "category": "Features — Symmetry",
+      "name": "Vertical Asymmetry",
+      "definition": "FaceIQ vision assessment of vertical asymmetry severity/quality.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image region; model-assessed",
+      "landmark_groups": [
+        "Image region",
+        "model-assessed"
+      ],
+      "formula_display": "Vision rating; no public deterministic formula",
+      "views": [
+        "front",
+        "profile"
+      ],
+      "unit": "0–10 rating",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-FEAT"
+        ]
+      },
+      "notes": "Highly photo-sensitive; lighting, compression and filters can change the apparent condition. FaceIQ category-level deduction caps are public, exact learned calibration is not.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "FQ_F_COLOR",
+      "category": "Features — Coloring",
+      "name": "Coloring / contrast",
+      "definition": "Category-level FaceIQ feature concept involving eye, hair and skin contrast.",
+      "definition_family": "FaceIQ-public definition",
+      "landmarks_text": "Image-wide appearance",
+      "landmark_groups": [
+        "Image-wide appearance"
+      ],
+      "formula_display": "Vision assessment; exact sub-assessments not publicly enumerated on overview page",
+      "views": [
+        "front"
+      ],
+      "unit": "0–10/category score",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": false,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Unknown",
+        "source_ids": [
+          "FQ-FEAT"
+        ]
+      },
+      "notes": "FaceIQ states coloring category cap (5%) but the overview does not enumerate exact item-level guides in the retrieved public text.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "R_ANTH_TRN",
+      "category": "Research Anthropometry — Linear",
+      "name": "Forehead Height (tr–n)",
+      "definition": "Direct anthropometric trichion-to-nasion height.",
+      "definition_family": "research-only definition",
+      "landmarks_text": "trichion; nasion",
+      "landmark_groups": [
+        "trichion",
+        "nasion"
+      ],
+      "formula_display": "Euclidean/projective distance(tr,n)",
+      "views": [
+        "front",
+        "direct_anthropometry"
+      ],
+      "unit": "mm",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Caution",
+        "calibration_required": true,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "High",
+        "source_ids": [
+          "FARKAS-2005"
+        ]
+      },
+      "notes": "Use calibrated/direct or scale-referenced photography; hairline placement is error-prone.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "R_ANTH_TRGN",
+      "category": "Research Anthropometry — Linear",
+      "name": "Physiognomic Face Height (tr–gn)",
+      "definition": "Trichion-to-gnathion total facial height.",
+      "definition_family": "research-only definition",
+      "landmarks_text": "trichion; gnathion",
+      "landmark_groups": [
+        "trichion",
+        "gnathion"
+      ],
+      "formula_display": "distance(tr,gn)",
+      "views": [
+        "front",
+        "direct_anthropometry"
+      ],
+      "unit": "mm",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Caution",
+        "calibration_required": true,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "High",
+        "source_ids": [
+          "FARKAS-2005"
+        ]
+      },
+      "notes": "Direct anthropometry source; photographic use needs scale and head-pose control.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "R_ANTH_NGN",
+      "category": "Research Anthropometry — Linear",
+      "name": "Morphologic Face Height (n–gn)",
+      "definition": "Nasion-to-gnathion face height.",
+      "definition_family": "research-only definition",
+      "landmarks_text": "nasion; gnathion",
+      "landmark_groups": [
+        "nasion",
+        "gnathion"
+      ],
+      "formula_display": "distance(n,gn)",
+      "views": [
+        "front",
+        "direct_anthropometry"
+      ],
+      "unit": "mm",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Caution",
+        "calibration_required": true,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "High",
+        "source_ids": [
+          "FARKAS-2005"
+        ]
+      },
+      "notes": "Normative, not aesthetic.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "R_ANTH_SNGN",
+      "category": "Research Anthropometry — Linear",
+      "name": "Lower Face Height (sn–gn)",
+      "definition": "Subnasale-to-gnathion lower face height.",
+      "definition_family": "research-only definition",
+      "landmarks_text": "subnasale; gnathion",
+      "landmark_groups": [
+        "subnasale",
+        "gnathion"
+      ],
+      "formula_display": "distance(sn,gn)",
+      "views": [
+        "front",
+        "direct_anthropometry"
+      ],
+      "unit": "mm",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Caution",
+        "calibration_required": true,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "High",
+        "source_ids": [
+          "FARKAS-2005"
+        ]
+      },
+      "notes": "Normative, not aesthetic.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "R_ANTH_ZYZY",
+      "category": "Research Anthropometry — Linear",
+      "name": "Bizygomatic Breadth (zy–zy)",
+      "definition": "Maximum cheekbone breadth.",
+      "definition_family": "research-only definition",
+      "landmarks_text": "bilateral zygion",
+      "landmark_groups": [
+        "bilateral zygion"
+      ],
+      "formula_display": "distance(zyL,zyR)",
+      "views": [
+        "front",
+        "direct_anthropometry"
+      ],
+      "unit": "mm",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Caution",
+        "calibration_required": true,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "High",
+        "source_ids": [
+          "FARKAS-2005",
+          "PHOTO2D-2021"
+        ]
+      },
+      "notes": "2D photographic agreement is weaker than for many central facial dimensions because zygion is a lateral contour landmark.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "R_ANTH_GOGO",
+      "category": "Research Anthropometry — Linear",
+      "name": "Bigonial Breadth (go–go)",
+      "definition": "Mandibular angle breadth.",
+      "definition_family": "research-only definition",
+      "landmarks_text": "bilateral gonion",
+      "landmark_groups": [
+        "bilateral gonion"
+      ],
+      "formula_display": "distance(goL,goR)",
+      "views": [
+        "front",
+        "direct_anthropometry"
+      ],
+      "unit": "mm",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Caution",
+        "calibration_required": true,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "High",
+        "source_ids": [
+          "FARKAS-2005",
+          "PHOTO2D-2021"
+        ]
+      },
+      "notes": "2D photogrammetry showed clinically important disagreement for this dimension; do not over-interpret photo-derived mm.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "R_ANTH_ENEN",
+      "category": "Research Anthropometry — Linear",
+      "name": "Intercanthal Distance (en–en)",
+      "definition": "Distance between medial canthi.",
+      "definition_family": "research-only definition",
+      "landmarks_text": "bilateral endocanthion",
+      "landmark_groups": [
+        "bilateral endocanthion"
+      ],
+      "formula_display": "distance(enL,enR)",
+      "views": [
+        "front",
+        "direct_anthropometry"
+      ],
+      "unit": "mm",
+      "value_type": "continuous",
+      "photo": {
+        "feasibility": "Yes",
+        "calibration_required": true,
+        "ordinary_photo_supported": true
+      },
+      "evidence": {
+        "quality": "Very High",
+        "source_ids": [
+          "FARKAS-2005",
+          "ICD-2022"
+        ]
+      },
+      "notes": "Population and often sex differences are well documented; measurement method also matters.",
+      "runtime": {
+        "calculation_key": null,
+        "implementation_status": "definition_ready_calculation_not_mapped",
+        "warning": "Do not parse formula_display at runtime. Map this stable measurement ID to deterministic Kotlin geometry code."
+      }
+    },
+    {
+      "id": "R_ANTH_ENEX",
+      "category": "Research Anthropometry — Linear",
+      "name": "Eye Fissure Length (en–ex)",
