@@ -135,7 +135,7 @@ Before WP01 starts:
 - no secret files tracked by Git
 - production applicationId is `app.ascend.mobile`
 - development/debug applicationId is `app.ascend.mobile.dev`
-- signing/update strategy completed
+- signing/update strategy is frozen; permanent key creation/backups must complete before P0 closes and before the first long-lived signed QA APK
 - Room + supported SQLCipher compatibility-spike acceptance criteria are frozen; the executable proof runs on the Phase 0 project before P0 closes
 - key-envelope format/version/rotation/deletion semantics frozen
 - 16 KB page-size test strategy frozen for every native dependency
