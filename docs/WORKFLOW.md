@@ -75,7 +75,7 @@ Review THREAT_MODEL.md and confirm mitigations for:
 - minimized structured AI input
 - strict response schema
 - approved recommendation allowlist
-- server age/entitlement enforcement
+- server validation of stored self-declared 13+ product-gate state where relevant + entitlement enforcement
 - rate limits + spending circuit breaker
 - kill switches
 - future Play Integrity seam
