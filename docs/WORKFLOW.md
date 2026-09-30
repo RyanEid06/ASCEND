@@ -30,6 +30,10 @@ Mandatory WP00 workstreams:
 ### WP00C — Local privacy/security
 - AES-GCM encrypted app-private face assets
 - Android Keystore-protected keys
+- explicit encryption envelope: formatVersion + keyVersion + nonce + ciphertext/authentication tag metadata
+- random DB/session passphrases wrapped/protected by Keystore keys; define rotation, missing-key and deletion semantics
+- prove a compatible modern Room + supported SQLCipher-for-Android integration; do not use deprecated `android-database-sqlcipher`
+- prove encrypted DB create/reopen/migrate/process-death behavior and native 16 KB page-size compatibility before WP06
 - encrypted sensitive Room/session storage
 - Android backup/device-transfer exclusions
 - Photo Picker instead of broad gallery permissions
@@ -45,7 +49,9 @@ Mandatory WP00 workstreams:
 - account switching
 - schema/grants/RLS
 - negative authorization tests
-- sync revisions/tombstones
+- server-issued monotonic sync revisions + tombstones; deletion wins over stale updates
+- idempotency-key contract for durable/retryable mutations
+- WorkManager durable-job contract for sync/delete/research operations
 - account deletion
 
 ### WP00E — Threat model
@@ -76,7 +82,8 @@ Review THREAT_MODEL.md and confirm mitigations for:
 
 ### WP00 sync gate
 Do not begin permanent WP01 implementation until:
-- canonical WP00 documents are merged to main
+- canonical Architecture Freeze 2.2 documents are merged to main
+- `main` is actually protected by repository rules/branch protection against direct force-push/deletion and implementation merges require PR + CI when CI exists
 - final applicationId is recorded
 - signing/update chain is ready
 - development environment checklist passes
@@ -167,6 +174,7 @@ At each phase boundary:
 - docs updated
 - both Ryan and Eddy manually exercise the integrated feature
 - build the signed QA APK from integrated/main baseline when an APK exists
+- if native libraries exist, verify 16 KB page-size compatibility/alignment
 - install it over the previous signed QA APK without uninstalling
 - verify migrations/settings/history/encrypted assets survive the update
 - tag or record the phase baseline commit
@@ -208,13 +216,16 @@ Ryan — WP01 Android Foundation
 - production + dev application identity from WP00
 - minSdk 26; target current Play-required API (API 36 at architecture freeze, re-check at implementation/release)
 - Jetpack Compose + Material 3
-- portrait lock
+- portrait-first **adaptive/resizable** layouts; compact/medium/expanded window handling and state preservation
+- no correctness dependency on manifest portrait locking
+- Navigation 3 using the current stable release at implementation time
+- UDF screen architecture: Compose -> ViewModel/StateFlow -> repositories/use-cases where justified
 - dependency injection
-- navigation shell
 - light ASCEND theme
 - baseline app icon/branding placeholder
 - feature flag framework
 - local debug menu
+- keep modules intentionally small: `app`, `core:model`, `core:geometry`, `core:scoring`, and `core:data` only when needed; feature packages stay packages until module boundaries earn their cost
 
 Eddy — WP02 Core Contracts + CI
 - core model types
@@ -222,6 +233,8 @@ Eddy — WP02 Core Contracts + CI
 - metric-result/category-result/overall-result contracts
 - analysis version structure
 - CI for build, unit tests, lint
+- dependency verification/locking baseline
+- native-library inventory + automated 16 KB compatibility/alignment gate once any native dependency appears
 - secrets/config strategy
 - no-secret sample environment docs
 - consume SECURITY/BACKEND/DATA lifecycle contracts rather than inventing new security rules
@@ -239,13 +252,17 @@ Ryan — WP03 Geometry Engine
 - point/vector/angle utilities
 - pose-normalized coordinate helpers
 - formula registry
-- implement a first representative subset of front/profile formulas
+- metric feasibility matrix for every candidate: formula/extractor, view, automatic/assisted/manual/unsupported, required landmarks, resolution/pose/lighting dependencies, calibration requirement, confidence and reliability status
+- implement only a first representative subset of technically feasible front/profile formulas
 - pure-Kotlin unit tests
 - synthetic fixtures
 
 Eddy — WP04 Reference Config + Scoring Engine
-- JSON/config schema for Male/Female reference models
-- explicit versioned enabled metric IDs; no hard-coded 33/34 count
+- consume `reference-models/schema.json`; research CSVs are not runtime config
+- validate that draft/invalid runtime models fail closed
+- explicit versioned enabled metric IDs; no hard-coded 33/34/147 count
+- enabled metrics must resolve to technically supported WP03 formula/extractor entries
+- explicit benchmark-purpose, definition-compatibility and age-applicability review before any research evidence becomes a runtime constant
 - T1-T5 evaluator
 - hidden 0-100 interpolation
 - metric weighting
@@ -257,6 +274,7 @@ Eddy — WP04 Reference Config + Scoring Engine
 - deterministic strongest/weakest extrema selector with tie sets
 - rank mapper with TBD thresholds disabled until supplied
 - config validation + hash/versioning
+- no production `male.json`/`female.json` assets until scoring constants are explicitly reviewed/frozen
 
 Sync Gate P1:
 - deterministic fixture flows geometry -> metric values -> tiers -> categories -> overall
@@ -284,7 +302,8 @@ Ryan — WP05 Capture Experience
 Eddy — WP06 Local Data + Quality Validation
 - Room schema
 - encrypted app-private standardized photo storage
-- Keystore-backed encryption
+- supported SQLCipher-for-Android integration proven in WP00; never the deprecated library
+- Keystore-backed encryption envelope/key versioning from WP00
 - backup exclusions
 - scan lifecycle/state machine
 - blur/brightness/resolution checks
@@ -332,11 +351,12 @@ Ryan — WP09 Profile Capture/Assist UI
 - profile-side metadata
 - guided key-point confirmation
 - constrained draggable correction zones
+- usable assisted fallback even when automatic profile extraction cannot provide a trusted point
 - profile overlay/angle rendering
 - prevent anatomically absurd movement
 
 Eddy — WP10 Profile Extractors
-- profile landmark adapter
+- profile landmark adapter where reliable; automatic extraction is an optimization, not a release dependency
 - profile formula implementations
 - required-point confidence model
 - manual-confirmation requirements
@@ -344,24 +364,53 @@ Eddy — WP10 Profile Extractors
 - soft-tissue proxy labeling where appropriate
 
 Sync Gate P4:
-- one side profile can be completed without freehand “score editing”
+- one side profile can be completed through automatic proposal **or the constrained assisted fallback** without freehand “score editing”
 - every profile metric clearly knows whether it is auto, assisted, or unavailable
 
-### Phase 5 — Full result experience
+### Phase 5 — Misc / Appearance Details foundation
 
-Shared goal: ASCEND starts to look like the product rather than a tech demo.
+Shared goal: finish every category required by Overall before building the final result experience.
 
-Ryan — WP11 Results Dashboard
-- Overall /10
-- community rank
-- four category /10 cards
+Ryan — WP11 Visual Feature Extraction
+- standardized ROI extraction
+- initial hairline/hair-density appearance
+- brow density/shape
+- beard coverage
+- under-eye/lip/facial-leanness feature hooks
+- skin clarity/evenness under controlled capture
+- confidence outputs
+- device/lighting sensitivity tests
+
+Eddy — WP12 Misc Scoring + UX Contract
+- internal category remains MISC; normal user-facing label is **Appearance Details**
+- visual-feature hidden 0-100 -> T1-T5 where applicable
+- category weighting
+- “cannot assess reliably” behavior
+- separate explanation content
+- fairness checks preventing skin-color ranking
+- no health-diagnosis wording
+
+Sync Gate P5:
+- Misc/Appearance Details is deterministic/versioned for the selected supported features
+- unreliable lighting or confidence produces retry/unavailable, not fabricated certainty
+- all four categories required by Overall now have an implementable data path
+
+### Phase 6 — Full result experience
+
+Shared goal: expose the completed four-category engine through a fast progressive-disclosure phone UX.
+
+Ryan — WP13 Results Dashboard
+- Overall /10 + community rank
 - Strongest measured feature / Largest improvement opportunity with tie/insufficient-data states
-- premium-lock placeholders/feature flags
-- metric navigation by category
-- share entry point
+- four category cards, including user-facing Appearance Details
+- small relevant-insight section
+- **See all measurements**
+- save/share entry points
+- responsive compact/medium/expanded Compose layout
 - original ASCEND white/blue visual system
 
-Eddy — WP12 Metric Detail Experience
+Eddy — WP14 Metric Detail Experience
+- category metric list
 - user value + T1-T5
 - reference/ideal range
 - overlay image
@@ -375,42 +424,18 @@ Eddy — WP12 Metric Detail Experience
 Competitive benchmark:
 FaceIQ-style strengths observed in supplied screenshots include a prominent result/value card, visual measurement overlay, ideal-region curve, explainer card, tutorial entry, and fast previous/next metric navigation. ASCEND should retain those useful information-design ideas without cloning its exact visuals/text.
 
-Sync Gate P5:
+Sync Gate P6:
 - full scan can be explored from Overall down to a metric explanation
 - score shown in UI matches engine fixtures exactly
-
-### Phase 6 — Misc visual features
-
-Shared goal: implement non-ratio appearance features without turning the system into an opaque AI judge.
-
-Ryan — WP13 Visual Feature Extraction
-- standardized ROI extraction
-- initial hairline/hair-density appearance
-- brow density/shape
-- beard coverage
-- under-eye/lip/facial-leanness feature hooks
-- skin clarity/evenness under controlled capture
-- confidence outputs
-- device/lighting sensitivity tests
-
-Eddy — WP14 Misc Scoring + UX
-- Misc feature schema
-- visual-feature hidden 0-100 -> T1-T5 where applicable
-- category weighting
-- “cannot assess reliably” behavior
-- separate explanation content
-- fairness checks preventing skin-color ranking
-- no health-diagnosis wording
-
-Sync Gate P6:
-- Misc is deterministic/versioned for the selected supported features
-- unreliable lighting or confidence produces retry/unavailable, not fabricated certainty
+- no completed Overall is shown if required category/coverage rules fail
+- rotation/window resizing preserves the result/navigation state
 
 ### Phase 7 — Advice and AI explanation
 
 Shared goal: useful recommendations without letting AI control scores.
 
 Ryan — WP15 Recommendation Engine
+- ask Softmax / Hardmax / Both intent here on first Advice entry, not during onboarding; persist the preference
 - curated recommendation database
 - map metric/feature deviations -> recommendation tags
 - Softmax rules
@@ -445,10 +470,10 @@ Ryan — WP17 History + Share
 - share card generation
 - privacy-safe export
 - foundation for later Scan A vs Scan B
-- guest one-scan limit
+- guest one-scan limit is best-effort per installation; no invasive device fingerprinting
 
 Eddy — WP18 Auth + Supabase Sync
-- optional account creation/login
+- optional account creation/login offered after first result / Save my results
 - sync scan metadata/results only by default; no full landmark mesh
 - no raw-photo upload
 - explicit grants + RLS policies + negative cross-user tests
@@ -456,7 +481,8 @@ Eddy — WP18 Auth + Supabase Sync
 - explicit pseudonymous dataset opt-in
 - private revocation/deletion linkage
 - research contribution eligibility follows the same self-declared 13+ product gate plus separate explicit consent
-- sync conflict strategy
+- server-issued monotonic revision + tombstone conflict strategy; deletion wins
+- unique WorkManager CoroutineWorkers for durable sync/delete/research operations with stable work names and idempotency keys
 
 Sync Gate P8:
 - guest works offline
@@ -495,6 +521,7 @@ Shared goal: prove reliability, privacy, performance, and release quality.
 
 Ryan — WP21 Device/UI QA
 - modern Android device matrix
+- compact/medium/expanded windows, landscape, tablet/foldable, multi-window/desktop resizing and state preservation
 - camera orientation/device quirks
 - accessibility
 - touch targets/text scaling
@@ -506,6 +533,8 @@ Ryan — WP21 Device/UI QA
 
 Eddy — WP22 Engine/Backend QA
 - formula and tier-boundary audit
+- fixed-landmark geometry/scoring exact determinism tests
+- same-image vision reproducibility tests with validated tolerances across supported device/delegate classes
 - enabled-metric-set/config audit
 - coverage and insufficient-reliable-measurements audit
 - strongest/weakest comparability, uncertainty, tie and historical-version audit
@@ -547,12 +576,15 @@ Do not block first public release on:
 
 - Kotlin
 - Jetpack Compose / Material 3
+- Navigation 3 current stable release
+- UDF + ViewModel/StateFlow for screen state
 - CameraX
 - MediaPipe Face Landmarker for frontal landmarking
-- Room + encrypted-at-rest database strategy
+- Room + **supported** SQLCipher-for-Android integration proven by WP00 compatibility spike; never deprecated `android-database-sqlcipher`
 - DataStore for non-secret settings
 - Android Keystore for face/session encryption keys
 - Coroutines / Flow
+- WorkManager / CoroutineWorker for persistent retryable sync/delete work
 - Hilt or equivalent DI
 - Supabase for Auth/Postgres/Edge Functions/sync; local CLI/Docker stack for development
 - Firebase Crashlytics + lightweight analytics if used, with strict event redaction
@@ -560,6 +592,8 @@ Do not block first public release on:
 - JUnit + Android instrumentation/Compose UI tests
 
 External service SDKs must sit behind repository/provider interfaces. Free-tier pricing/limits change; ASCEND must not be architecturally trapped by one vendor.
+
+Do not over-modularize a two-developer app. Begin with a small set of core modules only; split feature Gradle modules only when build performance, independent ownership, or dependency boundaries justify the maintenance cost.
 
 ## Phase release/update policy
 
