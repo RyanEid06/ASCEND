@@ -30,6 +30,7 @@ The product is based on standardized front + profile capture, deterministic faci
 - [Release & Signing](docs/RELEASE_SIGNING.md)
 - [Development Environment](docs/DEVELOPMENT_ENVIRONMENT.md)
 - [Facial Reference Data v1](reference-data/v1/README.md)
+- [Runtime Reference Models](reference-models/README.md)
 - [Facial Reference Integration](docs/research/FACIAL_REFERENCE_INTEGRATION.md)
 
 ## Current stage
