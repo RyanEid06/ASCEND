@@ -1,6 +1,6 @@
 # ASCEND Data Lifecycle
 
-Version: 2.0 Architecture Freeze
+Version: 2.2 Architecture Freeze
 Status: Canonical privacy/data contract
 
 ## 1. Data classes
@@ -31,6 +31,10 @@ Examples:
 - overall
 - rank
 - confidence
+- coverage state
+- enabled metric-set/config identity
+- deterministic strongest/weakest metric ID tie sets where available
+- score/comparability/extrema-selection versions
 - version hashes
 
 Guest: local only.
@@ -39,7 +43,7 @@ Account: eligible for cloud numeric-history sync.
 ### D. Account/profile data
 Examples:
 - Supabase user ID
-- age band
+- self-declared 13+ confirmation state/policy version
 - selected reference model
 - intent
 - consent states
@@ -48,7 +52,7 @@ Examples:
 Cloud: yes as required for account operation.
 
 ### E. Research contribution
-Adults only, separate consent, derived subset only.
+Same self-declared 13+ product gate, separate explicit consent, derived subset only.
 Pseudonymous while an account-to-contribution deletion link exists.
 
 ### F. AI context
@@ -84,7 +88,7 @@ Requirements:
 - enough resolution for validated metrics
 - deterministic normalization/crop metadata
 - encoded/decode format explicitly versioned if it affects results
-- encrypted app-private storage
+- encrypted app-private storage using explicit formatVersion/keyVersion/nonce metadata and authenticated encryption
 - no EXIF/GPS
 - image dimensions/pixel budget capped
 
@@ -142,7 +146,17 @@ Cloud-restored result:
 - explicit notice that original local image is unavailable
 - no fabricated photo overlay
 
-## 7. Delete Scan
+## 7. Durable local operations
+
+Network-dependent operations that must survive process death use unique WorkManager/CoroutineWorker jobs with stable entity/action names and idempotency keys:
+- numeric-history sync
+- remote scan deletion/tombstone acknowledgement
+- research contribution submission/withdrawal
+- account-deletion continuation where appropriate
+
+In-process coroutines remain appropriate for work that may safely stop when the process dies.
+
+## 8. Delete Scan
 
 Must remove:
 - encrypted front/profile assets
@@ -156,7 +170,7 @@ Must remove:
 
 Deletion must be idempotent and resilient to offline retries.
 
-## 8. Delete All / Account deletion
+## 9. Delete All / Account deletion
 
 Delete All local:
 - all local scan assets/results
@@ -169,13 +183,13 @@ Account deletion:
 
 Research contribution handling follows the exact published consent policy and revocation linkage.
 
-## 9. Android backup/device transfer
+## 10. Android backup/device transfer
 
 Sensitive local ASCEND state is excluded/disabled from platform backup unless a later reviewed design explicitly permits a narrow subset.
 
 Cloud numeric history is the controlled restoration mechanism for accounts.
 
-## 10. Sharing
+## 11. Sharing
 
 Default share card contains only selected result information and ASCEND branding.
 
@@ -189,7 +203,7 @@ Implementation:
 
 Never expose app-private path strings.
 
-## 11. Logs/crash/analytics
+## 12. Logs/crash/analytics
 
 General telemetry never receives:
 - raw face
@@ -201,7 +215,7 @@ General telemetry never receives:
 
 Use coarse event/failure categories.
 
-## 12. Retention and cleanup
+## 13. Retention and cleanup
 
 Define periodic cleanup for:
 - abandoned scan temp files
@@ -211,7 +225,7 @@ Define periodic cleanup for:
 
 Do not automatically delete completed user history without a clear documented retention rule.
 
-## 13. Version provenance
+## 14. Version provenance
 
 Each completed analysis stores enough provenance to explain/reproduce the result:
 - app version
@@ -219,7 +233,12 @@ Each completed analysis stores enough provenance to explain/reproduce the result
 - front landmark model + artifact hash/version
 - profile model/extractor version
 - reference model version
+- scoring model version
 - metric config hash
+- exact enabled metric-set/config snapshot identity
+- coverage policy version + stored coverage state
+- score-scale/cross-metric-comparability version
+- extrema selection version + strongest/weakest metric ID tie sets
 - recommendation version
 
 Historical records retain their original provenance even after app/config updates.

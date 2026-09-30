@@ -1,6 +1,6 @@
 # ASCEND Backend and Authentication Contract
 
-Version: 2.0 Architecture Freeze
+Version: 2.2 Architecture Freeze
 Status: Canonical backend contract
 
 ## 1. Environment model
@@ -42,7 +42,8 @@ After a guest finishes the one allowed guest scan and signs in:
 ### public/exposed
 profiles
 - user_id UUID PK -> auth.users
-- age_band
+- confirmed_13_plus
+- age_gate_policy_version
 - selected_reference_model
 - intent
 - created_at
@@ -65,7 +66,15 @@ analyses
 - front_landmark_model_version
 - profile_model_version
 - reference_model_version
+- scoring_model_version
 - metric_config_hash
+- enabled_metric_ids or immutable metric-set snapshot reference
+- coverage_policy_version
+- category/overall coverage state
+- score_scale_version / cross_metric_comparability_version
+- extrema_selection_version
+- strongest_metric_ids
+- weakest_metric_ids
 - recommendation_version
 - app_version
 - sync_revision
@@ -104,7 +113,8 @@ entitlements
 dataset_contributions
 - contribution_id random UUID
 - created_at
-- age_band
+- self_declared_13_plus
+- eligibility_policy_version
 - reference_model
 - approved derived metric subset
 - engine/config versions
@@ -169,21 +179,30 @@ Every policy has positive and negative integration tests.
 ## 7. Sync contract
 
 IDs:
-- UUIDs to permit offline creation without collision
+- UUIDs permit offline creation without collision.
 
-Revisions:
-- track a server/monotonic revision or updated_at discipline sufficient for deterministic conflict resolution
+Authority/revisions:
+- The server assigns a monotonically increasing `sync_revision` (or an equivalent server-generated ordered revision token) to every accepted mutable sync transition.
+- Client wall-clock timestamps never decide conflicts.
+- Completed analyses are immutable except for server-controlled sync/deletion metadata.
+- A client update based on an older revision cannot overwrite a newer server state.
 
 Deletion:
 - deletion wins over stale offline updates
-- use tombstone/revision semantics as needed to prevent resurrection
+- server records a tombstone/deleted revision sufficient to prevent resurrection
 - raw local assets are deleted immediately on local delete
-- remote delete syncs when connectivity returns
+- remote delete is an idempotent mutation and retries until acknowledged
+- stale devices observing the tombstone remove/mark the local synced record rather than re-uploading it
+
+Durable client work:
+- Android schedules persistent sync/delete/research jobs through unique WorkManager work.
+- Retryable mutations carry stable idempotency keys so process death/network retry cannot duplicate side effects.
+- Worker names/operation identities are stable per entity/action (for example `analysis-sync:<id>` and `analysis-delete:<id>`).
 
 Completed historical results:
-- do not silently recompute or mutate them when reference models change
-- new analysis uses the then-current supported reference model version
-- historical result continues to display its stored version
+- do not silently recompute or mutate them when reference/scoring models change
+- new analysis uses the then-current supported reference/scoring model versions
+- historical result continues to display its stored version, enabled metric set, coverage state, and strongest/weakest selection provenance
 
 ## 8. Account deletion
 
@@ -209,7 +228,7 @@ Deletion endpoints must be idempotent/recoverable from retry.
 ## 9. Research contribution contract
 
 V1:
-- adults only
+- eligibility follows the same self-declared 13+ product gate
 - separate explicit opt-in
 - fresh standardized capture preferred/required for research-quality submissions
 - no raw photo contribution
@@ -231,12 +250,12 @@ Endpoint receives:
 - authenticated account/session context where feature requires account
 - scan/result identifier or minimized structured result
 - requested explanation type
-- idempotency key
+- idempotency key for retryable/costly operations
 
 Server:
 1. validate JWT
 2. load/validate user ownership
-3. check age/intent where Hardmax-related
+3. check stored self-declared 13+ product-gate state and intent where the feature flow requires it
 4. check entitlement/rate quota
 5. construct minimized allowlisted prompt payload
 6. call configured provider

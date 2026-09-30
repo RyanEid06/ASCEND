@@ -1,0 +1,36 @@
+{
+  "schemaVersion": "1.0.0",
+  "modelVersion": "ascend-score-v1-draft",
+  "status": "DRAFT_NOT_RELEASE_SCORABLE",
+  "referenceModel": "FEMALE",
+  "enabledMetricIds": [],
+  "categories": {
+    "HARMONY": {
+      "weight": 0.25,
+      "minimumCoverage": 0
+    },
+    "DIMORPHISM": {
+      "weight": 0.25,
+      "minimumCoverage": 0
+    },
+    "ANGULARITY": {
+      "weight": 0.25,
+      "minimumCoverage": 0
+    },
+    "MISC": {
+      "weight": 0.25,
+      "minimumCoverage": 0
+    }
+  },
+  "metrics": [],
+  "rankThresholds": null,
+  "scoreScaleVersion": null,
+  "coveragePolicyVersion": null,
+  "extremaSelectionVersion": null,
+  "provenance": {
+    "researchDatasetVersion": "2026.09.30-research-audit.2",
+    "reviewState": "UNREVIEWED_DRAFT_PLACEHOLDER",
+    "approvedBy": [],
+    "notes": "Intentionally non-scorable. Do not invent constants to populate this file."
+  }
+}

@@ -1,0 +1,387 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ascend.local/reference-model.schema.json",
+  "title": "ASCEND Runtime Scoring Model",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "modelVersion",
+    "status",
+    "referenceModel",
+    "enabledMetricIds",
+    "categories",
+    "metrics",
+    "provenance"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "minLength": 1
+    },
+    "modelVersion": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "enum": [
+        "DRAFT_NOT_RELEASE_SCORABLE",
+        "VALIDATED_RELEASE"
+      ]
+    },
+    "referenceModel": {
+      "enum": [
+        "MALE",
+        "FEMALE"
+      ]
+    },
+    "enabledMetricIds": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "categories": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "HARMONY",
+        "DIMORPHISM",
+        "ANGULARITY",
+        "MISC"
+      ],
+      "properties": {
+        "HARMONY": {
+          "$ref": "#/$defs/category"
+        },
+        "DIMORPHISM": {
+          "$ref": "#/$defs/category"
+        },
+        "ANGULARITY": {
+          "$ref": "#/$defs/category"
+        },
+        "MISC": {
+          "$ref": "#/$defs/category"
+        }
+      }
+    },
+    "metrics": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/metric"
+      }
+    },
+    "rankThresholds": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "#/$defs/rank"
+      }
+    },
+    "scoreScaleVersion": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "coveragePolicyVersion": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "extremaSelectionVersion": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "researchDatasetVersion",
+        "reviewState"
+      ],
+      "properties": {
+        "researchDatasetVersion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reviewState": {
+          "type": "string",
+          "minLength": 1
+        },
+        "approvedBy": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "VALIDATED_RELEASE"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "enabledMetricIds": {
+            "minItems": 1
+          },
+          "metrics": {
+            "minItems": 1
+          },
+          "scoreScaleVersion": {
+            "type": "string",
+            "minLength": 1
+          },
+          "coveragePolicyVersion": {
+            "type": "string",
+            "minLength": 1
+          },
+          "extremaSelectionVersion": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "category": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "weight",
+        "minimumCoverage"
+      ],
+      "properties": {
+        "weight": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "minimumCoverage": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "metric": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "category",
+        "valueType",
+        "formulaOrExtractorId",
+        "measurementMode",
+        "calibrationRequired",
+        "reliabilityStatus",
+        "metricWeight",
+        "minimumConfidence",
+        "requiredForCompletion",
+        "extremaEligible",
+        "ageApplicability",
+        "benchmarkIds",
+        "tierRules",
+        "scoreCurve"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "category": {
+          "enum": [
+            "HARMONY",
+            "DIMORPHISM",
+            "ANGULARITY",
+            "MISC"
+          ]
+        },
+        "metricWeight": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "minimumConfidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "requiredForCompletion": {
+          "type": "boolean"
+        },
+        "extremaEligible": {
+          "type": "boolean"
+        },
+        "scoreScaleId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "measurementUncertainty": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "minimumMeaningfulScoreDelta": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "ageApplicability": {
+          "enum": [
+            "ADULT_EVIDENCE",
+            "ADOLESCENT_EVIDENCE",
+            "AGE_INVARIANT_VALIDATED",
+            "UNKNOWN"
+          ]
+        },
+        "benchmarkIds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "formulaOrExtractorId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "measurementMode": {
+          "enum": [
+            "AUTOMATIC",
+            "ASSISTED",
+            "MANUAL",
+            "UNSUPPORTED"
+          ]
+        },
+        "calibrationRequired": {
+          "type": "boolean"
+        },
+        "reliabilityStatus": {
+          "enum": [
+            "VALIDATED",
+            "LIMITED",
+            "UNVALIDATED",
+            "UNSUPPORTED"
+          ]
+        },
+        "reliabilityTolerance": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "valueType": {
+          "enum": [
+            "RATIO",
+            "DEGREE",
+            "NORMALIZED_DISTANCE",
+            "CATEGORICAL",
+            "CONTINUOUS_VISUAL"
+          ]
+        },
+        "tierRules": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "tier",
+              "ruleType",
+              "params"
+            ],
+            "properties": {
+              "tier": {
+                "enum": [
+                  "T1",
+                  "T2",
+                  "T3",
+                  "T4",
+                  "T5"
+                ]
+              },
+              "ruleType": {
+                "enum": [
+                  "VALUE_RANGE",
+                  "SCORE_RANGE",
+                  "CATEGORICAL",
+                  "CUSTOM_VERSIONED"
+                ]
+              },
+              "params": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "scoreCurve": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "type",
+            "params"
+          ],
+          "properties": {
+            "type": {
+              "enum": [
+                "PIECEWISE_LINEAR",
+                "CATEGORICAL_MAP",
+                "CUSTOM_VERSIONED"
+              ]
+            },
+            "params": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    },
+    "rank": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "label",
+        "minimumOverall"
+      ],
+      "properties": {
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "minimumOverall": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10
+        }
+      }
+    }
+  },
+  "$comment": "JSON Schema validates shape. WP04 semantic validation must additionally enforce: category weights sum to 1; tierRules contain exactly one T1..T5; enabledMetricIds match metric IDs exactly; benchmark IDs exist and are reviewed; validated-release ranks are complete; no unsupported/calibration-required metric is enabled without its validated path."
+}
