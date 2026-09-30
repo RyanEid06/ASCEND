@@ -10,6 +10,7 @@ The product is based on standardized front + profile capture, deterministic faci
 - Deterministic scoring relative to ASCEND's configured reference models.
 - Harmony, Dimorphism, Angularity, Misc, and Overall outputs.
 - One front image + one side-profile image per scan.
+- Portrait-first phone UX with adaptive/resizable Android layouts.
 - Local-first face-photo privacy.
 - Transparent metric overlays, ideal/reference visualization, and explanations.
 - 13+ product; the full V1 feature set, including curated informational Hardmax/procedure content, uses the same simple self-declared 13+ gate.
@@ -33,9 +34,9 @@ The product is based on standardized front + profile capture, deterministic faci
 
 ## Current stage
 
-Architecture Freeze 2.1 is the current baseline. WP00 must be completed before permanent WP01 implementation begins. After WP00, both developers read the phase contracts, branch from the exact phase integration baseline, work in parallel, and stop at every mandatory sync/update gate before moving forward.
+Architecture Freeze 2.2 is the current baseline. WP00 must be completed before permanent WP01 implementation begins. After WP00, both developers read the phase contracts, branch from the exact phase integration baseline, work in parallel, and stop at every mandatory sync/update gate before moving forward.
 
-Source-backed facial measurement/reference research is now stored under `reference-data/v1/`. Final ASCEND production enabled metrics, T1-T5 curves, hidden-score calibration, cross-metric comparability rules, measurement-uncertainty rules, coverage thresholds, metric/category weights, rank thresholds, and runtime scoring constants still require an explicit scoring-model freeze and must remain versioned rather than hard-coded throughout the app.
+Source-backed facial measurement/reference research is stored under `reference-data/v1/`, while production scoring authority is isolated under `reference-models/`. Research rows are never loaded directly as runtime scoring constants. The current Male/Female runtime files are intentionally non-scorable drafts until the explicit scoring-model freeze supplies validated enabled metrics, T1-T5 curves, hidden-score calibration, cross-metric comparability rules, measurement-uncertainty rules, coverage thresholds, weights and rank thresholds.
 
 
 ## Implementation gate
