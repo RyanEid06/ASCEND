@@ -1,9 +1,60 @@
 # ASCEND Master Plan
 
-Version: Planning Baseline 1.0
+Version: Architecture Freeze 2.0
 Owners: Ryan + Eddy
 Target: Android / Google Play
-Status: Ready to begin Phase 0
+Status: WP00 architecture/security freeze required before Phase 0 implementation
+
+
+## 0. Architecture freeze — WP00 (mandatory before implementation)
+
+The product plan is now split into canonical contracts. These documents are mandatory implementation constraints, not optional notes:
+
+- [Security Architecture](SECURITY.md)
+- [Threat Model](THREAT_MODEL.md)
+- [Backend and Authentication Contract](BACKEND_CONTRACT.md)
+- [Data Lifecycle](DATA_LIFECYCLE.md)
+- [Release, Signing and Update Contract](RELEASE_SIGNING.md)
+- [Development Environment](DEVELOPMENT_ENVIRONMENT.md)
+- [Scoring Contract](SCORING_CONTRACT.md)
+- [Frozen Product Decisions](DECISIONS.md)
+- [Ryan/Eddy Workflow](WORKFLOW.md)
+
+### WP00 completion requirements
+
+Before WP01 begins as permanent implementation work:
+
+1. choose and freeze the production Android applicationId
+2. define the separate development/debug application identity
+3. generate a brand-new ASCEND signing key; do not reuse another app's key
+4. create and verify two encrypted/offline signing-key backups
+5. verify the Windows/Android/Docker/Supabase development environment
+6. freeze local encryption, backup exclusion and session-storage contracts
+7. freeze Supabase schemas, grants, RLS ownership rules and negative-test requirements
+8. freeze Google Credential Manager -> Supabase Auth flow
+9. freeze guest -> account migration and account-switch behavior
+10. freeze account/data deletion behavior
+11. freeze the AI minimized-input/structured-output contract and server-only secrets rule
+12. freeze the pseudonymous adult-only research contribution contract
+13. freeze phase-by-phase signed APK update testing
+14. review the threat model
+15. enable repository governance appropriate for implementation before secrets or code accumulate
+
+WP00 does not require the final facial metric statistics. Those remain versioned product/reference data and may arrive later.
+
+### Security posture
+
+ASCEND must assume the APK can be reverse-engineered and a client can be modified. Therefore:
+- client-side checks are never the sole authorization mechanism
+- server secrets never enter the APK
+- raw face photos remain local in V1 normal operation
+- local face assets and sensitive structured state are encrypted at rest
+- sensitive app data is excluded from platform backup
+- normal cloud sync stores numeric history, not full landmark meshes
+- AI receives minimized structured results, never raw face photos
+- privileged server operations are authenticated, rate-limited and schema-validated
+- historical analyses retain the software/config versions that generated them
+
 
 ## 1. Product thesis
 
@@ -57,7 +108,7 @@ ASCEND V1 is not:
    - Hardmax only if 18+
 5. guest or account
 6. privacy/data notices
-7. optional anonymous-derived-data contribution consent
+7. optional pseudonymous derived-data contribution consent
 8. capture tutorial
 
 ### New scan
@@ -283,7 +334,7 @@ SyncState
 
 ## 11. Cloud data model
 
-Supabase/Postgres is the initial backend target.
+Supabase/Postgres is the initial backend target. Local development uses the Supabase CLI + Docker-compatible local stack; hosted staging is separated from production. Production readiness requires a deliberate backup/availability decision rather than assuming the free tier is permanent infrastructure.
 
 Suggested tables:
 
@@ -315,11 +366,6 @@ analysis_measurements
 - hidden score
 - confidence
 
-analysis_landmarks
-- analysis_id
-- view
-- normalized numeric payload only
-
 consents
 - user_id
 - consent type
@@ -327,13 +373,15 @@ consents
 - timestamp
 - version
 
-anonymous_dataset_contributions
+dataset_contributions
 - randomized contribution id
-- derived metrics/landmarks only
+- approved derived metric subset only
 - reference model
 - age band limited to adult contributors in V1
 - engine/config versions
 - no raw photo
+
+A private linkage table may temporarily map account -> random contribution ID solely to support consent withdrawal/deletion. While that link exists, describe the dataset as pseudonymous rather than truly anonymous.
 
 entitlements
 - user_id
@@ -356,10 +404,12 @@ Hard rules:
 - no API/service secrets in the APK
 - no test face photos in the public GitHub repo unless they are synthetic or explicitly licensed/consented for public use
 - redact measurement payloads from normal logs in release builds
-- app-private file storage
+- AES-GCM encrypted app-private face asset storage with keys protected by Android Keystore
+- sensitive Room/session state encrypted at rest
+- sensitive data excluded from Android backup/device transfer
 - user deletion deletes associated local assets
 - cloud deletion flow must exist for account data
-- anonymous dataset contribution is separate explicit opt-in
+- pseudonymous dataset contribution is a separate explicit opt-in
 - under-18 dataset contribution disabled for V1
 
 ## 13. Misc feature strategy
@@ -434,7 +484,7 @@ Server-side provider adapter:
 
 If AI is down, numerical analysis still works instantly.
 
-Choose the actual free-tier provider during WP16 based on then-current pricing, limits, privacy terms, latency and JSON reliability. Do not couple core code to one vendor.
+Choose the actual runtime AI provider during WP16 based on then-current pricing, limits, privacy/data-use terms, latency and JSON reliability. Do not select a free tier merely because it is free if its data-use terms are inappropriate for face-derived user information. Do not couple core code to one vendor.
 
 ## 16. UI/UX direction
 
@@ -477,11 +527,14 @@ Guest:
 - product must define reasonable reinstall/reset behavior later; do not build invasive device fingerprinting
 
 Account:
+- Google sign-in through Android Credential Manager + Supabase Auth in V1
 - history
 - multi-scan support
 - cloud sync of numeric data
 - future premium
 - future comparisons
+
+Guest -> account must be explicit: after sign-in, offer to save the existing guest result to the account. Never silently upload it. Account switching must never expose another account's local scans.
 
 Do not force login before the user understands the product.
 
@@ -564,6 +617,11 @@ At minimum test multiple:
 - another OEM
 - low/mid-range modern device
 
+### Upgrade/migration tests
+Every phase that can produce an installable application must be tested as an in-place update over the previous signed QA APK. Do not uninstall between phase gates. Verify Room migrations, settings, encrypted local assets, scan history and app launch after the update.
+
+Automated target: install prior APK -> seed representative local data -> install new APK with update semantics -> assert migration and historical-result readability.
+
 ### Reliability tests
 Same user, repeated standardized captures:
 - metric variance
@@ -588,6 +646,8 @@ This repo is public. Therefore:
 
 ## 22. CI/CD
 
+CI is also part of the security boundary. Release secrets must never be exposed to untrusted PR code.
+
 Early CI:
 - Gradle build
 - unit tests
@@ -598,7 +658,9 @@ Later:
 - debug APK artifact
 - emulator smoke tests
 - release candidate build
-- signed bundle via protected secrets
+- signed QA APK/release bundle via protected secrets
+- APK/AAB inspection for embedded secrets, debug flags, signing identity and unexpected endpoints
+- dependency/security scanning as the project matures
 - Play internal/closed track deployment can be added after signing setup
 
 Do not store signing key passwords in the repo.
@@ -668,7 +730,7 @@ ASCEND V1 is done only when:
 
 ## 26. Execution order
 
-Start with Phase 0 from WORKFLOW.md.
+Start with WP00 architecture/security freeze from WORKFLOW.md. Only after WP00 is complete does Phase 0 implementation begin.
 
 Do not jump to pretty result screens before:
 - core contracts

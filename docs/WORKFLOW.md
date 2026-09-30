@@ -1,6 +1,90 @@
 # Ryan + Eddy Development Workflow
 
-ASCEND is intentionally organized for parallel work with mandatory synchronization gates.
+ASCEND is intentionally organized for parallel work with mandatory synchronization gates. WP00 is a one-time architecture/security freeze that must complete before Phase 0 implementation.
+
+
+## WP00 — Architecture, security and release freeze
+
+WP00 is planning/setup work, not a facial-scoring implementation phase. It exists to prevent expensive security, signing, authentication and data-lifecycle rewrites later.
+
+Mandatory WP00 workstreams:
+
+### WP00A — Repository + governance
+- decide whether the implementation repository remains public or becomes private
+- protect main against force-push/deletion
+- require PR + required CI for implementation merges where repository settings permit
+- define emergency bypass ownership
+- establish dependency/security scanning plan
+- never store private face fixtures or secrets in Git
+
+### WP00B — Android identity + signing
+- freeze production applicationId
+- create separate dev/debug identity
+- generate ASCEND-only signing key
+- make two encrypted/offline backups
+- document certificate fingerprints
+- establish monotonic versionCode policy
+- establish signed QA APK update chain
+- plan Play App Signing + separate upload key
+
+### WP00C — Local privacy/security
+- AES-GCM encrypted app-private face assets
+- Android Keystore-protected keys
+- encrypted sensitive Room/session storage
+- Android backup/device-transfer exclusions
+- Photo Picker instead of broad gallery permissions
+- EXIF stripping and hostile image validation
+- sensitive-screen/share behavior
+- deletion/cleanup semantics
+
+### WP00D — Backend/auth
+- local/staging/production environment contract
+- Google Credential Manager -> Supabase Auth
+- guest/account ownership model
+- guest -> account explicit migration
+- account switching
+- schema/grants/RLS
+- negative authorization tests
+- sync revisions/tombstones
+- account deletion
+
+### WP00E — Threat model
+Review THREAT_MODEL.md and confirm mitigations for:
+- APK reverse engineering
+- modified client
+- stolen JWT/session
+- broken RLS/IDOR
+- database-function privilege escalation
+- malicious media
+- AI/API abuse
+- CI/signing compromise
+- database loss
+- free-tier outage/quota exhaustion
+- sync resurrection
+- research re-identification
+- dependency compromise
+
+### WP00F — AI/service boundary
+- backend-only provider credentials
+- minimized structured AI input
+- strict response schema
+- approved recommendation allowlist
+- server age/entitlement enforcement
+- rate limits + spending circuit breaker
+- kill switches
+- future Play Integrity seam
+
+### WP00 sync gate
+Do not begin permanent WP01 implementation until:
+- canonical WP00 documents are merged to main
+- final applicationId is recorded
+- signing/update chain is ready
+- development environment checklist passes
+- backend/auth/data contracts are frozen enough for Phase 0
+- threat model has no unresolved architecture blocker
+
+Final metric ranges, weights, anchors and rank thresholds are NOT a WP00 blocker.
+
 
 ## Branch model
 
@@ -82,6 +166,9 @@ At each phase boundary:
 - no raw face data leaked to logs/analytics
 - docs updated
 - both Ryan and Eddy manually exercise the integrated feature
+- build the signed QA APK from integrated/main baseline when an APK exists
+- install it over the previous signed QA APK without uninstalling
+- verify migrations/settings/history/encrypted assets survive the update
 - tag or record the phase baseline commit
 
 ## Recommended repo structure
@@ -112,10 +199,14 @@ Keep geometry/scoring as pure Kotlin wherever possible so it can be unit-tested 
 
 ### Phase 0 — Foundation and contracts
 
+Prerequisite: WP00 complete.
+
 Shared goal: a clean Android project, architecture, CI, baseline navigation, and stable core data contracts.
 
 Ryan — WP01 Android Foundation
 - Kotlin Android project
+- production + dev application identity from WP00
+- minSdk 26; target current Play-required API (API 36 at architecture freeze, re-check at implementation/release)
 - Jetpack Compose + Material 3
 - portrait lock
 - dependency injection
@@ -133,6 +224,7 @@ Eddy — WP02 Core Contracts + CI
 - CI for build, unit tests, lint
 - secrets/config strategy
 - no-secret sample environment docs
+- consume SECURITY/BACKEND/DATA lifecycle contracts rather than inventing new security rules
 
 Sync Gate P0:
 - clean clone builds
@@ -182,7 +274,9 @@ Ryan — WP05 Capture Experience
 
 Eddy — WP06 Local Data + Quality Validation
 - Room schema
-- app-private photo storage
+- encrypted app-private standardized photo storage
+- Keystore-backed encryption
+- backup exclusions
 - scan lifecycle/state machine
 - blur/brightness/resolution checks
 - face count and basic pose/centering validation hooks
@@ -345,11 +439,12 @@ Ryan — WP17 History + Share
 
 Eddy — WP18 Auth + Supabase Sync
 - optional account creation/login
-- sync scan metadata/results/normalized landmarks
+- sync scan metadata/results only by default; no full landmark mesh
 - no raw-photo upload
-- RLS policies
+- explicit grants + RLS policies + negative cross-user tests
 - consent records
-- explicit anonymous-dataset opt-in
+- explicit pseudonymous dataset opt-in
+- private revocation/deletion linkage
 - adult-only dataset contribution in V1
 - sync conflict strategy
 
@@ -441,16 +536,31 @@ Do not block first public release on:
 - Jetpack Compose / Material 3
 - CameraX
 - MediaPipe Face Landmarker for frontal landmarking
-- Room
-- DataStore
+- Room + encrypted-at-rest database strategy
+- DataStore for non-secret settings
+- Android Keystore for face/session encryption keys
 - Coroutines / Flow
 - Hilt or equivalent DI
-- Supabase for auth/Postgres/Edge Functions/sync
+- Supabase for Auth/Postgres/Edge Functions/sync; local CLI/Docker stack for development
 - Firebase Crashlytics + lightweight analytics if used, with strict event redaction
 - GitHub Actions
 - JUnit + Android instrumentation/Compose UI tests
 
 External service SDKs must sit behind repository/provider interfaces. Free-tier pricing/limits change; ASCEND must not be architecturally trapped by one vendor.
+
+## Phase release/update policy
+
+At every phase that produces an installable app:
+1. merge both lanes to phase integration
+2. green shared CI
+3. merge phase to main
+4. increment versionCode
+5. generate signed QA APK using the permanent ASCEND signing identity
+6. install over the prior QA APK without uninstalling
+7. perform the phase-appropriate physical-device smoke/visual test
+8. fix migration/update regressions before starting the next phase
+
+Fresh-install testing still exists, but it never substitutes for update testing.
 
 ## Release philosophy
 

@@ -141,32 +141,36 @@ ASCEND must not diagnose disease, hormone levels, vitamin deficiency, or other m
   - one scan
   - one result
 - Account:
+  - Google sign-in through Android Credential Manager + Supabase Auth in V1
   - multiple scans
   - saved history
-  - result restoration/sync of allowed data
+  - result restoration/sync of allowed numeric data
   - future premium entitlement support
+- Guest -> account migration is explicit: offer to save the guest result after authentication; never silently upload it.
+- Local data is ownership-scoped so account switching cannot expose another account's scans.
 
 ## Local-first data
 
-- Raw face photos remain on-device by default.
+- Raw face photos remain on-device by default and are stored as encrypted app-private analysis assets.
 - Do not upload raw scan photos to the backend in V1.
 - Account sync may contain:
   - scan metadata
   - numeric measurement results
   - category/overall scores
-  - normalized landmark data where needed
   - model/scoring version
+- Full landmark meshes are not part of normal V1 cloud sync. A later derived-geometry sync feature requires a privacy/threat review first.
 - Local history stores prior scans so users can reopen old ratings/results.
-- Imported/captured photos are copied to app-private storage rather than dumped into the public gallery by default.
+- Imported/captured photos are normalized, metadata-stripped, encrypted, and stored in app-private storage rather than dumped into the public gallery by default.
+- Sensitive local data is excluded from Android Auto Backup/device transfer in V1.
 - Delete Scan / Delete All must remove associated local assets.
 
-## Anonymous dataset contribution
+## Pseudonymous dataset contribution
 
 - Explicit one-time opt-in is required.
 - “Not now” must remain a valid path.
-- V1 dataset contribution should use derived numeric/landmark data, not raw photos.
+- V1 dataset contribution should use only an approved derived numeric/geometry subset, not raw photos.
 - Do not include under-18 users in the research/reference dataset in V1.
-- Consent state is auditable and revocable for future submissions.
+- Consent state is auditable and revocable. A private account-to-random-contribution linkage may exist solely so withdrawal/deletion can be honored; therefore V1 contribution data is described as pseudonymous rather than truly anonymous while that linkage exists.
 - This consent is separate from Terms acceptance.
 
 ## History and sharing
@@ -193,3 +197,19 @@ Future business model:
 - Do not fabricate “top X%” claims.
 - Percentiles are deferred until ASCEND has a legitimate comparison dataset or a properly licensed external one.
 - When added, the UI must identify the reference population/dataset used.
+
+
+## Security and release decisions
+
+- ASCEND assumes the APK can be reverse-engineered and the client can be modified.
+- No privileged authorization may depend only on client-side checks.
+- Provider/server secrets never ship in the APK.
+- Production face assets use AES-GCM encryption with key material protected by Android Keystore.
+- Sensitive structured/session state is encrypted at rest.
+- Release builds disable cleartext traffic and are non-debuggable.
+- Google authentication uses the platform Credential Manager and Supabase Auth; no custom password system in V1.
+- Row Level Security plus explicit grants protect user-owned Supabase data; negative cross-user authorization tests are mandatory.
+- AI receives minimized structured result context and cannot change deterministic scores or introduce recommendation IDs outside the curated catalogue.
+- ASCEND gets its own permanent signing key; no key reuse from other apps.
+- Every implementation phase must be tested as an in-place signed APK update over the previous phase build, in addition to fresh-install testing.
+- Historical completed analyses preserve the engine/model/config versions that produced them.
