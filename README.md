@@ -12,7 +12,7 @@ The product is based on standardized front + profile capture, deterministic faci
 - One front image + one side-profile image per scan.
 - Local-first face-photo privacy.
 - Transparent metric overlays, ideal/reference visualization, and explanations.
-- 13+ product; Hardmax/procedure guidance is restricted to 18+.
+- 13+ product; the full V1 feature set, including curated informational Hardmax/procedure content, uses the same simple self-declared 13+ gate.
 - Free-first development and beta; architecture prepared for later premium entitlements.
 - Android/Google Play first. No iOS work until Android is finished.
 
@@ -33,9 +33,9 @@ The product is based on standardized front + profile capture, deterministic faci
 
 ## Current stage
 
-Architecture Freeze 2.0 is the current baseline. WP00 must be completed before permanent WP01 implementation begins. After WP00, both developers read the phase contracts, branch from the exact phase integration baseline, work in parallel, and stop at every mandatory sync/update gate before moving forward.
+Architecture Freeze 2.1 is the current baseline. WP00 must be completed before permanent WP01 implementation begins. After WP00, both developers read the phase contracts, branch from the exact phase integration baseline, work in parallel, and stop at every mandatory sync/update gate before moving forward.
 
-Source-backed facial measurement/reference research is now stored under `reference-data/v1/`. Final ASCEND production T1-T5 curves, metric weights, rank thresholds, and runtime scoring constants still require an explicit scoring-model freeze and must remain versioned rather than hard-coded throughout the app.
+Source-backed facial measurement/reference research is now stored under `reference-data/v1/`. Final ASCEND production enabled metrics, T1-T5 curves, hidden-score calibration, cross-metric comparability rules, measurement-uncertainty rules, coverage thresholds, metric/category weights, rank thresholds, and runtime scoring constants still require an explicit scoring-model freeze and must remain versioned rather than hard-coded throughout the app.
 
 
 ## Implementation gate
