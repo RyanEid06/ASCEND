@@ -1,5 +1,6 @@
 # ASCEND Frozen Product Decisions
 
+Version: Architecture Freeze 2.1
 Status: baseline product decisions for implementation. A change to one of these items should be deliberate and documented.
 
 ## Identity and positioning
@@ -26,7 +27,8 @@ Status: baseline product decisions for implementation. A change to one of these 
 ## Scoring model
 
 - User selects the scoring reference model rather than the app inferring sex/gender.
-- Two initial reference models: Male and Female.
+- Two initial comparison models: **Male reference model** and **Female reference model**.
+- These labels describe ASCEND scoring/reference configurations. They are not an inferred sex/gender result, identity classification, or biological diagnosis.
 - Per-metric UI: T1, T2, T3, T4, T5 only.
 - T1 is best/ideal; T5 is worst/farthest from target.
 - Internally, metrics may use a 0-100 precision score so two values inside the same tier can contribute differently.
@@ -37,12 +39,28 @@ Status: baseline product decisions for implementation. A change to one of these 
   - Angularity
   - Misc
 - Initial overall weighting is 25% each category.
+- Equal category weighting is an initial product configuration, not a claim that research has proven the four categories are equally predictive or equally important. Category weights remain versioned configuration and require validation before a production scoring-model freeze.
 - Overall is /10 and may be displayed with up to two decimals.
 - Penalties come from distance from the configured ideal/T1 target; there is no special arbitrary “T5 catastrophe” multiplier.
 - Metric weights exist inside categories and are configurable data.
 - Missing/unreliable required measurements should trigger a retake or be marked unavailable; the app must not invent values.
+- The runtime metric set is defined by versioned configuration (`enabledMetricIds` or equivalent), never by a hard-coded count. The current 34 geometry measurements are candidates, not an automatic V1 enabled set.
+- Every completed category/result must satisfy configured coverage rules. If reliable coverage is insufficient, publish an explicit **Not enough reliable measurements** state rather than a partial score presented as complete.
+- Metric-specific hidden 0-100 scores may be compared across metrics for Strongest/Weakest selection only when those metrics are explicitly calibrated to the same cross-metric score semantics/version. Deterministic scores alone do not make unlike metric curves comparable.
+
+## Strongest / largest improvement opportunity
+
+- A completed scan may show **Strongest measured feature** and **Largest improvement opportunity**.
+- Selection is deterministic and uses only enabled, applicable, available, sufficiently confident metrics that are explicitly eligible for cross-metric comparison under the active scoring model.
+- Raw ratios, angles, T1-T5 labels alone, or uncalibrated metric-specific scores must not be used to rank metrics against each other.
+- Metrics whose score difference is smaller than their configured/validated measurement uncertainty are treated as effectively tied. The result stores the tied metric IDs deterministically rather than pretending one is clearly better/worse.
+- If coverage or cross-metric comparability is insufficient, omit the extrema labels and explain that there are not enough reliable/comparable measurements.
+- AI may explain the selected metrics but cannot choose, replace, reorder, or invent them.
+- Historical completed results store the enabled metric set, selected extrema metric IDs/tie sets, score-scale/config versions, coverage state, and selection-algorithm version so later model updates cannot silently change an old result.
 
 ## Community overall ranks
+
+The rank vocabulary is community terminology, not a scientific diagnosis or statement of identity. Rank thresholds remain versioned scoring configuration.
 
 Male final-rank vocabulary:
 - Sub 5
@@ -117,20 +135,19 @@ ASCEND must not diagnose disease, hormone levels, vitamin deficiency, or other m
 
 - Onboarding asks the user's intent.
 - Softmax can include grooming, hairstyle, skincare/presentation, sleep, fitness/presentation, and similar non-procedure guidance.
-- Hardmax is restricted to users 18+.
-- 13-17 users still receive the full measurement/scoring experience and softmax guidance.
-- Hardmax should be based on a curated recommendation database; AI may explain approved content but must not invent medical treatment.
-- Procedure content is informational, not individualized medical advice.
+- Hardmax/procedure content is available within the same 13+ product experience.
+- Hardmax is based on a curated recommendation database; AI may explain approved content but must not invent treatment, diagnosis, dosage, or unsupported procedures.
+- Procedure content is informational and educational, not individualized medical advice. The app must clearly encourage consultation with a qualified clinician for decisions involving medical or surgical care.
 
 ## Age and onboarding
 
-- Product is 13+.
-- Simple self-declared age/DOB gate; no ID verification in V1.
-- Hardmax unavailable to under-18 users.
+- Product is 13+ for the full V1 feature set.
+- V1 uses a simple self-declared **I am 13 or older** confirmation. No DOB collection, ID verification, or additional age-assurance system is required by the product architecture.
+- This confirmation is a product gate, not proof of a user's true age.
 - Initial wizard includes:
-  - age/DOB gate
+  - 13+ confirmation
   - selected Male/Female reference model
-  - Softmax/Hardmax intent where age-eligible
+  - Softmax/Hardmax intent
   - guest vs account path
   - privacy/consent notices
   - capture tutorial
@@ -169,13 +186,13 @@ ASCEND must not diagnose disease, hormone levels, vitamin deficiency, or other m
 - Explicit one-time opt-in is required.
 - “Not now” must remain a valid path.
 - V1 dataset contribution should use only an approved derived numeric/geometry subset, not raw photos.
-- Do not include under-18 users in the research/reference dataset in V1.
+- V1 research/reference contribution eligibility follows the same self-declared 13+ product gate, subject to the published consent flow and any release-time legal/store requirements that the team must satisfy.
 - Consent state is auditable and revocable. A private account-to-random-contribution linkage may exist solely so withdrawal/deletion can be honored; therefore V1 contribution data is described as pseudonymous rather than truly anonymous while that linkage exists.
 - This consent is separate from Terms acceptance.
 
 ## History and sharing
 
-- Save scan date/time, reference model, scoring version, category scores, overall score, rank, metrics, and local image links.
+- Save scan date/time, reference model, scoring version, enabled metric IDs/config hash, category scores, overall score, rank, metrics, coverage state, strongest/weakest metric ID tie sets, extrema-selection version, and local image links.
 - Side-by-side Scan A vs Scan B is planned after initial V1, not required for first usable scan.
 - Generate a clean share card for friends/social media.
 - Shared assets must never expose the full private local photo unless the user explicitly chooses that option.
@@ -212,4 +229,4 @@ Future business model:
 - AI receives minimized structured result context and cannot change deterministic scores or introduce recommendation IDs outside the curated catalogue.
 - ASCEND gets its own permanent signing key; no key reuse from other apps.
 - Every implementation phase must be tested as an in-place signed APK update over the previous phase build, in addition to fresh-install testing.
-- Historical completed analyses preserve the engine/model/config versions that produced them.
+- Historical completed analyses preserve the engine/model/config versions that produced them, including the enabled metric set and deterministic strongest/weakest selection provenance.
