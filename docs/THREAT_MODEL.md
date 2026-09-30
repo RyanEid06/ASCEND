@@ -1,6 +1,6 @@
 # ASCEND Threat Model
 
-Version: 2.1 Architecture Freeze
+Version: 2.2 Architecture Freeze
 Status: Required before implementation and revisited before release
 
 ## 1. Protected assets
@@ -165,6 +165,25 @@ Control:
 - call the data pseudonymous while revocation remains possible
 - do not promise true anonymity when a deletion link exists
 - research contribution follows the same self-declared 13+ product gate plus separate explicit consent and release-time legal/store review
+
+### Research/reference contamination
+Failure: a research/community/competitor row is accidentally consumed as production scoring truth, or a population norm is treated as an attractiveness ideal without review.
+
+Control:
+- research catalogue and runtime models live in separate directories/contracts
+- all research benchmark rows default to runtime_scoring_eligible=false
+- runtime model validates benchmark purpose, definition compatibility and age applicability
+- draft/missing runtime model fails closed
+- no direct research-data fallback in scoring code
+
+### Vision model/device drift
+Failure: the same image produces slightly different landmarks on different devices/delegates and tests incorrectly treat this as impossible.
+
+Control:
+- exact determinism begins after fixed landmark/measurement inputs
+- vision extraction has validated tolerance bounds and score/tier-stability tests
+- record model/delegate/version metadata needed for QA/reproducibility
+- disable metrics whose repeatability is not production-ready
 
 ### Unauthorized scoring-config changes
 Control:
