@@ -5,9 +5,11 @@ Status: Must be completed before the first implementation APK becomes the long-l
 
 ## 1. Permanent application identity
 
-Choose the final production applicationId before WP01 implementation work is treated as permanent.
+Frozen identities:
+- production: `app.ascend.mobile`
+- development/debug: `app.ascend.mobile.dev`
 
-Use a separate debug/development applicationId suffix so development and release/QA installs can coexist where useful.
+Do not change the production applicationId after WP01 begins. Development and release/QA installs can coexist because they use separate identities.
 
 Changing the production applicationId later creates a different Android application. Therefore it is an architecture decision, not a cosmetic rename.
 
