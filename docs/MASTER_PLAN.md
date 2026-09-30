@@ -1,6 +1,6 @@
 # ASCEND Master Plan
 
-Version: Architecture Freeze 2.1
+Version: Architecture Freeze 2.2
 Owners: Ryan + Eddy
 Target: Android / Google Play
 Status: WP00 architecture/security freeze required before Phase 0 implementation
@@ -38,7 +38,10 @@ Before WP01 begins as permanent implementation work:
 12. freeze the pseudonymous opt-in research contribution contract
 13. freeze phase-by-phase signed APK update testing
 14. review the threat model
-15. enable repository governance appropriate for implementation before secrets or code accumulate
+15. prove and freeze the Room + supported SQLCipher integration path, Keystore key-envelope format, migration/reopen behavior and 16 KB native-library compatibility before WP06 depends on it
+16. freeze the research-catalogue -> reviewed runtime-model boundary; research CSVs are never direct scoring inputs
+17. freeze durable sync scheduling with WorkManager plus server-issued revisions/tombstones/idempotency
+18. enable repository governance appropriate for implementation before secrets or code accumulate
 
 WP00 does not require the final facial metric statistics. Those remain versioned product/reference data and may arrive later.
 
@@ -100,16 +103,13 @@ ASCEND V1 is not:
 ## 4. Core user journey
 
 ### First launch
-1. ASCEND branding/onboarding
+1. ASCEND branding
 2. simple self-declared “I am 13 or older” gate
 3. choose Male reference model or Female reference model
-4. choose intent
-   - Softmax
-   - Hardmax
-5. guest or account
-6. privacy/data notices
-7. optional pseudonymous derived-data contribution consent
-8. capture tutorial
+4. concise essential privacy/data notice
+5. continue automatically as guest
+
+Capture guidance appears when the user starts a scan. Google sign-in is offered after the first result when the user chooses to save results. Research contribution consent is deferred until after a completed result or Settings/Research. Softmax/Hardmax/Both intent is asked only when Advice is opened.
 
 ### New scan
 1. choose Camera or Gallery
@@ -125,19 +125,15 @@ ASCEND V1 is not:
 11. result
 
 ### Result
-1. Overall /10
-2. overall community rank
-3. Harmony /10
-4. Dimorphism /10
-5. Angularity /10
-6. Misc /10
-7. Strongest measured feature / Largest improvement opportunity when reliable and cross-metric comparable
-8. category metric lists
-9. per-metric T1-T5
-10. overlay/reference/explanation
-11. recommendations
-12. share
-13. history if signed in/allowed by product gate
+Phone default hierarchy:
+1. Overall /10 + overall community rank
+2. Strongest measured feature / Largest improvement opportunity when reliable and cross-metric comparable
+3. Harmony /10, Dimorphism /10, Angularity /10, Appearance Details (Misc) /10
+4. a small set of relevant insights
+5. **See all measurements**
+6. share / save result actions
+
+Technical depth is progressive: category -> metric list -> metric detail -> measured value/T1-T5/overlay/reference/how-measured/scoring visualization/recommendations.
 
 ## 5. Capture specification
 
@@ -168,7 +164,7 @@ Use minimal status messaging, not clutter over the face:
 - Hold head level
 - Neutral expression
 
-A bad image should fail early instead of generating a polished bad score.
+A bad image should fail early instead of generating a polished bad score. Capture/viewfinder UI must remain correct under window resizing/orientation changes even though the phone experience is portrait-first.
 
 ### Profile side
 
@@ -202,9 +198,12 @@ V1 profile strategy:
 - profile orientation detection
 - dedicated visible-point extraction where reliable
 - propose critical landmarks
+- **guaranteed constrained assisted fallback** for critical points that cannot be reliably extracted automatically
 - show constrained correction/confirmation
 - compute profile angles/ratios only after required points are valid
 - mark unavailable when anatomy is not visible
+
+The implementation must not depend on discovering a future perfect 90-degree profile model.
 
 The correction control is a validation aid, not a way to redesign the user's face.
 
@@ -221,6 +220,20 @@ Responsibilities:
 - confidence propagation
 - unavailable/failure states
 
+Before a metric can enter the enabled V1 set it must pass a feasibility record containing:
+- metricId
+- formulaId/extractorId
+- FRONT | PROFILE | VISUAL
+- automatic | assisted | manual | unsupported
+- required landmarks/features
+- minimum usable resolution
+- pose/lighting dependencies
+- calibrationRequired
+- confidence rule
+- repeated-capture reliability status/tolerance
+
+The enabled V1 set is the intersection of **source-supported + technically measurable + sufficiently repeatable**, not the largest possible metric count. Metrics requiring real-world calibration are disabled unless a validated calibration path exists.
+
 A measurement result should contain:
 - metricId
 - rawValue
@@ -236,7 +249,9 @@ A measurement result should contain:
 See SCORING_CONTRACT.md for canonical rules.
 
 Key design:
-- reference data is configuration
+- research evidence and runtime scoring configuration are separate
+- `reference-data/` is research inventory only and is never loaded directly by the scoring engine
+- `reference-models/` is the only runtime scoring authority and fails closed while its model is draft/invalid
 - the enabled production metric set is versioned configuration; no source code assumes 33, 34, 147, or any other fixed metric count
 - formula code is not full of magic constants
 - tier labels are data
@@ -250,20 +265,22 @@ Key design:
 
 This lets Ryan/Eddy insert the final reference values later without rewriting UI or geometry.
 
-## 9. Recommended reference-model file layout
+## 9. Runtime reference-model contract
+
+The repository now separates research inventory from runtime scoring authority:
+
+reference-data/
+- v1/measurements.csv — definitions only
+- v1/benchmarks.csv — source-specific evidence; direct runtime scoring disabled
+- v1/sources.csv
+- v1/manifest.json
 
 reference-models/
-- schema.json
-- v1/
-  - male.json
-  - female.json
-  - ranks-male.json
-  - ranks-female.json
-  - recommendations.json
-  - content/
-    - metrics-en.json
+- schema.json — strict runtime model schema
+- v1/male.draft.json
+- v1/female.draft.json
 
-No final ideal/tier numbers should be invented merely to make the app look finished.
+Draft models are intentionally non-scorable and must fail closed. WP04 produces validated runtime assets only after Ryan/Eddy freeze enabled metrics, benchmark decisions, ranges, anchors, weights, coverage, comparability, uncertainty and ranks. No final ideal/tier numbers should be invented merely to make the app look finished.
 
 ## 10. Local data model
 
@@ -343,8 +360,10 @@ RecommendationResult
 
 SyncState
 - entity id
-- remote revision
+- server revision
 - state
+- tombstone/deleted state
+- last idempotency key / pending operation identity where needed
 
 ## 11. Cloud data model
 
@@ -427,6 +446,7 @@ Hard rules:
 - redact measurement payloads from normal logs in release builds
 - AES-GCM encrypted app-private face asset storage with keys protected by Android Keystore
 - sensitive Room/session state encrypted at rest
+- encrypted DB/photo/session formats use explicit formatVersion + keyVersion metadata and a documented Keystore envelope/rotation/failure contract
 - sensitive data excluded from Android backup/device transfer
 - user deletion deletes associated local assets
 - cloud deletion flow must exist for account data
@@ -508,6 +528,8 @@ Choose the actual runtime AI provider during WP16 based on then-current pricing,
 
 ## 16. UI/UX direction
 
+Phone UX is portrait-first but never correctness-dependent on portrait orientation. Compose surfaces must handle compact/medium/expanded windows, rotation, fold/unfold, multi-window and desktop resizing without losing state.
+
 Initial language:
 - clean white backgrounds
 - blue/teal ASCEND accent
@@ -521,10 +543,11 @@ Initial language:
 
 Result hierarchy:
 1. Overall and rank
-2. category scores
-3. strongest / weakest areas
-4. metrics
-5. explanation/advice
+2. strongest measured feature / largest improvement opportunity
+3. four category cards (user-facing “Appearance Details” for Misc)
+4. a few relevant insights
+5. **See all measurements**
+6. explanation/advice on demand
 
 Per-metric screen should borrow the useful information architecture seen in the supplied competitor screenshots:
 - clear metric name
@@ -541,10 +564,11 @@ But ASCEND should not reproduce the competitor's exact graphics, copy, tabs, or 
 ## 17. Account/guest design
 
 Guest:
-- no account required
+- no account required; guest is automatic on first use
 - one full scan and one result
 - local state records that the guest scan was used
-- product must define reasonable reinstall/reset behavior later; do not build invasive device fingerprinting
+- limit is best-effort per installation; clearing app data/reinstall may reset it
+- do not build invasive device fingerprinting to enforce the guest limit
 
 Account:
 - Google sign-in through Android Credential Manager + Supabase Auth in V1
@@ -556,7 +580,7 @@ Account:
 
 Guest -> account must be explicit: after sign-in, offer to save the existing guest result to the account. Never silently upload it. Account switching must never expose another account's local scans.
 
-Do not force login before the user understands the product.
+Do not force login before the user understands the product. Offer **Save my results** after the first result, then authenticate only if the user chooses it.
 
 ## 18. Premium design
 
@@ -625,8 +649,10 @@ Keep versioned synthetic/consented private fixtures with expected:
 - rank
 
 ### Android tests
-- onboarding
+- short onboarding / guest-default flow
 - age gate
+- adaptive compact/medium/expanded layouts
+- rotation, multi-window and fold/unfold state preservation
 - camera permission
 - capture/retake
 - gallery import
@@ -647,6 +673,12 @@ At minimum test multiple:
 Every phase that can produce an installable application must be tested as an in-place update over the previous signed QA APK. Do not uninstall between phase gates. Verify Room migrations, settings, encrypted local assets, scan history and app launch after the update.
 
 Automated target: install prior APK -> seed representative local data -> install new APK with update semantics -> assert migration and historical-result readability.
+
+### Vision/engine reproducibility
+- Vision extraction is validated within device/delegate-specific tolerances; it is not assumed bit-identical across hardware.
+- Pure geometry/scoring given identical normalized landmarks/measurements/config is deterministic.
+- Same-image tests assert landmark/measurement tolerance plus tier/score stability.
+- Synthetic/fixed-landmark tests assert exact geometry/scoring outputs.
 
 ### Reliability tests
 Same user, repeated standardized captures:
@@ -683,6 +715,7 @@ Early CI:
 Later:
 - debug APK artifact
 - emulator smoke tests
+- native-library / 16 KB page-size compatibility check for every APK/AAB containing native libraries
 - release candidate build
 - signed QA APK/release bundle via protected secrets
 - APK/AAB inspection for embedded secrets, debug flags, signing identity and unexpected endpoints
@@ -697,7 +730,8 @@ Before public listing:
 - privacy policy URL
 - Terms
 - accurate Data Safety form
-- age/target audience configuration consistent with actual app
+- age/target audience configuration consistent with actual app and applicable Play Families/target-audience requirements
+- health/medical-content declarations/disclosures required by the then-current Play policy for procedure-related informational content
 - content rating
 - clear handling of face photos and derived data
 - delete account/data support as applicable
@@ -731,8 +765,9 @@ These should be inserted through versioned configuration, not random constants i
 
 ASCEND V1 is done only when:
 
-- fresh install onboarding works
+- fresh install low-friction onboarding works
 - guest can complete one scan
+- compact/large-screen/rotation/window-resize paths remain usable and preserve state
 - account flow works
 - front + profile capture/import works
 - bad captures are rejected cleanly
@@ -762,11 +797,12 @@ ASCEND V1 is done only when:
 
 Start with WP00 architecture/security freeze from WORKFLOW.md. Only after WP00 is complete does Phase 0 implementation begin.
 
-Do not jump to pretty result screens before:
+Do not jump to the final result experience before:
 - core contracts
 - geometry
 - scoring
 - scan lifecycle
+- the supported Misc/Appearance Details inputs required by the four-category overall
 
 Do not implement final scoring constants before Ryan/Eddy supply the actual reference data.
 
