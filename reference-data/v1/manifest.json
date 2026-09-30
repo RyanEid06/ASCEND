@@ -12,13 +12,6 @@
     "benchmarks.csv",
     "sources.csv"
   ],
-  "provenance_values": [
-    "FACEIQ_DIRECT",
-    "RESEARCH_DIRECT",
-    "COMMUNITY_DIRECT",
-    "DERIVED_FROM_PUBLISHED_DATA",
-    "UNAVAILABLE_OR_UNCERTAIN"
-  ],
   "policy": {
     "never_infer_faceiq_private_values": true,
     "never_present_community_values_as_scientific_consensus": true,
@@ -29,5 +22,20 @@
     "production_scoring_requires_separate_validated_reference_model": true,
     "population_norms_are_not_automatic_attractiveness_targets": true,
     "age_applicability_must_be_preserved": true
-  }
+  },
+  "benchmark_purpose_values": [
+    "AESTHETIC_PREFERENCE",
+    "POPULATION_NORM",
+    "COMMUNITY_CONVENTION",
+    "COMPETITOR_REFERENCE",
+    "MEASUREMENT_VALIDATION",
+    "REFERENCE_ONLY"
+  ],
+  "age_applicability_values": [
+    "ADULT_EVIDENCE",
+    "ADOLESCENT_EVIDENCE",
+    "AGE_INVARIANT_VALIDATED",
+    "UNKNOWN"
+  ],
+  "runtime_scoring_eligible_default": false
 }
