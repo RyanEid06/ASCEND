@@ -1,6 +1,6 @@
 # ASCEND Backend and Authentication Contract
 
-Version: 2.0 Architecture Freeze
+Version: 2.1 Architecture Freeze
 Status: Canonical backend contract
 
 ## 1. Environment model
@@ -42,7 +42,8 @@ After a guest finishes the one allowed guest scan and signs in:
 ### public/exposed
 profiles
 - user_id UUID PK -> auth.users
-- age_band
+- confirmed_13_plus
+- age_gate_policy_version
 - selected_reference_model
 - intent
 - created_at
@@ -65,7 +66,15 @@ analyses
 - front_landmark_model_version
 - profile_model_version
 - reference_model_version
+- scoring_model_version
 - metric_config_hash
+- enabled_metric_ids or immutable metric-set snapshot reference
+- coverage_policy_version
+- category/overall coverage state
+- score_scale_version / cross_metric_comparability_version
+- extrema_selection_version
+- strongest_metric_ids
+- weakest_metric_ids
 - recommendation_version
 - app_version
 - sync_revision
@@ -104,7 +113,8 @@ entitlements
 dataset_contributions
 - contribution_id random UUID
 - created_at
-- age_band
+- self_declared_13_plus
+- eligibility_policy_version
 - reference_model
 - approved derived metric subset
 - engine/config versions
@@ -181,9 +191,9 @@ Deletion:
 - remote delete syncs when connectivity returns
 
 Completed historical results:
-- do not silently recompute or mutate them when reference models change
-- new analysis uses the then-current supported reference model version
-- historical result continues to display its stored version
+- do not silently recompute or mutate them when reference/scoring models change
+- new analysis uses the then-current supported reference/scoring model versions
+- historical result continues to display its stored version, enabled metric set, coverage state, and strongest/weakest selection provenance
 
 ## 8. Account deletion
 
@@ -209,7 +219,7 @@ Deletion endpoints must be idempotent/recoverable from retry.
 ## 9. Research contribution contract
 
 V1:
-- adults only
+- eligibility follows the same self-declared 13+ product gate
 - separate explicit opt-in
 - fresh standardized capture preferred/required for research-quality submissions
 - no raw photo contribution
@@ -236,7 +246,7 @@ Endpoint receives:
 Server:
 1. validate JWT
 2. load/validate user ownership
-3. check age/intent where Hardmax-related
+3. check stored self-declared 13+ product-gate state and intent where the feature flow requires it
 4. check entitlement/rate quota
 5. construct minimized allowlisted prompt payload
 6. call configured provider
