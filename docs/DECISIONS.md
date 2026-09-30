@@ -7,6 +7,8 @@ Status: baseline product decisions for implementation. A change to one of these 
 
 - Name: ASCEND.
 - Android first; Google Play is the first public-store target.
+- Production Android applicationId: `app.ascend.mobile`.
+- Development/debug applicationId: `app.ascend.mobile.dev`.
 - English first.
 - Phone UX is portrait-first, but the app architecture is adaptive/resizable. Large screens, foldables, landscape, multi-window and desktop windowing must remain usable; do not make correctness depend on a portrait lock.
 - Initial visual direction: light, premium, clean white/blue/teal interface.
