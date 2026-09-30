@@ -43,6 +43,9 @@ Use `kotlinx.serialization` for strict decoding. Keep `ignoreUnknownKeys = false
 5. `definition_compatibility` must be checked before automatic scoring. Approximate or uncertain definitions should remain display/reference-only.
 6. Do not use uncalibrated millimetres from ordinary photos. Prefer ratios/degrees unless scale calibration is available.
 7. Persist `dataset_version`, scoring-model version, landmark-model version, and the chosen `benchmark_id` with every analysis result.
+8. The 147 measurement definitions in this dataset are a reference catalogue, not the runtime scoring count. A versioned scoring model must explicitly select its enabled metric IDs; do not hard-code 33, 34, 147, or another count in the app.
+9. Hidden 0–100 metric scores may be compared across different metrics only when the scoring model explicitly calibrates those metrics to the same cross-metric score semantics/version. Equal numeric ranges alone are not enough.
+10. Completed results must retain the enabled metric-set/config identity, coverage policy/result, cross-metric score-scale version, and deterministic strongest/weakest selection provenance where that feature is available.
 
 ## Tier semantics
 
