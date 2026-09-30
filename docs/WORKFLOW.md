@@ -32,8 +32,8 @@ Mandatory WP00 workstreams:
 - Android Keystore-protected keys
 - explicit encryption envelope: formatVersion + keyVersion + nonce + ciphertext/authentication tag metadata
 - random DB/session passphrases wrapped/protected by Keystore keys; define rotation, missing-key and deletion semantics
-- prove a compatible modern Room + supported SQLCipher-for-Android integration; do not use deprecated `android-database-sqlcipher`
-- prove encrypted DB create/reopen/migrate/process-death behavior and native 16 KB page-size compatibility before WP06
+- freeze the acceptance criteria for a modern Room + supported SQLCipher-for-Android compatibility spike; deprecated `android-database-sqlcipher` is forbidden
+- the actual create/reopen/migrate/process-death/wrong-key/missing-key + native 16 KB compatibility spike runs in Phase 0 once the Android skeleton exists, and must pass before the P0 sync gate
 - encrypted sensitive Room/session storage
 - Android backup/device-transfer exclusions
 - Photo Picker instead of broad gallery permissions
@@ -228,6 +228,7 @@ Ryan — WP01 Android Foundation
 - keep modules intentionally small: `app`, `core:model`, `core:geometry`, `core:scoring`, and `core:data` only when needed; feature packages stay packages until module boundaries earn their cost
 
 Eddy — WP02 Core Contracts + CI
+- run the Room + supported SQLCipher + Keystore-envelope compatibility spike on the real Phase 0 Android skeleton and document the frozen versions/results
 - core model types
 - ScanSession / ReferenceModel / AgeConfirmation / IntentMode
 - metric-result/category-result/overall-result contracts
@@ -243,6 +244,8 @@ Sync Gate P0:
 - clean clone builds
 - CI green
 - both lanes compile against same core contracts
+- Room/SQLCipher create/reopen/migration/process-death/wrong-key/missing-key spike passes
+- native-library inventory is known and 16 KB compatibility strategy/check passes for dependencies already present
 
 ### Phase 1 — Deterministic geometry and scoring foundation
 
