@@ -218,7 +218,7 @@ Ryan — WP01 Android Foundation
 
 Eddy — WP02 Core Contracts + CI
 - core model types
-- ScanSession / ReferenceModel / AgeBand / IntentMode
+- ScanSession / ReferenceModel / AgeConfirmation / IntentMode
 - metric-result/category-result/overall-result contracts
 - analysis version structure
 - CI for build, unit tests, lint
@@ -245,16 +245,25 @@ Ryan — WP03 Geometry Engine
 
 Eddy — WP04 Reference Config + Scoring Engine
 - JSON/config schema for Male/Female reference models
+- explicit versioned enabled metric IDs; no hard-coded 33/34 count
 - T1-T5 evaluator
 - hidden 0-100 interpolation
 - metric weighting
 - category /10 calculation
-- equal 25% overall calculation
+- initial configurable 25% category weights
+- category/scan coverage policy + insufficient-reliable-measurements state
+- cross-metric score-scale/comparability contract
+- measurement-uncertainty / meaningful-difference hooks
+- deterministic strongest/weakest extrema selector with tie sets
 - rank mapper with TBD thresholds disabled until supplied
 - config validation + hash/versioning
 
 Sync Gate P1:
 - deterministic fixture flows geometry -> metric values -> tiers -> categories -> overall
+- enabled metric membership is config-driven
+- low-confidence/missing metrics obey coverage rules and can fail honestly
+- strongest/weakest selection only uses explicitly comparable reliable metrics
+- uncertainty ties are deterministic
 - no UI-specific scoring logic
 - every boundary covered by tests
 
@@ -346,6 +355,7 @@ Ryan — WP11 Results Dashboard
 - Overall /10
 - community rank
 - four category /10 cards
+- Strongest measured feature / Largest improvement opportunity with tie/insufficient-data states
 - premium-lock placeholders/feature flags
 - metric navigation by category
 - share entry point
@@ -404,8 +414,8 @@ Ryan — WP15 Recommendation Engine
 - curated recommendation database
 - map metric/feature deviations -> recommendation tags
 - Softmax rules
-- Hardmax 18+ rules
-- minor-safe filtering
+- Hardmax/procedure rules for the same self-declared 13+ product
+- informational/educational procedure-content guardrails
 - structured advice cards
 - no AI required for core recommendation selection
 
@@ -422,7 +432,7 @@ Eddy — WP16 AI Explanation Layer
 Sync Gate P7:
 - app remains fully functional if AI is unavailable
 - AI only explains approved facts/recommendations
-- under-18 Hardmax remains impossible in both client and server paths
+- Hardmax/procedure content follows the same simple self-declared 13+ gate and remains curated/informational
 
 ### Phase 8 — Accounts, sync, history, consent, sharing
 
@@ -445,7 +455,7 @@ Eddy — WP18 Auth + Supabase Sync
 - consent records
 - explicit pseudonymous dataset opt-in
 - private revocation/deletion linkage
-- adult-only dataset contribution in V1
+- research contribution eligibility follows the same self-declared 13+ product gate plus separate explicit consent
 - sync conflict strategy
 
 Sync Gate P8:
@@ -496,6 +506,9 @@ Ryan — WP21 Device/UI QA
 
 Eddy — WP22 Engine/Backend QA
 - formula and tier-boundary audit
+- enabled-metric-set/config audit
+- coverage and insufficient-reliable-measurements audit
+- strongest/weakest comparability, uncertainty, tie and historical-version audit
 - repeated-capture reliability tests
 - profile correction abuse tests
 - DB migration tests
