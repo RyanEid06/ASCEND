@@ -1,6 +1,6 @@
 # ASCEND Master Plan
 
-Version: Architecture Freeze 2.0
+Version: Architecture Freeze 2.1
 Owners: Ryan + Eddy
 Target: Android / Google Play
 Status: WP00 architecture/security freeze required before Phase 0 implementation
@@ -35,7 +35,7 @@ Before WP01 begins as permanent implementation work:
 9. freeze guest -> account migration and account-switch behavior
 10. freeze account/data deletion behavior
 11. freeze the AI minimized-input/structured-output contract and server-only secrets rule
-12. freeze the pseudonymous adult-only research contribution contract
+12. freeze the pseudonymous opt-in research contribution contract
 13. freeze phase-by-phase signed APK update testing
 14. review the threat model
 15. enable repository governance appropriate for implementation before secrets or code accumulate
@@ -66,7 +66,7 @@ ASCEND is a looksmaxxing-focused facial-analysis app. Its value proposition is n
 4. classify each metric T1-T5
 5. calculate Harmony, Dimorphism, Angularity, Misc and Overall deterministically
 6. explain why the result occurred
-7. give practical Softmax guidance and, for adults, optional Hardmax information
+7. give practical Softmax guidance and optional Hardmax/procedure information within the 13+ product
 
 The score is therefore reproducible relative to ASCEND's configured reference model. AI may explain results, but it does not own the numerical truth of the product.
 
@@ -101,11 +101,11 @@ ASCEND V1 is not:
 
 ### First launch
 1. ASCEND branding/onboarding
-2. 13+ self-declared age gate
-3. choose Male or Female reference model
+2. simple self-declared “I am 13 or older” gate
+3. choose Male reference model or Female reference model
 4. choose intent
    - Softmax
-   - Hardmax only if 18+
+   - Hardmax
 5. guest or account
 6. privacy/data notices
 7. optional pseudonymous derived-data contribution consent
@@ -131,12 +131,13 @@ ASCEND V1 is not:
 4. Dimorphism /10
 5. Angularity /10
 6. Misc /10
-7. category metric lists
-8. per-metric T1-T5
-9. overlay/reference/explanation
-10. recommendations
-11. share
-12. history if signed in/allowed by product gate
+7. Strongest measured feature / Largest improvement opportunity when reliable and cross-metric comparable
+8. category metric lists
+9. per-metric T1-T5
+10. overlay/reference/explanation
+11. recommendations
+12. share
+13. history if signed in/allowed by product gate
 
 ## 5. Capture specification
 
@@ -236,11 +237,15 @@ See SCORING_CONTRACT.md for canonical rules.
 
 Key design:
 - reference data is configuration
+- the enabled production metric set is versioned configuration; no source code assumes 33, 34, 147, or any other fixed metric count
 - formula code is not full of magic constants
 - tier labels are data
 - score curves are data
 - weights are data
 - ranks are data
+- category/scan coverage rules are versioned data
+- cross-metric comparability and measurement-uncertainty rules are versioned data
+- Strongest/Weakest selection is deterministic and outside AI
 - every result stores the versions/config hash used
 
 This lets Ryan/Eddy insert the final reference values later without rewriting UI or geometry.
@@ -309,17 +314,26 @@ MeasurementResult
 - weight used
 - confidence
 - available flag
+- score scale / comparability version where applicable
+- measurement uncertainty / meaningful-difference metadata where validated
 
 CategoryResult
 - scanId
 - category
 - score /10
 - coverage
+- coverage policy version
 
 OverallResult
 - scanId
 - overall /10
 - rank label
+- enabled metric IDs/config snapshot reference
+- overall coverage state
+- strongest metric ID tie set
+- weakest metric ID tie set
+- extrema selection version
+- score scale/comparability version
 
 RecommendationResult
 - scanId
@@ -340,7 +354,7 @@ Suggested tables:
 
 profiles
 - user_id
-- age_band
+- confirmed_13_plus
 - selected_reference_model
 - intent
 - created_at
@@ -353,7 +367,14 @@ analyses
 - analysis_engine_version
 - landmark_model_version
 - reference_model_version
+- scoring_model_version
 - config_hash
+- enabled metric IDs/config snapshot reference
+- coverage policy/version + completed coverage state
+- score scale/comparability version
+- extrema selection version
+- strongest metric ID tie set
+- weakest metric ID tie set
 - category scores
 - overall score
 - rank
@@ -377,7 +398,7 @@ dataset_contributions
 - randomized contribution id
 - approved derived metric subset only
 - reference model
-- age band limited to adult contributors in V1
+- self-declared 13+ eligibility state/policy version where required for audit
 - engine/config versions
 - no raw photo
 
@@ -410,7 +431,7 @@ Hard rules:
 - user deletion deletes associated local assets
 - cloud deletion flow must exist for account data
 - pseudonymous dataset contribution is a separate explicit opt-in
-- under-18 dataset contribution disabled for V1
+- research contribution follows the same self-declared 13+ product gate plus separate explicit consent
 
 ## 13. Misc feature strategy
 
@@ -445,7 +466,6 @@ Recommendation table concept:
 - trigger metric/feature tags
 - minimum deviation/tier
 - Softmax/Hardmax
-- minimum age
 - reference-model applicability
 - contraindication/guardrail tags
 - title
@@ -457,12 +477,12 @@ Example flow:
 
 measurement deviation
 -> recommendation tags
--> age + intent filter
+-> intent + applicability filter
 -> approved recommendation IDs
 -> UI cards
 -> optional AI explanation using only those approved cards + scan data
 
-This is much safer and more consistent than asking an LLM “what surgery does this face need?”
+This is much safer and more consistent than asking an LLM to invent individualized procedures. Hardmax/procedure content remains curated and informational; medical or surgical decisions belong with a qualified clinician.
 
 ## 15. AI architecture
 
@@ -584,9 +604,15 @@ into general analytics events.
 - geometry formulas
 - scoring interpolation
 - tier boundaries
+- enabled metric-set membership
+- low-confidence/missing metric exclusion
+- category/overall coverage and insufficient-reliable-measurements behavior
+- cross-metric score-scale eligibility
+- strongest/weakest selection and uncertainty ties
+- historical selection/version preservation
 - weight normalization
 - rank mapping
-- age/intent gates
+- 13+ onboarding/intent gates
 - entitlement visibility
 
 ### Golden regression tests
@@ -685,8 +711,12 @@ Before public listing:
 ## 24. What must be supplied later by Ryan/Eddy
 
 The architecture deliberately leaves these as product data:
-- exact T1-T5 ranges for every metric
+- exact enabled V1 metric set for each scoring/reference model version
+- exact T1-T5 ranges for every enabled metric
 - metric-specific hidden 0-100 scoring anchors
+- cross-metric score calibration/eligibility for Strongest/Weakest
+- validated measurement uncertainty / meaningful-difference rules where extrema comparison is enabled
+- category/scan coverage thresholds and blocking required metrics
 - metric weights
 - final category membership
 - overall community-rank thresholds
@@ -715,8 +745,8 @@ ASCEND V1 is done only when:
 - result drill-down shows overlay + explanation/reference
 - Misc supported features work or fail honestly
 - Softmax works
-- under-18 Hardmax is impossible
-- 18+ Hardmax uses curated approved content
+- the self-declared 13+ gate is consistently enforced by the product flow
+- Hardmax/procedure content uses curated approved content and is clearly informational rather than individualized medical advice
 - AI explanation cannot change scores
 - history works for accounts
 - local raw photos stay local
@@ -744,4 +774,4 @@ Do not add paid billing before the full product is useful.
 
 Do not add iOS before Android is stable.
 
-The correct first milestone is not “8.3/10 appears on screen.” The correct first milestone is “the same standardized scan produces explainable, repeatable numbers through a tested pipeline.”
+The correct first milestone is not “8.3/10 appears on screen.” The correct first milestone is “the same standardized scan produces explainable, repeatable numbers through a tested pipeline, and refuses to overstate results when coverage, confidence, comparability, or measurement uncertainty does not support them.”
