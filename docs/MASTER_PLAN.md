@@ -271,7 +271,7 @@ Suggested Room entities:
 
 UserSettings
 - local id
-- age band
+- self-declared 13+ confirmation state/policy version
 - reference model
 - intent
 - consent flags
