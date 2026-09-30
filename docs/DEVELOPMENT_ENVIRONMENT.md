@@ -1,6 +1,6 @@
 # ASCEND Development Environment
 
-Version: 2.0 Architecture Freeze
+Version: 2.2 Architecture Freeze
 Target host: Windows 11 developer machines
 
 ## 1. Required machine tooling
@@ -22,7 +22,9 @@ Project-owned tools/dependencies:
 - CameraX
 - MediaPipe
 - Room
-- SQLCipher integration
+- supported `sqlcipher-android` integration only after the WP00 compatibility spike; do not use deprecated `android-database-sqlcipher`
+- WorkManager
+- Navigation 3 current stable release
 - Hilt
 - Supabase Android libraries
 - test libraries
@@ -68,14 +70,17 @@ Initial architecture:
 - Jetpack Compose / Material 3
 - minSdk 26
 - targetSdk 36 initially, re-checked against current Play requirements before public release
-- portrait-only V1
+- portrait-first phone UX with adaptive/resizable compact/medium/expanded layouts; no correctness dependency on portrait locking
+- Navigation 3 stable
+- UDF + ViewModel/StateFlow screen state
 - CameraX
 - Android Photo Picker
 - Coroutines/Flow
 - Hilt
-- Room + encrypted DB strategy
+- Room + supported SQLCipher encrypted DB strategy proven before WP06
 - DataStore for non-secret settings
 - Android Keystore for encryption/session keys
+- WorkManager/CoroutineWorker for durable retryable sync/delete jobs
 
 ## 5. Device testing
 
@@ -118,7 +123,7 @@ Release build must not expose unrestricted debug controls.
 ## 8. Environment verification checklist
 
 Before WP01 implementation:
-- Android Studio opens project
+- Android Studio opens the skeleton/verification project once WP01 creates it
 - JDK 17 selected
 - SDK/platform tools available
 - adb sees physical device
@@ -130,3 +135,7 @@ Before WP01 implementation:
 - no secret files tracked by Git
 - final applicationId chosen
 - signing/update strategy completed
+- Room + supported SQLCipher compatibility spike documented: create/reopen/migrate/process death/wrong-key/missing-key behavior
+- key-envelope format/version/rotation/deletion semantics frozen
+- 16 KB page-size test strategy frozen for every native dependency
+- GitHub main-branch governance actually enabled, not merely documented
