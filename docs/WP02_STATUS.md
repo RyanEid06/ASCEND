@@ -16,9 +16,9 @@ Owner: Eddy lane. Base: `phase/P00-integration` at Architecture Freeze 2.2.
 
 The current Phase 0 app has no backend connection. Build and unit-test jobs use no service credentials or signing secrets. Future public identifiers such as a Supabase URL/publishable key may be configured per build environment, but provider secrets, service-role keys and signing passwords must only exist in protected server/build secret stores. `local.properties`, `.env*` (except a no-secret sample), keystores and private fixtures stay ignored. A missing environment setting must fail the feature explicitly rather than silently target production or localhost.
 
-## Room / SQLCipher compatibility spike — P0 gate, pending execution
+## Room / SQLCipher compatibility spike — 16 KB emulator check passed
 
-Run the committed instrumentation tests on the real WP01 Android skeleton before P0 closes; do not claim this spike passed from a documentation review, a JVM unit test, or a compiled test APK. The candidate pairing to validate is Room 3.0.3 with the maintained `net.zetetic:sqlcipher-android` 4.19.0 using its `SQLiteDriver` integration. These are candidates, **not frozen versions**, until the Android build and device tests pass. Do not use deprecated `android-database-sqlcipher`.
+The committed instrumentation tests ran successfully on the real WP01 Android skeleton using an API 35 emulator with a verified 16 KB page size ([CI run](https://github.com/RyanEid06/ASCEND/actions/runs/36899449242)). The pairing tested was Room 3.0.3 with `net.zetetic:sqlcipher-android` 4.19.0 using its `SQLiteDriver` integration. The versions remain candidates pending the remaining Phase 0 gates. Do not use deprecated `android-database-sqlcipher`.
 
 Required device/instrumentation evidence:
 
@@ -30,7 +30,7 @@ Required device/instrumentation evidence:
 6. Inspect the raw DB bytes to confirm they are encrypted, and verify Android backup/device transfer excludes the DB, key envelope and sensitive assets.
 7. Inspect every packaged native `.so` and the APK/AAB for 16 KB ELF and ZIP alignment; test installation/open on a 16 KB emulator/device when available.
 
-The local machine used for this change has no Android SDK or emulator, so local device compatibility is **not yet verified**. CI builds the instrumentation test APK, checks native libraries, and runs the tests on an API 35 emulator with a verified 16 KB page size once the build passes. Process-death recovery remains an explicit follow-up check. The phase integration gate remains open until it passes.
+CI has passed the build, unit tests, lint, native-library alignment checks, and device instrumentation for encrypted create/reopen, wrong key, migration, Keystore envelope and missing key. The local machine used for this change has no Android SDK or emulator. Process-death recovery, Android backup/device-transfer exclusion, and a physical 16 KB device check remain follow-ups. The phase integration gate remains open until the required checks pass.
 
 ## Dependency verification follow-up
 
