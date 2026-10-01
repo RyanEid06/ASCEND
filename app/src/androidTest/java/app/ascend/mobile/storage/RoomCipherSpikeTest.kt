@@ -14,7 +14,6 @@ import androidx.room3.Room
 import androidx.room3.RoomDatabase
 import androidx.room3.migration.Migration
 import androidx.sqlite.SQLiteConnection
-import androidx.sqlite.async.executeSQL
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import java.security.SecureRandom
@@ -81,22 +80,36 @@ class RoomCipherSpikeTest {
     @Test fun explicitMigrationKeepsExistingRecord() = runBlocking {
         val name = newDatabaseName()
         val passphrase = randomPassphrase()
-        openV1(name, passphrase).use { it.records().insert(SpikeRecordV1("metric-1", "kept")) }
+        val old = openV1(name, passphrase)
+        try {
+            old.records().insert(SpikeRecordV1("metric-1", "kept"))
+        } finally {
+            old.close()
+        }
 
         val migration = object : Migration(1, 2) {
             override suspend fun migrate(connection: SQLiteConnection) {
-                connection.executeSQL("ALTER TABLE spike_records ADD COLUMN label TEXT NOT NULL DEFAULT 'legacy'")
+                val statement = connection.prepare(
+                    "ALTER TABLE spike_records ADD COLUMN label TEXT NOT NULL DEFAULT 'legacy'"
+                )
+                try {
+                    statement.step()
+                } finally {
+                    statement.close()
+                }
             }
         }
         val migrated = Room.databaseBuilder(context, SpikeDatabaseV2::class.java, name)
             .setDriver(SQLCipherDriver(passphrase.copyOf(), null, null))
             .addMigrations(migration)
             .build()
-        migrated.use {
-            val record = it.records().get("metric-1")
+        try {
+            val record = migrated.records().get("metric-1")
             assertEquals("kept", record?.value)
             assertEquals("legacy", record?.label)
-            assertNull(it.records().get("nonexistent"))
+            assertNull(migrated.records().get("nonexistent"))
+        } finally {
+            migrated.close()
         }
     }
 
@@ -108,9 +121,17 @@ class RoomCipherSpikeTest {
         val restored = unwrapPassphrase(alias, envelope)
         assertArrayEquals(passphrase, restored)
 
-        openV1(name, restored).use { it.records().insert(SpikeRecordV1("metric-1", "kept")) }
-        openV1(name, unwrapPassphrase(alias, envelope)).use {
-            assertEquals("kept", it.records().get("metric-1")?.value)
+        val first = openV1(name, restored)
+        try {
+            first.records().insert(SpikeRecordV1("metric-1", "kept"))
+        } finally {
+            first.close()
+        }
+        val reopened = openV1(name, unwrapPassphrase(alias, envelope))
+        try {
+            assertEquals("kept", reopened.records().get("metric-1")?.value)
+        } finally {
+            reopened.close()
         }
 
         keyStore().deleteEntry(alias)
