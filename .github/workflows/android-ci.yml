@@ -46,8 +46,10 @@ jobs:
       - name: Check pinned dependency policy
         run: python3 scripts/check_dependency_policy.py gradle/libs.versions.toml
       - name: Build and unit tests
-        run: bash ./gradlew --no-daemon clean assembleDebug assembleRelease test
+        run: bash ./gradlew --no-daemon clean assembleDebug assembleRelease assembleDebugAndroidTest test
       - name: Check native libraries for 16 KB page support
-        run: python3 scripts/check_native_16k.py app/build/outputs/apk/debug/app-debug.apk
+        run: |
+          python3 scripts/check_native_16k.py app/build/outputs/apk/debug/app-debug.apk
+          python3 scripts/check_native_16k.py app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
       - name: Android lint
         run: bash ./gradlew --no-daemon lint
