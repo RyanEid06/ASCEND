@@ -16,6 +16,7 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "0.1.0"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -80,4 +81,12 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
 
     testImplementation(libs.junit4)
+
+    // Phase 0 compatibility spike only. Production Room storage arrives in WP06.
+    androidTestImplementation(libs.androidx.room3.runtime)
+    androidTestImplementation(libs.sqlcipher.android)
+    androidTestImplementation(libs.androidx.sqlite)
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    kspAndroidTest(libs.androidx.room3.compiler)
 }
