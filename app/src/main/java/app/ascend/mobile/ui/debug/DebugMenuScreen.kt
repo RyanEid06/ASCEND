@@ -1,3 +1,5 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+
 package app.ascend.mobile.ui.debug
 
 import androidx.compose.foundation.layout.Arrangement
