@@ -50,7 +50,11 @@ def main(apk: pathlib.Path) -> None:
     print(f"Native library inventory: {len(libraries)} files")
     if libraries:
         sdk = os.environ.get("ANDROID_HOME") or os.environ.get("ANDROID_SDK_ROOT", "")
-        candidates = sorted(pathlib.Path(sdk, "build-tools").glob("*/zipalign"), reverse=True) if sdk else []
+        candidates = list(pathlib.Path(sdk, "build-tools").glob("*/zipalign")) if sdk else []
+        candidates.sort(
+            key=lambda path: tuple(int(part) for part in path.parent.name.split(".")),
+            reverse=True,
+        )
         zipalign = shutil.which("zipalign") or (str(candidates[0]) if candidates else None)
         if not zipalign:
             raise SystemExit("zipalign is required when native libraries are present")

@@ -42,7 +42,9 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Check pinned dependency policy
         run: python3 scripts/check_dependency_policy.py gradle/libs.versions.toml
-      - name: Build, unit tests, lint
-        run: bash ./gradlew --no-daemon clean assembleDebug assembleRelease test lint
+      - name: Build and unit tests
+        run: bash ./gradlew --no-daemon clean assembleDebug assembleRelease test
       - name: Check native libraries for 16 KB page support
         run: python3 scripts/check_native_16k.py app/build/outputs/apk/debug/app-debug.apk
+      - name: Android lint
+        run: bash ./gradlew --no-daemon lint
