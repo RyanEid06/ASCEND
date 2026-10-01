@@ -1,0 +1,48 @@
+name: Android CI
+
+on:
+  push:
+    branches:
+      - main
+      - phase/P00-integration
+      - eddy/P00-WP02-core-contracts-ci
+  pull_request:
+    branches:
+      - main
+      - phase/P00-integration
+
+permissions:
+  contents: read
+
+jobs:
+  build-test-lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      # WP02 began from the same P0 baseline as WP01. Until WP01 is merged,
+      # compose both lanes only in this disposable CI checkout for validation.
+      - name: Compose Phase 0 lanes when the Android skeleton is absent
+        if: ${{ hashFiles('gradlew') == '' }}
+        run: |
+          git config user.name "ASCEND CI"
+          git config user.email "ci@users.noreply.github.com"
+          git fetch --no-tags origin ryan/P00-WP01-android-foundation
+          git merge --no-edit FETCH_HEAD
+          test -f gradlew
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - name: Install Android platform
+        run: sdkmanager 'platforms;android-37' 'build-tools;37.0.0'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Check pinned dependency policy
+        run: python3 scripts/check_dependency_policy.py gradle/libs.versions.toml
+      - name: Build, unit tests, lint
+        run: bash ./gradlew --no-daemon clean assembleDebug assembleRelease test lint
+      - name: Check native libraries for 16 KB page support
+        run: python3 scripts/check_native_16k.py app/build/outputs/apk/debug/app-debug.apk
