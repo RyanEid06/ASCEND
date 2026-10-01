@@ -8,7 +8,7 @@ Owner: Eddy lane. Base: `phase/P00-integration` at Architecture Freeze 2.2.
 - Constructors reject out-of-range scores/confidence, missing IDs/versions, mismatched enabled metric sets, and extrema IDs that do not use the completed result's comparable score scale.
 - An explicit `InsufficientReliableMeasurements` outcome without an overall score.
 - Unit tests for contract invariants, missing results, comparable extrema and tie sets.
-- Android CI for build, unit tests and lint. Until WP01 enters the phase branch, CI composes WP01 and WP02 in a disposable checkout; it does not merge either lane to `main`. The Phase 0 PR runs the encrypted database tests on an API 35 emulator after the build job passes.
+- Android CI for build, unit tests and lint. Until WP01 enters the phase branch, CI composes WP01 and WP02 in a disposable checkout; it does not merge either lane to `main`. The Phase 0 PR runs the encrypted database tests on a 16 KB API 35 emulator after the build job passes.
 - Static pinned-dependency policy and native-library inventory/16 KB alignment gate.
 - An instrumentation-only Room 3 + maintained SQLCipher proof that exercises encrypted create/reopen, wrong passphrase, explicit migration, and a versioned Keystore-wrapped passphrase/missing-key path. The SQLCipher/Room dependencies are scoped to the test APK; WP06 owns the production database.
 
@@ -30,7 +30,7 @@ Required device/instrumentation evidence:
 6. Inspect the raw DB bytes to confirm they are encrypted, and verify Android backup/device transfer excludes the DB, key envelope and sensitive assets.
 7. Inspect every packaged native `.so` and the APK/AAB for 16 KB ELF and ZIP alignment; test installation/open on a 16 KB emulator/device when available.
 
-The local machine used for this change has no Android SDK or emulator, so local device compatibility is **not yet verified**. CI builds the instrumentation test APK, checks native libraries, and runs the tests on an API 35 emulator once the build passes. Process-death recovery and 16 KB device installation remain explicit follow-up checks. The phase integration gate remains open until they pass.
+The local machine used for this change has no Android SDK or emulator, so local device compatibility is **not yet verified**. CI builds the instrumentation test APK, checks native libraries, and runs the tests on an API 35 emulator with a verified 16 KB page size once the build passes. Process-death recovery remains an explicit follow-up check. The phase integration gate remains open until it passes.
 
 ## Dependency verification follow-up
 

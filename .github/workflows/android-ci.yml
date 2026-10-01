@@ -76,9 +76,10 @@ jobs:
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
-      - name: Run encrypted Room compatibility tests on API 35 emulator
+      - name: Run encrypted Room compatibility tests on 16 KB API 35 emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 35
+          target: google_apis_ps16k
           arch: x86_64
-          script: bash ./gradlew --no-daemon connectedDebugAndroidTest
+          script: bash -lc 'test "$(adb shell getconf PAGE_SIZE | tr -d "\r")" = "16384" && ./gradlew --no-daemon connectedDebugAndroidTest'
