@@ -5,7 +5,6 @@ on:
     branches:
       - main
       - phase/P00-integration
-      - eddy/P00-WP02-core-contracts-ci
   pull_request:
     branches:
       - main
@@ -13,6 +12,10 @@ on:
 
 permissions:
   contents: read
+
+concurrency:
+  group: android-ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-test-lint:
