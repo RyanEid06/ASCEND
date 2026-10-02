@@ -17,6 +17,40 @@ class RepresentativeFormulasTest {
         assertEquals(80.0, jaw.rawValue, 1e-9)
     }
 
+    @Test fun aspectRatioCorrectionKeepsRatiosAnglesAndRollStable() {
+        val square = SyntheticGeometryFixtures.front()
+        val squareElongation = registry.measure("m", FormulaIds.FACIAL_ELONGATION, square) as GeometryMeasurementResult.Available
+        val squareCanthal = registry.measure("m", FormulaIds.CANTHAL_INCLINATION, square) as GeometryMeasurementResult.Available
+
+        val portraitResolution = PixelResolution(1080, 1920)
+        val aspect = portraitResolution.height.toDouble() / portraitResolution.width
+        val portraitPoints = square.landmarks.mapValues { (_, observation) ->
+            Point2(observation.point.x, observation.point.y / aspect)
+        }
+        val portrait = SyntheticGeometryFixtures.front(
+            resolution = portraitResolution,
+            points = portraitPoints,
+        )
+        val portraitElongation = registry.measure("m", FormulaIds.FACIAL_ELONGATION, portrait) as GeometryMeasurementResult.Available
+        val portraitCanthal = registry.measure("m", FormulaIds.CANTHAL_INCLINATION, portrait) as GeometryMeasurementResult.Available
+
+        assertEquals(squareElongation.rawValue, portraitElongation.rawValue, 1e-9)
+        assertEquals(squareCanthal.rawValue, portraitCanthal.rawValue, 1e-9)
+
+        val physicalPivot = centroid(square.landmarks.values.map { it.point })!!
+        val rolledPortraitPoints = square.landmarks.mapValues { (_, observation) ->
+            val rolledPhysical = rotate(observation.point, 10.0, physicalPivot)
+            Point2(rolledPhysical.x, rolledPhysical.y / aspect)
+        }
+        val rolledPortrait = SyntheticGeometryFixtures.front(
+            pose = PoseDeviation(rollDegrees = 10.0),
+            resolution = portraitResolution,
+            points = rolledPortraitPoints,
+        )
+        val corrected = registry.measure("m", FormulaIds.FACIAL_ELONGATION, rolledPortrait) as GeometryMeasurementResult.Available
+        assertEquals(squareElongation.rawValue, corrected.rawValue, 1e-9)
+    }
+
     @Test fun rollNormalizationKeepsVerticalHorizontalRatioStable() {
         val base = SyntheticGeometryFixtures.front()
         val pivot = centroid(base.landmarks.values.map { it.point })!!
