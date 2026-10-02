@@ -185,6 +185,12 @@ class ScoringEngine private constructor(
                 if (metric.bool("requiredForCompletion") == null || metric.bool("extremaEligible") == null) {
                     fail("Missing completion/extrema flag for $id")
                 }
+                val scoreScaleElement = metric["scoreScaleId"]
+                if (scoreScaleElement != null && scoreScaleElement != JsonNull &&
+                    metric.string("scoreScaleId").isNullOrBlank()
+                ) {
+                    fail("Invalid score scale for $id")
+                }
 
                 val ageApplicability = metric.string("ageApplicability")
                 if (ageApplicability !in supportedAgeApplicability) fail("Age applicability unresolved for $id")
@@ -209,7 +215,7 @@ class ScoringEngine private constructor(
                     }
                 }
 
-                for (optionalNonNegative in listOf("measurementUncertainty", "reliabilityTolerance")) {
+                for (optionalNonNegative in listOf("measurementUncertainty", "reliabilityTolerance", "minimumMeaningfulScoreDelta")) {
                     val element = metric[optionalNonNegative]
                     if (element != null && element != JsonNull) {
                         val value = metric.number(optionalNonNegative) ?: fail("Invalid $optionalNonNegative for $id")
