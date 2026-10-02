@@ -239,6 +239,22 @@ class ScoringEngineTest {
         }
     }
 
+    @Test fun invalidOptionalCalibrationFieldsFailClosedBeforeScoring() {
+        val negativeDelta = defaultMetrics.toMutableList().apply {
+            this[0] = this[0].copy(extrema = false, delta = -1.0, scoreScaleId = null)
+        }
+        assertThrows(InvalidScoringConfig::class.java) {
+            load(config(metrics = negativeDelta))
+        }
+
+        val blankScale = defaultMetrics.toMutableList().apply {
+            this[0] = this[0].copy(extrema = false, scoreScaleId = "")
+        }
+        assertThrows(InvalidScoringConfig::class.java) {
+            load(config(metrics = blankScale))
+        }
+    }
+
     @Test fun rankMappingRequiresCompleteOrderedThresholds() {
         val ranks = """[
             {"label":"Sub 5","minimumOverall":0},
