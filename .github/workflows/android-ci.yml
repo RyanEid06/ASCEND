@@ -83,4 +83,5 @@ jobs:
           api-level: 35
           target: google_apis_ps16k
           arch: x86_64
+          disk-size: 4G
           script: bash -lc 'test "$(adb shell getconf PAGE_SIZE | tr -d "\r")" = "16384" && ./gradlew --no-daemon connectedDebugAndroidTest'
