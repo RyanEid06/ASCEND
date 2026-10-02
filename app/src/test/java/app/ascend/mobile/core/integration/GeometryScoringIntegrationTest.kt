@@ -116,7 +116,7 @@ class GeometryScoringIntegrationTest {
     """.trimIndent()
 
     private fun config(): String {
-        val ids = metrics.joinToString(",") { "\"\${it.id}\"" }
+        val ids = metrics.joinToString(",") { "\"${it.id}\"" }
         val definitions = metrics.joinToString(",") { metricJson(it) }
         return """
             {
@@ -124,14 +124,14 @@ class GeometryScoringIntegrationTest {
               "modelVersion":"integration-v1",
               "status":"VALIDATED_RELEASE",
               "referenceModel":"MALE",
-              "enabledMetricIds":[\$ids],
+              "enabledMetricIds":[$ids],
               "categories":{
                 "HARMONY":{"weight":0.25,"minimumCoverage":1.0},
                 "DIMORPHISM":{"weight":0.25,"minimumCoverage":1.0},
                 "ANGULARITY":{"weight":0.25,"minimumCoverage":1.0},
                 "MISC":{"weight":0.25,"minimumCoverage":1.0}
               },
-              "metrics":[\$definitions],
+              "metrics":[$definitions],
               "rankThresholds":null,
               "scoreScaleVersion":"integration-scale-v1",
               "coveragePolicyVersion":"integration-coverage-v1",
