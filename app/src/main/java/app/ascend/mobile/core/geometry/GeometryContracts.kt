@@ -95,13 +95,31 @@ data class GeometryFrame(
         require(millimetersPerNormalizedUnit == null || (millimetersPerNormalizedUnit.isFinite() && millimetersPerNormalizedUnit > 0.0))
     }
 
-    private val normalizationOrigin: Point2 by lazy {
-        rollOrigin ?: centroid(landmarks.values.map { it.point }) ?: Point2(0.5, 0.5)
+    /**
+     * Landmark detectors report x/y independently normalized by image width/height.
+     * Convert them into isotropic short-edge units before Euclidean geometry so
+     * portrait/landscape aspect ratio cannot distort ratios, angles, or roll correction.
+     */
+    private fun toIsotropic(point: Point2): Point2 {
+        val scale = resolution.shortEdge.toDouble()
+        return Point2(
+            x = point.x * resolution.width / scale,
+            y = point.y * resolution.height / scale,
+        )
     }
 
-    fun normalizedPoint(id: LandmarkId): Point2? = landmarks[id]?.point?.let {
-        rotate(it, -pose.rollDegrees, normalizationOrigin)
+    private val normalizationOrigin: Point2 by lazy {
+        rollOrigin?.let(::toIsotropic)
+            ?: centroid(landmarks.values.map { toIsotropic(it.point) })
+            ?: Point2(
+                0.5 * resolution.width / resolution.shortEdge.toDouble(),
+                0.5 * resolution.height / resolution.shortEdge.toDouble(),
+            )
     }
+
+    fun normalizedPoint(id: LandmarkId): Point2? = landmarks[id]?.point
+        ?.let(::toIsotropic)
+        ?.let { rotate(it, -pose.rollDegrees, normalizationOrigin) }
 }
 
 enum class MeasurementMode { AUTOMATIC, ASSISTED, MANUAL, UNSUPPORTED }
