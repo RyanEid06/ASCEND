@@ -37,7 +37,7 @@ class GeometryScoringIntegrationTest {
             FormulaIds.FACIAL_ELONGATION,
             "AUTOMATIC",
             MeasurementView.FRONT,
-            SyntheticGeometryFixtures::front,
+            { SyntheticGeometryFixtures.front() },
         ),
         FlowMetric(
             "integration.dimorphism",
@@ -45,7 +45,7 @@ class GeometryScoringIntegrationTest {
             FormulaIds.JAW_TO_CHEEK_WIDTH,
             "AUTOMATIC",
             MeasurementView.FRONT,
-            SyntheticGeometryFixtures::front,
+            { SyntheticGeometryFixtures.front() },
         ),
         FlowMetric(
             "integration.angularity",
@@ -53,7 +53,7 @@ class GeometryScoringIntegrationTest {
             FormulaIds.NASOFRONTAL_ANGLE,
             "ASSISTED",
             MeasurementView.PROFILE,
-            SyntheticGeometryFixtures::profile,
+            { SyntheticGeometryFixtures.profile() },
         ),
         FlowMetric(
             "integration.misc",
@@ -61,7 +61,7 @@ class GeometryScoringIntegrationTest {
             FormulaIds.NASOLABIAL_ANGLE,
             "ASSISTED",
             MeasurementView.PROFILE,
-            SyntheticGeometryFixtures::profile,
+            { SyntheticGeometryFixtures.profile() },
         ),
     )
 
