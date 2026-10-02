@@ -35,6 +35,7 @@ androidx-compose-material3 = { module = "androidx.compose.material3:material3" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
 hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" }
 kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "serialization" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
 junit4 = { module = "junit:junit", version.ref = "junit4" }
 androidx-room3-runtime = { module = "androidx.room3:room3-runtime", version.ref = "room3" }

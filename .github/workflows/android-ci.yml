@@ -4,11 +4,11 @@ on:
   push:
     branches:
       - main
-      - phase/P00-integration
+      - 'phase/**'
   pull_request:
     branches:
       - main
-      - phase/P00-integration
+      - 'phase/**'
 
 permissions:
   contents: read
@@ -56,7 +56,7 @@ jobs:
           retention-days: 14
 
   instrumented-storage-spike:
-    if: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/phase/P00-integration') || (github.event_name == 'pull_request' && (github.base_ref == 'phase/P00-integration' || github.base_ref == 'main')) }}
+    if: ${{ (github.event_name == 'push' && startsWith(github.ref, 'refs/heads/phase/')) || github.event_name == 'pull_request' }}
     needs: build-test-lint
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -77,6 +77,25 @@ jobs:
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
+      - name: Free disk space for the 16 KB emulator
+        run: |
+          echo "Free space before cleanup:"
+          df -h / /home/runner
+          # The 16 KB system image needs ~7.4 GB free to create its 4 GB userdata
+          # partition, and a hosted runner is left with only ~7.19 GB once the
+          # Android SDK and system image are installed. Reclaim the toolchains
+          # this project never uses: there is no NDK/CMake build, no .NET, no GHC,
+          # no Boost and no CodeQL analysis in this workflow.
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android/sdk/ndk
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /usr/local/share/boost
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo rm -rf /usr/local/share/chromium
+          sudo rm -rf /usr/local/share/swift
+          sudo apt-get clean
+          echo "Free space after cleanup:"
+          df -h / /home/runner
       - name: Run encrypted Room compatibility tests on 16 KB API 35 emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
