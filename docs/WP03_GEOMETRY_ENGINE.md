@@ -19,7 +19,7 @@ It does **not** provide scoring constants, beauty ranges, rank thresholds, camer
 
 ## Coordinate and pose contract
 
-Input points are normalized image coordinates. `PoseDeviation` is the residual deviation from the requested capture target (FRONT or PROFILE), not raw anatomical head yaw. Formula evaluation removes roll before any vertical/horizontal projection. Upstream landmark adapters are responsible for mapping model-specific indexes to semantic `LandmarkId`s and for matching the pose sign convention.
+Input points are normalized image coordinates. Before any Euclidean geometry, x/y are converted into isotropic short-edge units using the real image resolution so portrait/landscape aspect ratio cannot distort ratios, angles, or roll correction. `PoseDeviation` is the residual deviation from the requested capture target (FRONT or PROFILE), not raw anatomical head yaw. Formula evaluation removes roll only after that aspect correction and before any vertical/horizontal projection. Upstream landmark adapters are responsible for mapping model-specific indexes to semantic `LandmarkId`s and for matching the pose sign convention.
 
 ## Fail-closed behavior
 
