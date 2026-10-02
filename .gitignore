@@ -1,0 +1,40 @@
+# Gradle / Android build output
+.gradle/
+build/
+**/build/
+
+# Android Studio / IntelliJ local state
+.idea/
+*.iml
+.navigation/
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Local SDK and machine configuration
+local.properties
+
+# Local environment / secrets
+.env
+.env.*
+!.env.example
+keystore.properties
+*.jks
+*.keystore
+*.p12
+*.pem
+*.key
+
+# Private/sensitive test material
+private-fixtures/
+private-fixtures/**
+test-fixtures/private/
+test-fixtures/private/**
+*.db
+*.db-shm
+*.db-wal
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+*.swp
