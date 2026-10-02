@@ -92,11 +92,15 @@ object CaptureReducer {
                 if (state.step != CaptureStep.Review(action.role)) {
                     state
                 } else {
-                    val media = state.mediaFor(action.role) ?: return state
-                    state.withMedia(
-                        action.role,
-                        media.copy(crop = action.crop),
-                    )
+                    val media = state.mediaFor(action.role)
+                    if (media == null) {
+                        state
+                    } else {
+                        state.withMedia(
+                            action.role,
+                            media.copy(crop = action.crop),
+                        )
+                    }
                 }
             }
 
@@ -223,13 +227,17 @@ object CaptureReducer {
                 )
 
             CaptureStep.Ready -> {
-                val profile = state.profile ?: return state
-                state
-                    .withMedia(
-                        CaptureRole.PROFILE,
-                        profile.copy(confirmed = false),
-                    )
-                    .copy(step = CaptureStep.Review(CaptureRole.PROFILE))
+                val profile = state.profile
+                if (profile == null) {
+                    state
+                } else {
+                    state
+                        .withMedia(
+                            CaptureRole.PROFILE,
+                            profile.copy(confirmed = false),
+                        )
+                        .copy(step = CaptureStep.Review(CaptureRole.PROFILE))
+                }
             }
         }
 
