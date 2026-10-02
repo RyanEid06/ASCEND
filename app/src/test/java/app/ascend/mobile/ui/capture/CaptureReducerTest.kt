@@ -81,6 +81,24 @@ class CaptureReducerTest {
     }
 
     @Test
+    fun chooseAnotherCanReplaceMediaWithoutLeavingReview() {
+        val review = frontReviewState()
+
+        val replaced = reduce(
+            review,
+            CaptureAction.MediaSelected(
+                CaptureRole.FRONT,
+                CaptureSource.GALLERY,
+                "content://replacement",
+            ),
+        )
+
+        assertEquals(CaptureStep.Review(CaptureRole.FRONT), replaced.step)
+        assertEquals("content://replacement", replaced.front?.uri)
+        assertEquals(CaptureSource.GALLERY, replaced.front?.source)
+    }
+
+    @Test
     fun timerStateOnlyAdvancesWhileMatchingCameraIsActive() {
         var state = CaptureUiState(step = CaptureStep.Camera(CaptureRole.FRONT))
 

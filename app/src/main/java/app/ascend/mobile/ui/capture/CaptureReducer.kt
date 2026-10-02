@@ -45,7 +45,8 @@ object CaptureReducer {
             is CaptureAction.MediaSelected -> {
                 val allowed =
                     state.step == CaptureStep.Acquisition(action.role) ||
-                        state.step == CaptureStep.Camera(action.role)
+                        state.step == CaptureStep.Camera(action.role) ||
+                        state.step == CaptureStep.Review(action.role)
 
                 if (!allowed || action.uri.isBlank()) {
                     state
