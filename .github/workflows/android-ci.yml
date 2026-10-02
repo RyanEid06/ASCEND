@@ -4,11 +4,11 @@ on:
   push:
     branches:
       - main
-      - phase/P00-integration
+      - 'phase/**'
   pull_request:
     branches:
       - main
-      - phase/P00-integration
+      - 'phase/**'
 
 permissions:
   contents: read
@@ -56,7 +56,7 @@ jobs:
           retention-days: 14
 
   instrumented-storage-spike:
-    if: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/phase/P00-integration') || (github.event_name == 'pull_request' && (github.base_ref == 'phase/P00-integration' || github.base_ref == 'main')) }}
+    if: ${{ (github.event_name == 'push' && startsWith(github.ref, 'refs/heads/phase/')) || github.event_name == 'pull_request' }}
     needs: build-test-lint
     runs-on: ubuntu-latest
     timeout-minutes: 60
