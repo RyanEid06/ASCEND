@@ -68,7 +68,9 @@ jobs:
       - name: Verify Phase 2 signed QA APK
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/phase/P02-integration' }}
         run: |
-          apksigner verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk
+          APKSIGNER="$(find "$ANDROID_HOME/build-tools" -maxdepth 2 -type f -name apksigner -print -quit)"
+          test -n "$APKSIGNER"
+          "$APKSIGNER" verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk
           cp app/build/outputs/apk/release/app-release.apk ASCEND-P2-QA-signed.apk
       - name: Upload Phase 2 signed QA APK
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/phase/P02-integration' }}
