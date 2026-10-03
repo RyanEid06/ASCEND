@@ -6,6 +6,17 @@ plugins {
     alias(libs.plugins.hilt)
 }
 
+val qaKeystorePath = providers.environmentVariable("ASCEND_KEYSTORE_PATH").orNull
+val qaKeystorePassword = providers.environmentVariable("ASCEND_KEYSTORE_PASSWORD").orNull
+val qaKeyAlias = providers.environmentVariable("ASCEND_KEY_ALIAS").orNull
+val qaKeyPassword = providers.environmentVariable("ASCEND_KEY_PASSWORD").orNull
+val qaSigningAvailable = listOf(
+    qaKeystorePath,
+    qaKeystorePassword,
+    qaKeyAlias,
+    qaKeyPassword,
+).all { !it.isNullOrBlank() }
+
 android {
     namespace = "app.ascend.mobile"
     compileSdk = 37
@@ -14,9 +25,20 @@ android {
         applicationId = "app.ascend.mobile"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = 2
+        versionName = "0.2.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        if (qaSigningAvailable) {
+            create("qa") {
+                storeFile = file(requireNotNull(qaKeystorePath))
+                storePassword = requireNotNull(qaKeystorePassword)
+                keyAlias = requireNotNull(qaKeyAlias)
+                keyPassword = requireNotNull(qaKeyPassword)
+            }
+        }
     }
 
     buildTypes {
@@ -27,6 +49,9 @@ android {
         }
         release {
             manifestPlaceholders["appLabel"] = "ASCEND"
+            if (qaSigningAvailable) {
+                signingConfig = signingConfigs.getByName("qa")
+            }
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
