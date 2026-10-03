@@ -230,7 +230,9 @@ class LocalScanStorageTest {
                 assertEquals(32, normalized.bitmap.height)
                 val stripped = androidx.exifinterface.media.ExifInterface(java.io.ByteArrayInputStream(normalized.png))
                 assertNull(stripped.getAttribute(androidx.exifinterface.media.ExifInterface.TAG_GPS_LATITUDE))
-                assertNull(stripped.getAttribute(androidx.exifinterface.media.ExifInterface.TAG_ORIENTATION))
+                // ExifInterface synthesizes UNDEFINED when the encoded image has no orientation tag.
+                assertEquals(androidx.exifinterface.media.ExifInterface.ORIENTATION_UNDEFINED,
+                    stripped.getAttributeInt(androidx.exifinterface.media.ExifInterface.TAG_ORIENTATION, -1))
             } finally { normalized.bitmap.recycle(); normalized.png.fill(0) }
             bitmap.eraseColor(Color.TRANSPARENT)
             val encoded = ByteArrayOutputStream().also { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }.toByteArray()
