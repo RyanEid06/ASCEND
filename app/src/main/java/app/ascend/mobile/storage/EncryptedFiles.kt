@@ -15,6 +15,7 @@ import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 
 class StorageKeyUnavailable : IllegalStateException("Local storage key unavailable; explicit recovery or deletion required")
+class StorageDataUnavailable : IllegalStateException("Local database unavailable while encrypted artifacts remain; explicit recovery or deletion required")
 
 /** Format 1: magic, formatVersion, keyVersion, 12-byte nonce, ciphertext including 128-bit tag. */
 internal class EncryptedFiles(private val alias: String) {
@@ -32,6 +33,8 @@ internal class EncryptedFiles(private val alias: String) {
     }
 
     private fun key(): SecretKey = keyStore().getKey(alias, null) as? SecretKey ?: throw StorageKeyUnavailable()
+
+    fun deleteAfterExplicitReset() { keyStore().deleteEntry(alias) }
 
     fun encrypt(plaintext: ByteArray, purpose: String): ByteArray {
         val cipher = Cipher.getInstance("AES/GCM/NoPadding")

@@ -13,6 +13,8 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import net.zetetic.database.sqlcipher.driver.SQLCipherDriver
+import net.zetetic.database.Logger
+import net.zetetic.database.NoopTarget
 
 /** One application-scoped instance. All calls are serialized, including recovery and deletion. */
 class EncryptedScanRepository internal constructor(
@@ -21,10 +23,11 @@ class EncryptedScanRepository internal constructor(
     private val imagePolicy: ImageStoragePolicy,
     private val qualityPolicy: PhotoQualityPolicy,
     private val hook: FaceValidationHook,
+    private val acquisitionCache: File,
 ) : LocalScanRepository {
     private val dao = database.scans()
     private val mutex = Mutex()
-    private var closed = false
+    @Volatile private var closed = false
     private val normalizer = PhotoNormalizer(imagePolicy)
 
     private suspend fun <T> serialized(block: suspend () -> T): T = withContext(Dispatchers.IO) {
@@ -134,6 +137,7 @@ class EncryptedScanRepository internal constructor(
         dao.markAllDeleting()
         dao.all().forEach { finishDelete(it.id) }
         files.cleanup(emptySet())
+        clearAcquisitionCache(acquisitionCache)
     }
 
     override suspend fun recover(owner: ScanOwner, atEpochMillis: Long): List<LocalScan> = serialized {
@@ -191,6 +195,7 @@ class EncryptedScanRepository internal constructor(
             hook: FaceValidationHook = FaceValidationHook { _, _ -> null },
         ): EncryptedScanRepository = withContext(Dispatchers.IO) {
             System.loadLibrary("sqlcipher")
+            Logger.setTarget(NoopTarget())
             val root = File(context.noBackupFilesDir, "ascend-local")
             check(root.isDirectory || root.mkdirs())
             val databaseFile = File(root, "scans.db")
@@ -198,6 +203,8 @@ class EncryptedScanRepository internal constructor(
             val photoDirectory = File(root, "photos")
             val crypto = EncryptedFiles("${context.packageName}.local-storage.v1")
             val hasEnvelope = envelopeFile.exists() || File(root, "database-key.enc.bak").exists()
+            if (!databaseFile.exists() && (photoDirectory.listFiles()?.isNotEmpty() == true ||
+                    File(root, "scans.db-wal").exists() || File(root, "scans.db-shm").exists())) throw StorageDataUnavailable()
             val passphrase = if (hasEnvelope) {
                 crypto.decrypt(EncryptedFiles.read(envelopeFile, 256), "database-passphrase")
             } else {
@@ -216,10 +223,29 @@ class EncryptedScanRepository internal constructor(
                     .addMigrations(ScanDatabase.MIGRATION_1_2).build()
             } finally { passphrase.fill(0) }
             try {
-                val repository = EncryptedScanRepository(database, PhotoFiles(photoDirectory, crypto, 32_000_000), imagePolicy, qualityPolicy, hook)
+                val repository = EncryptedScanRepository(database, PhotoFiles(photoDirectory, crypto, 32_000_000), imagePolicy, qualityPolicy, hook,
+                    File(context.cacheDir, "ascend_capture"))
                 repository.cleanup() // Forces encrypted open/schema validation before returning.
                 repository
             } catch (failure: Throwable) { database.close(); throw failure }
+        }
+
+        /** Destructive recovery only after explicit Delete All choice and all repository instances close.
+         * This is available even when missing keys prevent opening the database. No remote/auth deletion.
+         */
+        suspend fun eraseUnrecoverableLocalData(context: Context) = withContext(Dispatchers.IO) {
+            val parent = context.noBackupFilesDir.canonicalFile
+            val root = File(parent, "ascend-local").canonicalFile
+            require(root.parentFile == parent)
+            fun erase(file: File) {
+                val resolved = file.canonicalFile
+                require(resolved == root || resolved.path.startsWith(root.path + File.separator))
+                if (file.isDirectory) file.listFiles()?.forEach(::erase)
+                check(file.delete() || !file.exists())
+            }
+            if (root.exists()) erase(root)
+            clearAcquisitionCache(File(context.cacheDir, "ascend_capture"))
+            EncryptedFiles("${context.packageName}.local-storage.v1").deleteAfterExplicitReset()
         }
     }
 }
@@ -256,3 +282,12 @@ private fun validation(reasons: Set<RetakeReason>, pending: Boolean) = when {
 
 private fun Set<RetakeReason>.encode() = sortedBy { it.name }.joinToString(",") { it.name }
 private fun String.decode(): Set<RetakeReason> = if (isEmpty()) emptySet() else split(',').map(RetakeReason::valueOf).toSet()
+
+/** Call Delete All only after capture/timer writers have stopped. No gallery originals are touched. */
+private fun clearAcquisitionCache(directory: File) {
+    val root = directory.canonicalFile
+    directory.listFiles()?.forEach { file ->
+        require(file.canonicalFile.parentFile == root && file.isFile)
+        check(file.delete() || !file.exists())
+    }
+}

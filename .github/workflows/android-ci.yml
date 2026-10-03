@@ -116,9 +116,18 @@ jobs:
           script: |
             test "$(adb shell getconf PAGE_SIZE | tr -d '\r')" = "16384"
             ./gradlew --no-daemon connectedDebugAndroidTest
-            ./gradlew --no-daemon connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=app.ascend.mobile.storage.StorageProcessDeathTest#a_seed
+            # Gradle/UTP tears down app data between connected-test invocations.
+            # Install once, then run both fixtures directly so restart preserves data.
+            adb install -r app/build/outputs/apk/debug/app-debug.apk
+            adb install -r app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+            mkdir -p app/build/reports/storage-process
+            adb shell am instrument -w -e class app.ascend.mobile.storage.StorageProcessDeathTest#a_seed app.ascend.mobile.dev.test/androidx.test.runner.AndroidJUnitRunner > app/build/reports/storage-process/seed.txt
+            cat app/build/reports/storage-process/seed.txt
+            python3 scripts/check_instrumentation_result.py app/build/reports/storage-process/seed.txt
             adb shell am force-stop app.ascend.mobile.dev
-            ./gradlew --no-daemon connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=app.ascend.mobile.storage.StorageProcessDeathTest#b_verifyAfterRestart
+            adb shell am instrument -w -e class app.ascend.mobile.storage.StorageProcessDeathTest#b_verifyAfterRestart app.ascend.mobile.dev.test/androidx.test.runner.AndroidJUnitRunner > app/build/reports/storage-process/verify.txt
+            cat app/build/reports/storage-process/verify.txt
+            python3 scripts/check_instrumentation_result.py app/build/reports/storage-process/verify.txt
       - name: Upload instrumentation reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -126,4 +135,5 @@ jobs:
           name: android-storage-reports
           path: |
             app/build/reports/androidTests/
+            app/build/reports/storage-process/
             app/build/outputs/androidTest-results/

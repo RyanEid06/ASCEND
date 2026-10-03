@@ -25,23 +25,6 @@ object ScanLifecycle {
         )
     }
 
-    /** A rejected front keeps the profile asset; a rejected profile keeps the front asset.
-     * Repositories must invalidate derived results when applying either retake.
-     */
-    fun retake(session: ScanSession, view: CaptureView, atEpochMillis: Long): ScanSession {
-        require(atEpochMillis >= session.updatedAtEpochMillis)
-        require(session.state != ScanState.COMPLETE) { "Completed history is immutable; create a new scan" }
-        if (view == CaptureView.PROFILE) require(session.state in setOf(
-            ScanState.PROFILE_PENDING, ScanState.PROFILE_CAPTURED, ScanState.PROFILE_VALID,
-            ScanState.LANDMARKING, ScanState.MEASURING, ScanState.SCORING,
-        )) { "Profile retake requires a validated front" }
-        return session.copy(
-            state = if (view == CaptureView.FRONT) ScanState.FRONT_PENDING else ScanState.PROFILE_PENDING,
-            updatedAtEpochMillis = atEpochMillis,
-            completedAtEpochMillis = null,
-            profileSide = if (view == CaptureView.PROFILE) null else session.profileSide,
-        )
-    }
 }
 
 enum class CaptureView { FRONT, PROFILE }

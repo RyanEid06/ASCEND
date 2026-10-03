@@ -106,6 +106,9 @@ class LocalScanStorageTest {
         val before = db.readBytes()
         try { open(context); fail("Missing key must fail closed") } catch (_: StorageKeyUnavailable) { }
         assertArrayEquals(before, db.readBytes())
+        EncryptedScanRepository.eraseUnrecoverableLocalData(context)
+        val empty = open(context)
+        try { assertTrue(empty.list(ScanOwner.Guest).isEmpty()) } finally { empty.close() }
     }
 
     @Test fun deletionResumesAfterInterruptionAndDeleteAllRemovesOtherOwners() = runBlocking {
@@ -128,7 +131,10 @@ class LocalScanStorageTest {
             assertNull(reopened.get(ScanOwner.Guest, id))
             assertTrue(photoDirectory(context).listFiles().orEmpty().isEmpty())
             assertEquals(1, reopened.list(ScanOwner.Account("test-owner")).size)
+            val abandonedDirectory = File(context.cacheDir, "ascend_capture").apply { mkdirs() }
+            val abandoned = File.createTempFile("wp06-abandoned-", ".jpg", abandonedDirectory).apply { writeBytes(png()) }
             reopened.deleteAll()
+            assertFalse(abandoned.exists())
             reopened.deleteAll()
             assertTrue(reopened.list(ScanOwner.Account("test-owner")).isEmpty())
         } finally { reopened.close() }
@@ -158,6 +164,79 @@ class LocalScanStorageTest {
                 assertArrayEquals(before, repository.readPhoto(ScanOwner.Guest, id, CaptureView.FRONT))
             }
         } finally { repository.deleteAll(); repository.close() }
+    }
+
+    @Test fun boundedCameraImportDeletesOnlyOwnedTemporarySource() = runBlocking {
+        val context = isolated()
+        val repository = open(context)
+        val directory = File(context.cacheDir, "ascend_capture").apply { mkdirs() }
+        val source = File.createTempFile("wp06-test-", ".png", directory).apply { writeBytes(png()) }
+        val outside = File.createTempFile("wp06-outside-", ".png", context.cacheDir).apply { writeBytes(png()) }
+        try {
+            val id = repository.create(ScanOwner.Guest, ReferenceModel.MALE, 0).session.id
+            val importer = LocalCaptureImporter(context, repository, imagePolicy)
+            importer.persistFromUri(ScanOwner.Guest, id, CaptureView.FRONT, android.net.Uri.fromFile(source),
+                CaptureCrop(viewportAspectRatio = 1f), CaptureOrigin.CAMERA, null, 1)
+            assertFalse(source.exists())
+            assertTrue(repository.readPhoto(ScanOwner.Guest, id, CaptureView.FRONT).isNotEmpty())
+            try {
+                importer.persistFromUri(ScanOwner.Guest, id, CaptureView.FRONT, android.net.Uri.fromFile(outside),
+                    CaptureCrop(), CaptureOrigin.CAMERA, null, 2)
+                fail("Only WP05 private acquisition cache may be consumed as a camera file")
+            } catch (_: IllegalArgumentException) { }
+            assertTrue(outside.exists())
+            val oversize = File.createTempFile("wp06-oversize-", ".png", directory).apply { writeBytes(ByteArray(imagePolicy.maxEncodedBytes + 1)) }
+            try {
+                importer.persistFromUri(ScanOwner.Guest, id, CaptureView.FRONT, android.net.Uri.fromFile(oversize),
+                    CaptureCrop(), CaptureOrigin.CAMERA, null, 2)
+                fail("Oversized source must be rejected before decode")
+            } catch (_: CaptureRejected) { } finally { oversize.delete() }
+        } finally { source.delete(); outside.delete(); repository.deleteAll(); repository.close() }
+    }
+
+    @Test fun missingEnvelopeAndMissingDatabaseNeverEraseHistory() = runBlocking {
+        val context = isolated()
+        val repository = open(context)
+        val id = repository.create(ScanOwner.Guest, ReferenceModel.MALE, 0).session.id
+        repository.putCapture(ScanOwner.Guest, id, capture(CaptureView.FRONT), 1)
+        repository.close()
+        val root = File(context.noBackupFilesDir, "ascend-local")
+        val envelope = File(root, "database-key.enc")
+        val original = envelope.readBytes()
+        envelope.delete()
+        try { open(context); fail("Missing envelope cannot replace data") } catch (_: StorageKeyUnavailable) { }
+        assertFalse(envelope.exists())
+        envelope.writeBytes(original)
+        File(root, "scans.db").delete()
+        try { open(context); fail("Missing database cannot erase retained photos") } catch (_: StorageDataUnavailable) { }
+        assertEquals(1, photoDirectory(context).listFiles()!!.size)
+        EncryptedScanRepository.eraseUnrecoverableLocalData(context)
+    }
+
+    @Test fun normalizerAppliesExifAndStripsMetadataAndRejectsTransparency() {
+        val temporary = File.createTempFile("wp06-exif-", ".jpg", base.cacheDir)
+        val bitmap = Bitmap.createBitmap(40, 24, Bitmap.Config.ARGB_8888).apply { eraseColor(Color.GRAY) }
+        try {
+            temporary.outputStream().use { bitmap.compress(Bitmap.CompressFormat.JPEG, 100, it) }
+            androidx.exifinterface.media.ExifInterface(temporary).apply {
+                setAttribute(androidx.exifinterface.media.ExifInterface.TAG_ORIENTATION, "6")
+                setAttribute(androidx.exifinterface.media.ExifInterface.TAG_GPS_LATITUDE, "12/1,0/1,0/1")
+                setAttribute(androidx.exifinterface.media.ExifInterface.TAG_GPS_LATITUDE_REF, "N")
+                saveAttributes()
+            }
+            val normalized = PhotoNormalizer(imagePolicy).normalize(temporary.readBytes(), CaptureCrop())
+            try {
+                assertEquals(24, normalized.bitmap.width)
+                assertEquals(32, normalized.bitmap.height)
+                val stripped = androidx.exifinterface.media.ExifInterface(java.io.ByteArrayInputStream(normalized.png))
+                assertNull(stripped.getAttribute(androidx.exifinterface.media.ExifInterface.TAG_GPS_LATITUDE))
+                assertNull(stripped.getAttribute(androidx.exifinterface.media.ExifInterface.TAG_ORIENTATION))
+            } finally { normalized.bitmap.recycle(); normalized.png.fill(0) }
+            bitmap.eraseColor(Color.TRANSPARENT)
+            val encoded = ByteArrayOutputStream().also { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }.toByteArray()
+            try { PhotoNormalizer(imagePolicy).normalize(encoded, CaptureCrop()); fail("Transparent input must not invent a background") }
+            catch (failure: InvalidPhoto) { assertEquals(RetakeReason.INVALID_IMAGE, failure.reason) }
+        } finally { bitmap.recycle(); temporary.delete() }
     }
 
     @Test fun encryptedProductionSchemaMigrationKeepsSessionAndMedia() = runBlocking {

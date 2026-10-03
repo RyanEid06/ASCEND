@@ -3,6 +3,7 @@ package app.ascend.mobile.storage
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.graphics.ColorSpace
 import android.graphics.Matrix
 import androidx.exifinterface.media.ExifInterface
 import app.ascend.mobile.core.data.CaptureCrop
@@ -58,6 +59,7 @@ internal class PhotoNormalizer(private val policy: ImageStoragePolicy) {
         val options = BitmapFactory.Options().apply {
             inSampleSize = sample
             inPreferredConfig = Bitmap.Config.ARGB_8888
+            inPreferredColorSpace = ColorSpace.get(ColorSpace.Named.SRGB)
             inScaled = false
         }
         val decoded = BitmapFactory.decodeByteArray(encoded, 0, encoded.size, options)
