@@ -80,18 +80,23 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
 
+    implementation(libs.androidx.camera.core)
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.view)
+    implementation(libs.androidx.exifinterface)
+
+    implementation(libs.androidx.room3.runtime)
+    implementation(libs.sqlcipher.android)
+    implementation(libs.androidx.sqlite)
+    ksp(libs.androidx.room3.compiler)
+
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
 
     debugImplementation(libs.androidx.compose.ui.tooling)
 
     testImplementation(libs.junit4)
-
-    implementation(libs.androidx.room3.runtime)
-    implementation(libs.sqlcipher.android)
-    implementation(libs.androidx.sqlite)
-    implementation(libs.androidx.exifinterface)
-    ksp(libs.androidx.room3.compiler)
 
     // Keep the Phase 0 compatibility regression fixtures alongside WP06 tests.
     androidTestImplementation(libs.androidx.room3.runtime)

@@ -33,6 +33,7 @@ fun FoundationHomeScreen(
     windowWidthClass: AscendWindowWidthClass,
     uiState: HomeUiState,
     showDebugEntry: Boolean,
+    onStartScan: () -> Unit,
     onToggleDetails: () -> Unit,
     onOpenFoundationInfo: () -> Unit,
     onOpenDebugMenu: () -> Unit,
@@ -47,6 +48,9 @@ fun FoundationHomeScreen(
                     )
                 },
                 actions = {
+                    TextButton(onClick = onStartScan) {
+                        Text("New scan")
+                    }
                     if (showDebugEntry) {
                         TextButton(onClick = onOpenDebugMenu) {
                             Text("Debug")
@@ -154,7 +158,7 @@ private fun FoundationHero() {
             fontWeight = FontWeight.SemiBold,
         )
         Text(
-            text = "Phase 0 proves startup, adaptive Compose UI, Navigation 3, state, and dependency injection without pretending later scan features already exist.",
+            text = "The Phase 0 foundation now hosts the Phase 2 capture lane while local persistence and quality validation remain isolated to WP06.",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

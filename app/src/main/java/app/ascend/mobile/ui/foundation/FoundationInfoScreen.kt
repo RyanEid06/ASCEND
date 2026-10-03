@@ -54,7 +54,7 @@ fun FoundationInfoScreen(onBack: () -> Unit) {
             )
             BoundaryCard(
                 title = "Deliberately not implemented",
-                body = "Core scan contracts, database schema, CameraX capture, geometry, scoring, facial analysis, account sync, AI, billing, and other later work packages.",
+                body = "Production Room/encrypted persistence, quality validation, MediaPipe extraction, account sync, AI, billing, and other later work packages remain outside this capture lane.",
             )
         }
     }

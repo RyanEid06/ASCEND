@@ -11,3 +11,6 @@ data object FoundationInfoRoute : NavKey
 
 @Serializable
 data object DebugMenuRoute : NavKey
+
+@Serializable
+data object CaptureFlowRoute : NavKey
