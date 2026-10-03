@@ -6,6 +6,17 @@ plugins {
     alias(libs.plugins.hilt)
 }
 
+val qaKeystorePath = providers.environmentVariable("ASCEND_KEYSTORE_PATH").orNull
+val qaKeystorePassword = providers.environmentVariable("ASCEND_KEYSTORE_PASSWORD").orNull
+val qaKeyAlias = providers.environmentVariable("ASCEND_KEY_ALIAS").orNull
+val qaKeyPassword = providers.environmentVariable("ASCEND_KEY_PASSWORD").orNull
+val qaSigningAvailable = listOf(
+    qaKeystorePath,
+    qaKeystorePassword,
+    qaKeyAlias,
+    qaKeyPassword,
+).all { !it.isNullOrBlank() }
+
 android {
     namespace = "app.ascend.mobile"
     compileSdk = 37
@@ -14,9 +25,20 @@ android {
         applicationId = "app.ascend.mobile"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = 2
+        versionName = "0.2.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        if (qaSigningAvailable) {
+            create("qa") {
+                storeFile = file(requireNotNull(qaKeystorePath))
+                storePassword = requireNotNull(qaKeystorePassword)
+                keyAlias = requireNotNull(qaKeyAlias)
+                keyPassword = requireNotNull(qaKeyPassword)
+            }
+        }
     }
 
     buildTypes {
@@ -27,6 +49,9 @@ android {
         }
         release {
             manifestPlaceholders["appLabel"] = "ASCEND"
+            if (qaSigningAvailable) {
+                signingConfig = signingConfigs.getByName("qa")
+            }
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
@@ -57,6 +82,10 @@ android {
     }
 }
 
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
@@ -76,6 +105,17 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
 
+    implementation(libs.androidx.camera.core)
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.view)
+    implementation(libs.androidx.exifinterface)
+
+    implementation(libs.androidx.room3.runtime)
+    implementation(libs.sqlcipher.android)
+    implementation(libs.androidx.sqlite)
+    ksp(libs.androidx.room3.compiler)
+
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
 
@@ -83,7 +123,7 @@ dependencies {
 
     testImplementation(libs.junit4)
 
-    // Phase 0 compatibility spike only. Production Room storage arrives in WP06.
+    // Keep the Phase 0 compatibility regression fixtures alongside WP06 tests.
     androidTestImplementation(libs.androidx.room3.runtime)
     androidTestImplementation(libs.sqlcipher.android)
     androidTestImplementation(libs.androidx.sqlite)

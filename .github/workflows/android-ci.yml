@@ -33,16 +33,64 @@ jobs:
       - name: Install Android platform
         run: sdkmanager 'platforms;android-37.0' 'build-tools;37.0.0'
       - uses: gradle/actions/setup-gradle@v4
+      - name: Prepare permanent ASCEND signing identity
+        if: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/phase/P02-integration' || github.ref == 'refs/heads/main') }}
+        env:
+          ASCEND_KEYSTORE_BASE64: ${{ secrets.ASCEND_KEYSTORE_BASE64 }}
+          ASCEND_KEYSTORE_PASSWORD: ${{ secrets.ASCEND_KEYSTORE_PASSWORD }}
+          ASCEND_KEY_ALIAS: ${{ secrets.ASCEND_KEY_ALIAS }}
+          ASCEND_KEY_PASSWORD: ${{ secrets.ASCEND_KEY_PASSWORD }}
+        run: |
+          test -n "$ASCEND_KEYSTORE_BASE64"
+          test -n "$ASCEND_KEYSTORE_PASSWORD"
+          test -n "$ASCEND_KEY_ALIAS"
+          test -n "$ASCEND_KEY_PASSWORD"
+          printf '%s' "$ASCEND_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/ascend-release.jks"
+          chmod 600 "$RUNNER_TEMP/ascend-release.jks"
+          echo "ASCEND_KEYSTORE_PATH=$RUNNER_TEMP/ascend-release.jks" >> "$GITHUB_ENV"
+          echo "ASCEND_KEYSTORE_PASSWORD=$ASCEND_KEYSTORE_PASSWORD" >> "$GITHUB_ENV"
+          echo "ASCEND_KEY_ALIAS=$ASCEND_KEY_ALIAS" >> "$GITHUB_ENV"
+          echo "ASCEND_KEY_PASSWORD=$ASCEND_KEY_PASSWORD" >> "$GITHUB_ENV"
       - name: Check pinned dependency policy
         run: python3 scripts/check_dependency_policy.py gradle/libs.versions.toml
+      - name: Check local storage privacy contract
+        run: python3 scripts/check_local_storage_contract.py
       - name: Build and unit tests
         run: bash ./gradlew --no-daemon clean assembleDebug assembleRelease assembleDebugAndroidTest test
       - name: Check native libraries for 16 KB page support
         run: |
           python3 scripts/check_native_16k.py app/build/outputs/apk/debug/app-debug.apk
+          RELEASE_APK="$(find app/build/outputs/apk/release -maxdepth 1 -type f -name '*.apk' -print -quit)"
+          test -n "$RELEASE_APK"
+          echo "Checking release APK: $RELEASE_APK"
+          python3 scripts/check_native_16k.py "$RELEASE_APK"
           python3 scripts/check_native_16k.py app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+      - name: Verify Phase 2 signed QA APK
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/phase/P02-integration' }}
+        run: |
+          APKSIGNER="$(find "$ANDROID_HOME/build-tools" -maxdepth 2 -type f -name apksigner -print -quit)"
+          test -n "$APKSIGNER"
+          "$APKSIGNER" verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk
+          cp app/build/outputs/apk/release/app-release.apk ASCEND-P2-QA-signed.apk
+      - name: Upload Phase 2 signed QA APK
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/phase/P02-integration' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ASCEND-P2-QA-${{ github.sha }}
+          path: ASCEND-P2-QA-signed.apk
+          if-no-files-found: error
+          retention-days: 30
       - name: Android lint
         run: bash ./gradlew --no-daemon lint
+      - name: Upload schemas and test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-build-reports
+          path: |
+            app/schemas/
+            app/build/reports/
+            app/build/test-results/
       - name: Stage Phase 0 debug APK
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/phase/P00-integration' }}
         run: cp app/build/outputs/apk/debug/app-debug.apk ASCEND-P0-debug.apk
@@ -96,10 +144,33 @@ jobs:
           sudo apt-get clean
           echo "Free space after cleanup:"
           df -h / /home/runner
-      - name: Run encrypted Room compatibility tests on 16 KB API 35 emulator
+      - name: Run encrypted storage, migration and restart tests on 16 KB API 35 emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 35
           target: google_apis_ps16k
           arch: x86_64
-          script: bash -lc 'test "$(adb shell getconf PAGE_SIZE | tr -d "\r")" = "16384" && ./gradlew --no-daemon connectedDebugAndroidTest'
+          script: |
+            test "$(adb shell getconf PAGE_SIZE | tr -d '\r')" = "16384"
+            ./gradlew --no-daemon connectedDebugAndroidTest
+            # Gradle/UTP tears down app data between connected-test invocations.
+            # Install once, then run both fixtures directly so restart preserves data.
+            adb install -r app/build/outputs/apk/debug/app-debug.apk
+            adb install -r app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+            mkdir -p app/build/reports/storage-process
+            adb shell am instrument -w -e class app.ascend.mobile.storage.StorageProcessDeathTest#a_seed app.ascend.mobile.dev.test/androidx.test.runner.AndroidJUnitRunner > app/build/reports/storage-process/seed.txt
+            cat app/build/reports/storage-process/seed.txt
+            python3 scripts/check_instrumentation_result.py app/build/reports/storage-process/seed.txt
+            adb shell am force-stop app.ascend.mobile.dev
+            adb shell am instrument -w -e class app.ascend.mobile.storage.StorageProcessDeathTest#b_verifyAfterRestart app.ascend.mobile.dev.test/androidx.test.runner.AndroidJUnitRunner > app/build/reports/storage-process/verify.txt
+            cat app/build/reports/storage-process/verify.txt
+            python3 scripts/check_instrumentation_result.py app/build/reports/storage-process/verify.txt
+      - name: Upload instrumentation reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-storage-reports
+          path: |
+            app/build/reports/androidTests/
+            app/build/reports/storage-process/
+            app/build/outputs/androidTest-results/

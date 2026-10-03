@@ -33,6 +33,7 @@ fun FoundationHomeScreen(
     windowWidthClass: AscendWindowWidthClass,
     uiState: HomeUiState,
     showDebugEntry: Boolean,
+    onStartScan: () -> Unit,
     onToggleDetails: () -> Unit,
     onOpenFoundationInfo: () -> Unit,
     onOpenDebugMenu: () -> Unit,
@@ -47,6 +48,9 @@ fun FoundationHomeScreen(
                     )
                 },
                 actions = {
+                    TextButton(onClick = onStartScan) {
+                        Text("New scan")
+                    }
                     if (showDebugEntry) {
                         TextButton(onClick = onOpenDebugMenu) {
                             Text("Debug")
@@ -154,7 +158,7 @@ private fun FoundationHero() {
             fontWeight = FontWeight.SemiBold,
         )
         Text(
-            text = "Phase 0 proves startup, adaptive Compose UI, Navigation 3, state, and dependency injection without pretending later scan features already exist.",
+            text = "Phase 2 now connects the capture flow to encrypted app-private local storage. Raw photos are not uploaded.",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -188,6 +192,21 @@ private fun FoundationStatusCard(
             StatusLine(label = "Navigation", value = "Navigation 3")
             StatusLine(label = "State", value = "ViewModel + StateFlow")
             StatusLine(label = "Dependency injection", value = "Hilt")
+            StatusLine(
+                label = "Local captures",
+                value = when {
+                    uiState.localStorageLoading -> "Checking…"
+                    uiState.localStorageError != null -> "Needs attention"
+                    else -> "${uiState.savedLocalScanCount} saved"
+                },
+            )
+            uiState.localStorageError?.let { error ->
+                Text(
+                    text = error,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                )
+            }
 
             if (uiState.detailsExpanded) {
                 HorizontalDivider()
