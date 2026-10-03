@@ -1,3 +1,11 @@
+plugins {
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt)
+}
+
 val qaKeystorePath = providers.environmentVariable("ASCEND_KEYSTORE_PATH").orNull
 val qaKeystorePassword = providers.environmentVariable("ASCEND_KEYSTORE_PASSWORD").orNull
 val qaKeyAlias = providers.environmentVariable("ASCEND_KEY_ALIAS").orNull
@@ -8,14 +16,6 @@ val qaSigningAvailable = listOf(
     qaKeyAlias,
     qaKeyPassword,
 ).all { !it.isNullOrBlank() }
-
-plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.compose.compiler)
-    alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.ksp)
-    alias(libs.plugins.hilt)
-}
 
 android {
     namespace = "app.ascend.mobile"
