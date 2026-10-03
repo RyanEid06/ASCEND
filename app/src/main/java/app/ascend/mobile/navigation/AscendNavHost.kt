@@ -10,6 +10,7 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import app.ascend.mobile.BuildConfig
 import app.ascend.mobile.ui.adaptive.AscendWindowWidthClass
+import app.ascend.mobile.ui.capture.CaptureRoute
 import app.ascend.mobile.ui.debug.DebugAccessPolicy
 import app.ascend.mobile.ui.debug.DebugMenuScreen
 import app.ascend.mobile.ui.debug.DebugMenuViewModel
@@ -38,6 +39,7 @@ fun AscendNavHost(windowWidthClass: AscendWindowWidthClass) {
                     windowWidthClass = windowWidthClass,
                     uiState = uiState,
                     showDebugEntry = debugAvailable,
+                    onStartScan = { backStack.add(CaptureFlowRoute) },
                     onToggleDetails = viewModel::onToggleFoundationDetails,
                     onOpenFoundationInfo = { backStack.add(FoundationInfoRoute) },
                     onOpenDebugMenu = {
@@ -51,6 +53,17 @@ fun AscendNavHost(windowWidthClass: AscendWindowWidthClass) {
             entry<FoundationInfoRoute> {
                 FoundationInfoScreen(
                     onBack = { backStack.removeLastOrNull() },
+                )
+            }
+
+            entry<CaptureFlowRoute> {
+                CaptureRoute(
+                    windowWidthClass = windowWidthClass,
+                    onExit = { backStack.removeLastOrNull() },
+                    onCaptureReady = { _ ->
+                        // WP06 will consume this typed payload at the Phase 2 sync gate.
+                        backStack.removeLastOrNull()
+                    },
                 )
             }
 
