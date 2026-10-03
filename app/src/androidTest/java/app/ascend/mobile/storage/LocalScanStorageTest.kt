@@ -24,6 +24,7 @@ class LocalScanStorageTest {
     private fun isolated(): Context = object : android.content.ContextWrapper(base) {
         private val directory = File(base.noBackupFilesDir, "wp06-${UUID.randomUUID()}")
         override fun getNoBackupFilesDir(): File = directory.apply { mkdirs() }
+        override fun getCacheDir(): File = File(base.cacheDir, directory.name).apply { mkdirs() }
         override fun getPackageName(): String = "${base.packageName}.${directory.name}"
     }
 

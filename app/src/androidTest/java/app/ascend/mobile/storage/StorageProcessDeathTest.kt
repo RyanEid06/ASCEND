@@ -17,6 +17,7 @@ class StorageProcessDeathTest {
     private val target = InstrumentationRegistry.getInstrumentation().targetContext
     private val context = object : ContextWrapper(target) {
         override fun getNoBackupFilesDir(): File = File(target.noBackupFilesDir, "wp06-process-test").apply { mkdirs() }
+        override fun getCacheDir(): File = File(target.cacheDir, "wp06-process-test").apply { mkdirs() }
         override fun getPackageName(): String = "${target.packageName}.wp06process"
     }
     private val marker get() = File(context.noBackupFilesDir, "scan-id.txt")
