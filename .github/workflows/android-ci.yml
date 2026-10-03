@@ -60,7 +60,10 @@ jobs:
       - name: Check native libraries for 16 KB page support
         run: |
           python3 scripts/check_native_16k.py app/build/outputs/apk/debug/app-debug.apk
-          python3 scripts/check_native_16k.py app/build/outputs/apk/release/app-release.apk
+          RELEASE_APK="$(find app/build/outputs/apk/release -maxdepth 1 -type f -name '*.apk' -print -quit)"
+          test -n "$RELEASE_APK"
+          echo "Checking release APK: $RELEASE_APK"
+          python3 scripts/check_native_16k.py "$RELEASE_APK"
           python3 scripts/check_native_16k.py app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
       - name: Verify Phase 2 signed QA APK
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/phase/P02-integration' }}
