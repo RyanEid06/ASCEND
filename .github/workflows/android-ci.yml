@@ -33,6 +33,24 @@ jobs:
       - name: Install Android platform
         run: sdkmanager 'platforms;android-37.0' 'build-tools;37.0.0'
       - uses: gradle/actions/setup-gradle@v4
+      - name: Prepare permanent ASCEND signing identity
+        if: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/phase/P02-integration' || github.ref == 'refs/heads/main') }}
+        env:
+          ASCEND_KEYSTORE_BASE64: ${{ secrets.ASCEND_KEYSTORE_BASE64 }}
+          ASCEND_KEYSTORE_PASSWORD: ${{ secrets.ASCEND_KEYSTORE_PASSWORD }}
+          ASCEND_KEY_ALIAS: ${{ secrets.ASCEND_KEY_ALIAS }}
+          ASCEND_KEY_PASSWORD: ${{ secrets.ASCEND_KEY_PASSWORD }}
+        run: |
+          test -n "$ASCEND_KEYSTORE_BASE64"
+          test -n "$ASCEND_KEYSTORE_PASSWORD"
+          test -n "$ASCEND_KEY_ALIAS"
+          test -n "$ASCEND_KEY_PASSWORD"
+          printf '%s' "$ASCEND_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/ascend-release.jks"
+          chmod 600 "$RUNNER_TEMP/ascend-release.jks"
+          echo "ASCEND_KEYSTORE_PATH=$RUNNER_TEMP/ascend-release.jks" >> "$GITHUB_ENV"
+          echo "ASCEND_KEYSTORE_PASSWORD=$ASCEND_KEYSTORE_PASSWORD" >> "$GITHUB_ENV"
+          echo "ASCEND_KEY_ALIAS=$ASCEND_KEY_ALIAS" >> "$GITHUB_ENV"
+          echo "ASCEND_KEY_PASSWORD=$ASCEND_KEY_PASSWORD" >> "$GITHUB_ENV"
       - name: Check pinned dependency policy
         run: python3 scripts/check_dependency_policy.py gradle/libs.versions.toml
       - name: Check local storage privacy contract
@@ -42,7 +60,21 @@ jobs:
       - name: Check native libraries for 16 KB page support
         run: |
           python3 scripts/check_native_16k.py app/build/outputs/apk/debug/app-debug.apk
+          python3 scripts/check_native_16k.py app/build/outputs/apk/release/app-release.apk
           python3 scripts/check_native_16k.py app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+      - name: Verify Phase 2 signed QA APK
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/phase/P02-integration' }}
+        run: |
+          apksigner verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk
+          cp app/build/outputs/apk/release/app-release.apk ASCEND-P2-QA-signed.apk
+      - name: Upload Phase 2 signed QA APK
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/phase/P02-integration' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ASCEND-P2-QA-${{ github.sha }}
+          path: ASCEND-P2-QA-signed.apk
+          if-no-files-found: error
+          retention-days: 30
       - name: Android lint
         run: bash ./gradlew --no-daemon lint
       - name: Upload schemas and test reports
