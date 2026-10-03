@@ -27,6 +27,10 @@ class StorageProcessDeathTest {
         val id = repository.create(ScanOwner.Guest, ReferenceModel.MALE, 0).session.id
         repository.putCapture(ScanOwner.Guest, id, LocalScanStorageTest.capture(CaptureView.FRONT), 1)
         repository.putCapture(ScanOwner.Guest, id, LocalScanStorageTest.capture(CaptureView.PROFILE), 2)
+        repository.advance(ScanOwner.Guest, id, 3)
+        repository.advance(ScanOwner.Guest, id, 4)
+        repository.advance(ScanOwner.Guest, id, 5)
+        repository.complete(ScanOwner.Guest, LocalScanStorageTest.analysisFixture(id), 6)
         marker.writeText(id) // Synthetic fixture ID only; no photo or key material.
         repository.close()
     }
@@ -35,9 +39,10 @@ class StorageProcessDeathTest {
         val repository = LocalScanStorageTest.open(context)
         try {
             val id = marker.readText()
-            val scan = repository.recover(ScanOwner.Guest, 3).single()
+            val scan = repository.recover(ScanOwner.Guest, 7).single()
             assertEquals(id, scan.session.id)
-            assertEquals(ScanState.PROFILE_VALID, scan.session.state)
+            assertEquals(ScanState.COMPLETE, scan.session.state)
+            assertEquals(LocalScanStorageTest.analysisFixture(id), repository.readAnalysis(ScanOwner.Guest, id))
             assertTrue(repository.readPhoto(ScanOwner.Guest, id, CaptureView.FRONT).isNotEmpty())
             assertTrue(repository.readPhoto(ScanOwner.Guest, id, CaptureView.PROFILE).isNotEmpty())
         } finally { repository.deleteAll(); repository.close(); marker.delete() }

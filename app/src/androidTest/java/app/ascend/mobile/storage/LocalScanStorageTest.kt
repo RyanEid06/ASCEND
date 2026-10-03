@@ -276,10 +276,7 @@ class LocalScanStorageTest {
             repository.advance(ScanOwner.Guest, id, 4)
             repository.advance(ScanOwner.Guest, id, 5)
             try { repository.advance(ScanOwner.Guest, id, 6); fail("Completion needs a typed result") } catch (_: IllegalArgumentException) { }
-            val result = AnalysisOutcome.Complete(id, ReferenceModel.MALE,
-                AnalysisVersions("app", "geometry", "front", "profile", "reference", "scoring", "hash", "enabled", "coverage", "scale", "extrema", "recommendations"),
-                setOf("synthetic"), listOf(MetricResult.Available("synthetic", Category.HARMONY, MeasurementView.FRONT, 1.0, Tier.T2, 80.0, 1.0, 1.0, "scale")),
-                Category.entries.associateWith { CategoryResult(it, 8.0, 1.0, "coverage") }, 8.0, null, emptySet(), emptySet())
+            val result = analysisFixture(id)
             assertEquals(ScanState.COMPLETE, repository.complete(ScanOwner.Guest, result, 6).session.state)
             repository.close()
             repository = open(context)
@@ -298,6 +295,10 @@ class LocalScanStorageTest {
     companion object {
         internal val imagePolicy = ImageStoragePolicy("synthetic-test", 1_000_000, 1024, 1_048_576, 1_048_576, 128, 32)
         internal val qualityPolicy = PhotoQualityPolicy("synthetic-test", 3, 3, 0.0, 1.0, 0.0, 0.5, 90.0, 180.0, 90.0, 0.0, 180.0)
+        internal fun analysisFixture(id: String) = AnalysisOutcome.Complete(id, ReferenceModel.MALE,
+            AnalysisVersions("app", "geometry", "front", "profile", "reference", "scoring", "hash", "enabled", "coverage", "scale", "extrema", "recommendations"),
+            setOf("synthetic"), listOf(MetricResult.Available("synthetic", Category.HARMONY, MeasurementView.FRONT, 1.0, Tier.T2, 80.0, 1.0, 1.0, "scale")),
+            Category.entries.associateWith { CategoryResult(it, 8.0, 1.0, "coverage") }, 8.0, null, emptySet(), emptySet())
         internal suspend fun open(context: Context, hook: FaceValidationHook = FaceValidationHook { view, _ ->
             FaceObservation(1, 0.5, 0.5, if (view == CaptureView.PROFILE) 90.0 else 0.0, 0.0, 0.0)
         }) = EncryptedScanRepository.open(context, imagePolicy, qualityPolicy, hook)
