@@ -6,8 +6,13 @@ object CaptureReducer {
         action: CaptureAction,
     ): CaptureUiState =
         when (action) {
+            is CaptureAction.SelectReferenceModel -> {
+                if (state.step != CaptureStep.SourceSelection) state
+                else state.copy(referenceModel = action.model, errorMessage = null)
+            }
+
             is CaptureAction.SelectPreferredSource -> {
-                if (state.step != CaptureStep.SourceSelection) {
+                if (state.step != CaptureStep.SourceSelection || state.referenceModel == null) {
                     state
                 } else {
                     state.copy(

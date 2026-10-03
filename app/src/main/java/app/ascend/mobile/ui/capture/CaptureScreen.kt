@@ -78,6 +78,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import app.ascend.mobile.core.model.ProfileSide
+import app.ascend.mobile.core.model.ReferenceModel
 import app.ascend.mobile.ui.adaptive.AscendWindowWidthClass
 import kotlin.math.max
 
@@ -85,11 +86,18 @@ import kotlin.math.max
 fun CaptureRoute(
     windowWidthClass: AscendWindowWidthClass,
     onExit: () -> Unit,
-    onCaptureReady: (CaptureReadyPayload) -> Unit,
+    onCaptureSaved: () -> Unit,
 ) {
     val viewModel: CaptureViewModel = viewModel()
     val state = viewModel.uiState.collectAsStateWithLifecycle().value
+    val saveState = viewModel.saveState.collectAsStateWithLifecycle().value
     val context = LocalContext.current
+
+    LaunchedEffect(saveState) {
+        if (saveState is CaptureSaveState.Saved) {
+            onCaptureSaved()
+        }
+    }
 
     var galleryRole by remember { mutableStateOf<CaptureRole?>(null) }
     val picker = rememberLauncherForActivityResult(
@@ -119,6 +127,7 @@ fun CaptureRoute(
     }
 
     fun handleBack() {
+        if (saveState == CaptureSaveState.Saving) return
         val reviewRole = (state.step as? CaptureStep.Review)?.role
         if (reviewRole != null) {
             deleteTemporaryCaptureIfOwned(context, state.mediaFor(reviewRole))
@@ -133,8 +142,10 @@ fun CaptureRoute(
     CaptureScreen(
         windowWidthClass = windowWidthClass,
         state = state,
+        saveState = saveState,
         effects = viewModel.effects,
         onBack = ::handleBack,
+        onSelectReferenceModel = viewModel::selectReferenceModel,
         onSelectSource = viewModel::selectPreferredSource,
         onContinueTutorial = viewModel::continueTutorial,
         onSelectProfileSide = viewModel::selectProfileSide,
@@ -152,7 +163,7 @@ fun CaptureRoute(
             viewModel.retake(role)
         },
         onConfirmReview = viewModel::confirmReview,
-        onCaptureReady = onCaptureReady,
+        onCaptureReady = viewModel::saveReady,
     )
 }
 
@@ -160,8 +171,10 @@ fun CaptureRoute(
 private fun CaptureScreen(
     windowWidthClass: AscendWindowWidthClass,
     state: CaptureUiState,
+    saveState: CaptureSaveState,
     effects: kotlinx.coroutines.flow.SharedFlow<CaptureEffect>,
     onBack: () -> Unit,
+    onSelectReferenceModel: (ReferenceModel) -> Unit,
     onSelectSource: (CaptureSource) -> Unit,
     onContinueTutorial: (CaptureRole) -> Unit,
     onSelectProfileSide: (ProfileSide) -> Unit,
@@ -212,6 +225,8 @@ private fun CaptureScreen(
             ) {
                 when (val step = state.step) {
                     CaptureStep.SourceSelection -> SourceSelectionScreen(
+                        selectedReferenceModel = state.referenceModel,
+                        onSelectReferenceModel = onSelectReferenceModel,
                         onSelectSource = onSelectSource,
                     )
 
@@ -226,6 +241,7 @@ private fun CaptureScreen(
                         role = step.role,
                         preferredSource = state.preferredSource,
                         profileSide = state.profileSide,
+                        errorMessage = state.errorMessage,
                         onOpenCamera = { onOpenCamera(step.role) },
                         onPickGallery = { onPickGallery(step.role) },
                     )
@@ -265,6 +281,8 @@ private fun CaptureScreen(
                         } else {
                             ReadyScreen(
                                 payload = payload,
+                                saveState = saveState,
+                                errorMessage = state.errorMessage,
                                 onRetake = onRetake,
                                 onContinue = { onCaptureReady(payload) },
                             )
@@ -278,6 +296,8 @@ private fun CaptureScreen(
 
 @Composable
 private fun SourceSelectionScreen(
+    selectedReferenceModel: ReferenceModel?,
+    onSelectReferenceModel: (ReferenceModel) -> Unit,
     onSelectSource: (CaptureSource) -> Unit,
 ) {
     ScrollStage {
@@ -291,16 +311,45 @@ private fun SourceSelectionScreen(
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+        Text(
+            text = "Reference model",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            ReferenceModelButton(
+                modifier = Modifier.weight(1f),
+                text = "Male",
+                selected = selectedReferenceModel == ReferenceModel.MALE,
+                onClick = { onSelectReferenceModel(ReferenceModel.MALE) },
+            )
+            ReferenceModelButton(
+                modifier = Modifier.weight(1f),
+                text = "Female",
+                selected = selectedReferenceModel == ReferenceModel.FEMALE,
+                onClick = { onSelectReferenceModel(ReferenceModel.FEMALE) },
+            )
+        }
+        Text(
+            text = "This is the comparison model you choose; ASCEND does not infer it from your face.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
         SourceCard(
             title = "Use rear camera",
             body = "Recommended for standardized capture. Camera permission is requested only when you enter the camera.",
             button = "Camera",
+            enabled = selectedReferenceModel != null,
             onClick = { onSelectSource(CaptureSource.CAMERA) },
         )
         SourceCard(
             title = "Choose from gallery",
             body = "Uses Android Photo Picker. ASCEND does not request broad photo-library or storage permission.",
             button = "Gallery",
+            enabled = selectedReferenceModel != null,
             onClick = { onSelectSource(CaptureSource.GALLERY) },
         )
     }
@@ -311,6 +360,7 @@ private fun SourceCard(
     title: String,
     body: String,
     button: String,
+    enabled: Boolean = true,
     onClick: () -> Unit,
 ) {
     Card(
@@ -329,6 +379,7 @@ private fun SourceCard(
             )
             Button(
                 modifier = Modifier.fillMaxWidth(),
+                enabled = enabled,
                 onClick = onClick,
             ) {
                 Text(button)
@@ -423,6 +474,24 @@ private fun GuidanceCard() {
 }
 
 @Composable
+private fun ReferenceModelButton(
+    modifier: Modifier,
+    text: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+) {
+    if (selected) {
+        Button(modifier = modifier, onClick = onClick) {
+            Text(text)
+        }
+    } else {
+        OutlinedButton(modifier = modifier, onClick = onClick) {
+            Text(text)
+        }
+    }
+}
+
+@Composable
 private fun ProfileSideButton(
     modifier: Modifier,
     text: String,
@@ -445,6 +514,7 @@ private fun AcquisitionScreen(
     role: CaptureRole,
     preferredSource: CaptureSource?,
     profileSide: ProfileSide,
+    errorMessage: String?,
     onOpenCamera: () -> Unit,
     onPickGallery: () -> Unit,
 ) {
@@ -462,6 +532,13 @@ private fun AcquisitionScreen(
             },
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+        errorMessage?.let {
+            Text(
+                text = it,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        }
         if (preferredSource == CaptureSource.GALLERY) {
             Button(
                 modifier = Modifier.fillMaxWidth(),
@@ -859,6 +936,8 @@ private fun CroppableImage(
 @Composable
 private fun ReadyScreen(
     payload: CaptureReadyPayload,
+    saveState: CaptureSaveState,
+    errorMessage: String?,
     onRetake: (CaptureRole) -> Unit,
     onContinue: () -> Unit,
 ) {
@@ -869,9 +948,21 @@ private fun ReadyScreen(
             fontWeight = FontWeight.SemiBold,
         )
         Text(
-            text = "Both views are ready for the local quality/persistence boundary. Replacing either view keeps the other one intact.",
+            text = "Both views are ready to be standardized, encrypted, and stored only on this device. Face/pose validation remains explicitly pending until the Phase 3 vision pipeline.",
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+        Text(
+            text = "Reference model: ${payload.referenceModel.name.lowercase().replaceFirstChar { it.uppercase() }}",
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Medium,
+        )
+        errorMessage?.let {
+            Text(
+                text = it,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        }
         ReadyMediaCard(
             media = payload.front,
             subtitle = "Straight front",
@@ -884,9 +975,10 @@ private fun ReadyScreen(
         )
         Button(
             modifier = Modifier.fillMaxWidth(),
+            enabled = saveState != CaptureSaveState.Saving,
             onClick = onContinue,
         ) {
-            Text("Continue")
+            Text(if (saveState == CaptureSaveState.Saving) "Saving securely…" else "Save local scan")
         }
     }
 }

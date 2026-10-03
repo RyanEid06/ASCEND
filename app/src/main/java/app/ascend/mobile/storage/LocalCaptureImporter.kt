@@ -24,6 +24,7 @@ class LocalCaptureImporter(
         origin: CaptureOrigin,
         profileSide: ProfileSide?,
         atEpochMillis: Long,
+        cleanupCameraSource: Boolean = true,
     ): LocalScan = withContext(Dispatchers.IO) {
         val cameraFile = if (origin == CaptureOrigin.CAMERA) {
             require(uri.scheme == "file")
@@ -49,7 +50,9 @@ class LocalCaptureImporter(
         try {
             val scan = repository.putCapture(owner, scanId, LocalCapture(view, encoded, crop, origin, profileSide), atEpochMillis)
             // A returned scan has committed an encrypted asset, including rejected/pending validation.
-            if (cameraFile != null) check(cameraFile.delete() || !cameraFile.exists()) { "Temporary capture cleanup requires retry" }
+            if (cleanupCameraSource && cameraFile != null) {
+                check(cameraFile.delete() || !cameraFile.exists()) { "Temporary capture cleanup requires retry" }
+            }
             scan
         } finally { encoded.fill(0) }
     }

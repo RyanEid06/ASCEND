@@ -1,6 +1,7 @@
 package app.ascend.mobile.ui.capture
 
 import app.ascend.mobile.core.model.ProfileSide
+import app.ascend.mobile.core.model.ReferenceModel
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
@@ -10,12 +11,23 @@ import org.junit.Test
 
 class CaptureReducerTest {
     @Test
-    fun sourceSelectionStartsFrontTutorialAndPreservesPreference() {
-        val state = reduce(
+    fun sourceSelectionRequiresReferenceModelAndPreservesPreference() {
+        val blocked = reduce(
             CaptureUiState(),
             CaptureAction.SelectPreferredSource(CaptureSource.GALLERY),
         )
+        assertEquals(CaptureStep.SourceSelection, blocked.step)
 
+        val withModel = reduce(
+            blocked,
+            CaptureAction.SelectReferenceModel(ReferenceModel.FEMALE),
+        )
+        val state = reduce(
+            withModel,
+            CaptureAction.SelectPreferredSource(CaptureSource.GALLERY),
+        )
+
+        assertEquals(ReferenceModel.FEMALE, state.referenceModel)
         assertEquals(CaptureSource.GALLERY, state.preferredSource)
         assertEquals(CaptureStep.Tutorial(CaptureRole.FRONT), state.step)
     }
@@ -187,6 +199,7 @@ class CaptureReducerTest {
 
         assertNotNull(payload)
         assertEquals(ProfileSide.LEFT, payload?.profileSide)
+        assertEquals(ReferenceModel.MALE, payload?.referenceModel)
         assertEquals(CaptureRole.FRONT, payload?.front?.role)
         assertEquals(CaptureRole.PROFILE, payload?.profile?.role)
     }
@@ -194,6 +207,7 @@ class CaptureReducerTest {
     private fun frontReviewState(): CaptureUiState =
         CaptureUiState(
             step = CaptureStep.Review(CaptureRole.FRONT),
+            referenceModel = ReferenceModel.MALE,
             preferredSource = CaptureSource.CAMERA,
             front = CaptureMedia(
                 role = CaptureRole.FRONT,

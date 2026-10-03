@@ -1,6 +1,7 @@
 package app.ascend.mobile.ui.capture
 
 import app.ascend.mobile.core.model.ProfileSide
+import app.ascend.mobile.core.model.ReferenceModel
 
 enum class CaptureRole {
     FRONT,
@@ -68,6 +69,7 @@ data class CaptureReadyPayload(
     val front: CaptureMedia,
     val profile: CaptureMedia,
     val profileSide: ProfileSide,
+    val referenceModel: ReferenceModel,
 ) {
     init {
         require(front.role == CaptureRole.FRONT && front.confirmed)
@@ -77,6 +79,7 @@ data class CaptureReadyPayload(
 
 data class CaptureUiState(
     val step: CaptureStep = CaptureStep.SourceSelection,
+    val referenceModel: ReferenceModel? = null,
     val preferredSource: CaptureSource? = null,
     val profileSide: ProfileSide = ProfileSide.RIGHT,
     val front: CaptureMedia? = null,
@@ -93,17 +96,20 @@ data class CaptureUiState(
         }
 
     fun readyPayloadOrNull(): CaptureReadyPayload? {
+        val selectedModel = referenceModel ?: return null
         val confirmedFront = front?.takeIf { it.confirmed } ?: return null
         val confirmedProfile = profile?.takeIf { it.confirmed } ?: return null
         return CaptureReadyPayload(
             front = confirmedFront,
             profile = confirmedProfile,
             profileSide = profileSide,
+            referenceModel = selectedModel,
         )
     }
 }
 
 sealed interface CaptureAction {
+    data class SelectReferenceModel(val model: ReferenceModel) : CaptureAction
     data class SelectPreferredSource(val source: CaptureSource) : CaptureAction
     data class ContinueTutorial(val role: CaptureRole) : CaptureAction
     data class OpenCamera(val role: CaptureRole) : CaptureAction
@@ -145,4 +151,14 @@ sealed interface CaptureAction {
 
 sealed interface CaptureEffect {
     data class TriggerShutter(val role: CaptureRole) : CaptureEffect
+}
+
+
+sealed interface CaptureSaveState {
+    data object Idle : CaptureSaveState
+    data object Saving : CaptureSaveState
+    data class Saved(
+        val scanId: String,
+        val validationPending: Boolean,
+    ) : CaptureSaveState
 }

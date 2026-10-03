@@ -1,6 +1,7 @@
 package app.ascend.mobile.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -34,6 +35,9 @@ fun AscendNavHost(windowWidthClass: AscendWindowWidthClass) {
             entry<FoundationHomeRoute> {
                 val viewModel: HomeViewModel = viewModel()
                 val uiState = viewModel.uiState.collectAsStateWithLifecycle().value
+                LaunchedEffect(backStack.size) {
+                    viewModel.refreshLocalScans()
+                }
 
                 FoundationHomeScreen(
                     windowWidthClass = windowWidthClass,
@@ -60,10 +64,7 @@ fun AscendNavHost(windowWidthClass: AscendWindowWidthClass) {
                 CaptureRoute(
                     windowWidthClass = windowWidthClass,
                     onExit = { backStack.removeLastOrNull() },
-                    onCaptureReady = { _ ->
-                        // WP06 will consume this typed payload at the Phase 2 sync gate.
-                        backStack.removeLastOrNull()
-                    },
+                    onCaptureSaved = { backStack.removeLastOrNull() },
                 )
             }
 
