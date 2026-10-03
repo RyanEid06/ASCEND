@@ -52,6 +52,8 @@ internal data class ScanPayloadRow(val scanId: String, val kind: String, val pay
 internal abstract class ScanDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE) abstract suspend fun saveScan(row: ScanRow)
     @Insert(onConflict = OnConflictStrategy.REPLACE) abstract suspend fun savePhoto(row: PhotoRow)
+    @Insert(onConflict = OnConflictStrategy.REPLACE) abstract suspend fun savePayload(row: ScanPayloadRow)
+    @Query("SELECT * FROM scan_payloads WHERE scanId = :id AND kind = :kind") abstract suspend fun payload(id: String, kind: String): ScanPayloadRow?
     @Query("SELECT * FROM local_scans WHERE owner = :owner AND deleting = 0 ORDER BY createdAt DESC") abstract suspend fun list(owner: String): List<ScanRow>
     @Query("SELECT * FROM local_scans WHERE id = :id AND owner = :owner AND deleting = 0") abstract suspend fun get(owner: String, id: String): ScanRow?
     @Query("SELECT * FROM local_scans") abstract suspend fun all(): List<ScanRow>
@@ -84,6 +86,11 @@ internal abstract class ScanDao {
         invalidateDerived(id)
         removePhotos(id)
         removeScan(id)
+    }
+
+    @Transaction open suspend fun complete(scan: ScanRow, payload: ScanPayloadRow) {
+        savePayload(payload)
+        saveScan(scan)
     }
 }
 

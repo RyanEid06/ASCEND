@@ -251,6 +251,7 @@ class LocalScanStorageTest {
         old.records().insert(ScanRowV1("old", "GUEST", "MALE", "FRONT_CAPTURED", 10, 11, null, null))
         old.records().insertPhoto(PhotoRow("old", "FRONT", UUID.randomUUID().toString(), 32, 32, "CAMERA", "1,0,0,1",
             "PENDING_HOOKS", "", "test", "test", 0.5, 0.0, null))
+        old.records().insertPayload(ScanPayloadRow("old", "test-derived", byteArrayOf(1, 2, 3)))
         old.close()
         val migrated = Room.databaseBuilder(context, ScanDatabase::class.java, file.absolutePath)
             .setDriver(SQLCipherDriver(secret.copyOf(), null, null)).addMigrations(ScanDatabase.MIGRATION_1_2).build()
@@ -260,7 +261,38 @@ class LocalScanStorageTest {
             assertFalse(row.deleting)
             assertEquals("FRONT_CAPTURED", row.state)
             assertEquals(1, migrated.scans().photos("old").size)
+            assertArrayEquals(byteArrayOf(1, 2, 3), migrated.scans().payload("old", "test-derived")!!.payload)
         } finally { migrated.close() }
+    }
+
+    @Test fun completionPersistsProvenanceAndDeletionRemovesIt() = runBlocking {
+        val context = isolated()
+        var repository = open(context)
+        try {
+            val id = repository.create(ScanOwner.Guest, ReferenceModel.MALE, 0).session.id
+            repository.putCapture(ScanOwner.Guest, id, capture(CaptureView.FRONT), 1)
+            repository.putCapture(ScanOwner.Guest, id, capture(CaptureView.PROFILE), 2)
+            repository.advance(ScanOwner.Guest, id, 3)
+            repository.advance(ScanOwner.Guest, id, 4)
+            repository.advance(ScanOwner.Guest, id, 5)
+            try { repository.advance(ScanOwner.Guest, id, 6); fail("Completion needs a typed result") } catch (_: IllegalArgumentException) { }
+            val result = AnalysisOutcome.Complete(id, ReferenceModel.MALE,
+                AnalysisVersions("app", "geometry", "front", "profile", "reference", "scoring", "hash", "enabled", "coverage", "scale", "extrema", "recommendations"),
+                setOf("synthetic"), listOf(MetricResult.Available("synthetic", Category.HARMONY, MeasurementView.FRONT, 1.0, Tier.T2, 80.0, 1.0, 1.0, "scale")),
+                Category.entries.associateWith { CategoryResult(it, 8.0, 1.0, "coverage") }, 8.0, null, emptySet(), emptySet())
+            assertEquals(ScanState.COMPLETE, repository.complete(ScanOwner.Guest, result, 6).session.state)
+            repository.close()
+            repository = open(context)
+            assertEquals(result, repository.readAnalysis(ScanOwner.Guest, id))
+            assertNull(repository.readAnalysis(ScanOwner.Account("other"), id))
+            try { repository.retake(ScanOwner.Guest, id, CaptureView.FRONT, 7); fail("Completed history is immutable") } catch (_: IllegalArgumentException) { }
+            photoDirectory(context).listFiles()!!.first().delete()
+            val recovered = repository.recover(ScanOwner.Guest, 7).single()
+            assertEquals(ScanState.COMPLETE, recovered.session.state)
+            assertEquals(result, repository.readAnalysis(ScanOwner.Guest, id))
+            repository.deleteScan(ScanOwner.Guest, id)
+            assertNull(repository.readAnalysis(ScanOwner.Guest, id))
+        } finally { repository.deleteAll(); repository.close() }
     }
 
     companion object {
@@ -291,6 +323,7 @@ internal data class ScanRowV1(@PrimaryKey val id: String, val owner: String, val
 internal interface LocalScanV1Dao {
     @Insert suspend fun insert(row: ScanRowV1)
     @Insert suspend fun insertPhoto(row: PhotoRow)
+    @Insert suspend fun insertPayload(row: ScanPayloadRow)
 }
 
 @Database(entities = [ScanRowV1::class, PhotoRow::class, ScanPayloadRow::class], version = 1, exportSchema = false)

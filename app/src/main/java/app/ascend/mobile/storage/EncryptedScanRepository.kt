@@ -114,7 +114,9 @@ class EncryptedScanRepository internal constructor(
 
     override suspend fun advance(owner: ScanOwner, scanId: String, atEpochMillis: Long): LocalScan = serialized {
         val row = editable(owner, scanId, atEpochMillis)
-        require(ScanState.valueOf(row.state) in setOf(ScanState.PROFILE_VALID, ScanState.LANDMARKING, ScanState.MEASURING, ScanState.SCORING))
+        require(ScanState.valueOf(row.state) in setOf(ScanState.PROFILE_VALID, ScanState.LANDMARKING, ScanState.MEASURING)) {
+            "Completion requires an analysis result with immutable provenance"
+        }
         val photos = dao.photos(scanId)
         require(photos.size == 2 && photos.all { it.validation == ViewValidation.ACCEPTED.name })
         photos.forEach { files.read(it.assetId).fill(0) }
@@ -122,6 +124,34 @@ class EncryptedScanRepository internal constructor(
         val advanced = row.copy(state = session.state.name, updatedAt = session.updatedAtEpochMillis, completedAt = session.completedAtEpochMillis)
         dao.saveScan(advanced)
         snapshot(advanced)
+    }
+
+    override suspend fun complete(owner: ScanOwner, outcome: AnalysisOutcome.Complete, atEpochMillis: Long): LocalScan = serialized {
+        val row = editable(owner, outcome.scanId, atEpochMillis)
+        require(row.state == ScanState.SCORING.name && row.referenceModel == outcome.referenceModel.name)
+        val photos = dao.photos(row.id)
+        require(photos.size == 2 && photos.all { it.validation == ViewValidation.ACCEPTED.name })
+        photos.forEach { files.read(it.assetId).fill(0) }
+        val completed = ScanLifecycle.advance(row.session(), atEpochMillis)
+        val bytes = AnalysisStorageCodec.encode(outcome)
+        try {
+            AnalysisStorageCodec.decode(bytes) // Validate the frozen snapshot even if caller collections were mutable.
+            val stored = row.copy(state = completed.state.name, updatedAt = atEpochMillis, completedAt = atEpochMillis)
+            dao.complete(stored, ScanPayloadRow(row.id, "analysis-v1", bytes))
+            snapshot(stored)
+        } finally { bytes.fill(0) }
+    }
+
+    override suspend fun readAnalysis(owner: ScanOwner, scanId: String): AnalysisOutcome.Complete? = serialized {
+        val row = dao.get(owner.scope(), scanId) ?: return@serialized null
+        if (row.state != ScanState.COMPLETE.name) return@serialized null
+        requireNotNull(dao.payload(scanId, "analysis-v1")) { "Completed analysis snapshot unavailable" }.let { payload ->
+            try {
+                AnalysisStorageCodec.decode(payload.payload).also {
+                    require(it.scanId == scanId && it.referenceModel.name == row.referenceModel)
+                }
+            } finally { payload.payload.fill(0) }
+        }
     }
 
     override suspend fun deleteScan(owner: ScanOwner, scanId: String) = serialized {

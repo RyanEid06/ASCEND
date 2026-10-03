@@ -6,6 +6,7 @@ import app.ascend.mobile.core.model.ReferenceModel
 import app.ascend.mobile.core.model.RetakeReason
 import app.ascend.mobile.core.model.ScanOwner
 import app.ascend.mobile.core.model.ScanSession
+import app.ascend.mobile.core.model.AnalysisOutcome
 
 /** Same viewport-relative pan/zoom semantics as WP05 CropTransform. */
 data class CaptureCrop(
@@ -57,6 +58,8 @@ interface LocalScanRepository : AutoCloseable {
     suspend fun retake(owner: ScanOwner, scanId: String, view: CaptureView, atEpochMillis: Long): LocalScan
     suspend fun readPhoto(owner: ScanOwner, scanId: String, view: CaptureView): ByteArray
     suspend fun advance(owner: ScanOwner, scanId: String, atEpochMillis: Long): LocalScan
+    suspend fun complete(owner: ScanOwner, outcome: AnalysisOutcome.Complete, atEpochMillis: Long): LocalScan
+    suspend fun readAnalysis(owner: ScanOwner, scanId: String): AnalysisOutcome.Complete?
     suspend fun deleteScan(owner: ScanOwner, scanId: String)
     /** Explicit local Delete All; does not delete remote/account data or auth state. */
     suspend fun deleteAll()
