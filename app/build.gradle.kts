@@ -57,6 +57,10 @@ android {
     }
 }
 
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
@@ -82,6 +86,11 @@ dependencies {
     implementation(libs.androidx.camera.view)
     implementation(libs.androidx.exifinterface)
 
+    implementation(libs.androidx.room3.runtime)
+    implementation(libs.sqlcipher.android)
+    implementation(libs.androidx.sqlite)
+    ksp(libs.androidx.room3.compiler)
+
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
 
@@ -89,7 +98,7 @@ dependencies {
 
     testImplementation(libs.junit4)
 
-    // Phase 0 compatibility spike only. Production Room storage arrives in WP06.
+    // Keep the Phase 0 compatibility regression fixtures alongside WP06 tests.
     androidTestImplementation(libs.androidx.room3.runtime)
     androidTestImplementation(libs.sqlcipher.android)
     androidTestImplementation(libs.androidx.sqlite)
