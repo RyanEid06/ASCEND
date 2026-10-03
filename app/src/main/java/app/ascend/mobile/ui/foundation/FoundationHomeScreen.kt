@@ -158,7 +158,7 @@ private fun FoundationHero() {
             fontWeight = FontWeight.SemiBold,
         )
         Text(
-            text = "The Phase 0 foundation now hosts the Phase 2 capture lane while local persistence and quality validation remain isolated to WP06.",
+            text = "Phase 2 now connects the capture flow to encrypted app-private local storage. Raw photos are not uploaded.",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -192,6 +192,21 @@ private fun FoundationStatusCard(
             StatusLine(label = "Navigation", value = "Navigation 3")
             StatusLine(label = "State", value = "ViewModel + StateFlow")
             StatusLine(label = "Dependency injection", value = "Hilt")
+            StatusLine(
+                label = "Local captures",
+                value = when {
+                    uiState.localStorageLoading -> "Checking…"
+                    uiState.localStorageError != null -> "Needs attention"
+                    else -> "${uiState.savedLocalScanCount} saved"
+                },
+            )
+            uiState.localStorageError?.let { error ->
+                Text(
+                    text = error,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                )
+            }
 
             if (uiState.detailsExpanded) {
                 HorizontalDivider()
