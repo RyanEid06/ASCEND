@@ -35,6 +35,8 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Check pinned dependency policy
         run: python3 scripts/check_dependency_policy.py gradle/libs.versions.toml
+      - name: Check local storage privacy contract
+        run: python3 scripts/check_local_storage_contract.py
       - name: Build and unit tests
         run: bash ./gradlew --no-daemon clean assembleDebug assembleRelease assembleDebugAndroidTest test
       - name: Check native libraries for 16 KB page support
@@ -43,6 +45,15 @@ jobs:
           python3 scripts/check_native_16k.py app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
       - name: Android lint
         run: bash ./gradlew --no-daemon lint
+      - name: Upload schemas and test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-build-reports
+          path: |
+            app/schemas/
+            app/build/reports/
+            app/build/test-results/
       - name: Stage Phase 0 debug APK
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/phase/P00-integration' }}
         run: cp app/build/outputs/apk/debug/app-debug.apk ASCEND-P0-debug.apk
@@ -96,10 +107,23 @@ jobs:
           sudo apt-get clean
           echo "Free space after cleanup:"
           df -h / /home/runner
-      - name: Run encrypted Room compatibility tests on 16 KB API 35 emulator
+      - name: Run encrypted storage, migration and restart tests on 16 KB API 35 emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 35
           target: google_apis_ps16k
           arch: x86_64
-          script: bash -lc 'test "$(adb shell getconf PAGE_SIZE | tr -d "\r")" = "16384" && ./gradlew --no-daemon connectedDebugAndroidTest'
+          script: |
+            test "$(adb shell getconf PAGE_SIZE | tr -d '\r')" = "16384"
+            ./gradlew --no-daemon connectedDebugAndroidTest
+            ./gradlew --no-daemon connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=app.ascend.mobile.storage.StorageProcessDeathTest#a_seed
+            adb shell am force-stop app.ascend.mobile.dev
+            ./gradlew --no-daemon connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=app.ascend.mobile.storage.StorageProcessDeathTest#b_verifyAfterRestart
+      - name: Upload instrumentation reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-storage-reports
+          path: |
+            app/build/reports/androidTests/
+            app/build/outputs/androidTest-results/
