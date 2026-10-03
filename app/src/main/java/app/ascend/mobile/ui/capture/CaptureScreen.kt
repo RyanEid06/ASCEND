@@ -441,10 +441,9 @@ private fun TutorialScreen(
         }
         Button(
             modifier = Modifier.fillMaxWidth(),
-            enabled = saveState != CaptureSaveState.Saving,
             onClick = onContinue,
         ) {
-            Text(if (saveState == CaptureSaveState.Saving) "Saving securely…" else "Save local scan")
+            Text("Continue")
         }
     }
 }
@@ -976,9 +975,10 @@ private fun ReadyScreen(
         )
         Button(
             modifier = Modifier.fillMaxWidth(),
+            enabled = saveState != CaptureSaveState.Saving,
             onClick = onContinue,
         ) {
-            Text("Continue")
+            Text(if (saveState == CaptureSaveState.Saving) "Saving securely…" else "Save local scan")
         }
     }
 }
