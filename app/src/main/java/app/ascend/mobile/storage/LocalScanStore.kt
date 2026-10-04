@@ -9,6 +9,7 @@ import app.ascend.mobile.core.model.CaptureView
 import app.ascend.mobile.core.model.ProfileSide
 import app.ascend.mobile.core.model.ReferenceModel
 import app.ascend.mobile.core.model.ScanOwner
+import app.ascend.mobile.core.vision.FrontLandmarkSnapshot
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
 import javax.inject.Inject
@@ -21,9 +22,9 @@ import kotlinx.coroutines.withContext
 /**
  * Phase-2 application-scoped gateway for encrypted guest scans.
  *
- * Face/pose validation intentionally remains pending until the WP07 vision provider exists.
- * The Phase-2 policy therefore enforces safe resource bounds and deterministic normalization
- * without inventing unvalidated biometric thresholds.
+ * Capture admission remains pending until a reviewed CV quality/confidence policy is integrated.
+ * WP07 previews the stored front mesh separately; model admission settings do not replace
+ * validated biometric thresholds or the later, separate profile validation path.
  */
 @Singleton
 class LocalScanStore @Inject constructor(
@@ -74,6 +75,14 @@ class LocalScanStore @Inject constructor(
     suspend fun recoverGuest(
         atEpochMillis: Long = System.currentTimeMillis(),
     ): List<LocalScan> = repository().recover(ScanOwner.Guest, atEpochMillis)
+
+    suspend fun readGuestFrontPhoto(scanId: String): ByteArray = repository().readPhoto(ScanOwner.Guest, scanId, CaptureView.FRONT)
+
+    suspend fun readGuestFrontLandmarks(scanId: String): FrontLandmarkSnapshot? = repository().readFrontLandmarks(ScanOwner.Guest, scanId)
+
+    suspend fun saveGuestFrontLandmarks(scanId: String, snapshot: FrontLandmarkSnapshot) {
+        repository().saveFrontLandmarks(ScanOwner.Guest, scanId, snapshot)
+    }
 
     suspend fun deleteGuestScan(scanId: String) {
         repository().deleteScan(ScanOwner.Guest, scanId)

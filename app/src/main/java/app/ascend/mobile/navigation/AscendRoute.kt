@@ -14,3 +14,6 @@ data object DebugMenuRoute : NavKey
 
 @Serializable
 data object CaptureFlowRoute : NavKey
+
+@Serializable
+data class FrontLandmarkRoute(val scanId: String) : NavKey

@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory
 import androidx.room3.Room
 import app.ascend.mobile.core.data.*
 import app.ascend.mobile.core.model.*
+import app.ascend.mobile.core.vision.*
 import java.io.File
 import java.security.SecureRandom
 import java.util.UUID
@@ -110,6 +111,40 @@ class EncryptedScanRepository internal constructor(
         requireNotNull(dao.get(owner.scope(), scanId)) { "Scan unavailable in active owner scope" }
         val photo = requireNotNull(dao.photos(scanId).firstOrNull { it.view == view.name })
         files.read(photo.assetId)
+    }
+
+    /** Additive WP07 seam; existing shared repository contract and schema are unchanged. */
+    suspend fun saveFrontLandmarks(owner: ScanOwner, scanId: String, snapshot: FrontLandmarkSnapshot) = serialized {
+        val row = requireNotNull(dao.get(owner.scope(), scanId)) { "Scan unavailable in active owner scope" }
+        require(row.state != ScanState.COMPLETE.name) { "Completed history is immutable" }
+        val photo = requireNotNull(dao.photos(scanId).firstOrNull { it.view == CaptureView.FRONT.name })
+        require(photo.validation != ViewValidation.REJECTED.name)
+        val bytes = files.read(photo.assetId)
+        try {
+            require(frontImageSha256(bytes) == snapshot.sourceImageSha256) { "Front image changed during extraction" }
+            require(snapshot.resolution.width == photo.width && snapshot.resolution.height == photo.height)
+            val encoded = FrontLandmarkCodec.encode(snapshot)
+            try {
+                FrontLandmarkCodec.decode(encoded)
+                dao.savePayload(ScanPayloadRow(scanId, "front-landmarks-v1", encoded))
+            } finally { encoded.fill(0) }
+        } finally { bytes.fill(0) }
+    }
+
+    suspend fun readFrontLandmarks(owner: ScanOwner, scanId: String): FrontLandmarkSnapshot? = serialized {
+        if (dao.get(owner.scope(), scanId) == null) return@serialized null
+        val photo = dao.photos(scanId).firstOrNull { it.view == CaptureView.FRONT.name } ?: return@serialized null
+        if (photo.validation == ViewValidation.REJECTED.name) return@serialized null
+        val payload = dao.payload(scanId, "front-landmarks-v1") ?: return@serialized null
+        try {
+            val snapshot = FrontLandmarkCodec.decodeCached(payload.payload) ?: return@serialized null
+            val bytes = files.read(photo.assetId)
+            try {
+                require(frontImageSha256(bytes) == snapshot.sourceImageSha256)
+                require(snapshot.resolution.width == photo.width && snapshot.resolution.height == photo.height)
+                snapshot
+            } finally { bytes.fill(0) }
+        } finally { payload.payload.fill(0) }
     }
 
     override suspend fun advance(owner: ScanOwner, scanId: String, atEpochMillis: Long): LocalScan = serialized {
