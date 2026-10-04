@@ -319,6 +319,7 @@ class LocalScanStorageTest {
             try {
                 caches.forEach { db.scans().savePayload(ScanPayloadRow(id, it, byteArrayOf(1))) }
                 db.scans().savePayload(ScanPayloadRow(id, "profile-input-v1", byteArrayOf(2)))
+                db.scans().savePayload(ScanPayloadRow(id, "front-landmarks-v1", byteArrayOf(3)))
             } finally { db.close() }
             repository = open(context); isOpen = true
             val corrected = repository.correctFront(ScanOwner.Guest, id, 0, bounds, "lateral_canthus_left", .7, .37, 5)
@@ -330,6 +331,7 @@ class LocalScanStorageTest {
             try {
                 caches.forEach { assertNull(verified.scans().payload(id, it)) }
                 assertArrayEquals(byteArrayOf(2), verified.scans().payload(id, "profile-input-v1")!!.payload)
+                assertArrayEquals(byteArrayOf(3), verified.scans().payload(id, "front-landmarks-v1")!!.payload)
             } finally { verified.close() }
             repository = open(context); isOpen = true
             assertEquals(corrected, repository.readFrontRevision(ScanOwner.Guest, id))

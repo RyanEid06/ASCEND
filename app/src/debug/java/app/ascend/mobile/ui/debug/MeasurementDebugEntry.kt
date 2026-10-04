@@ -1,6 +1,8 @@
 package app.ascend.mobile.ui.debug
 
 import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import android.view.WindowManager
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
@@ -30,8 +32,13 @@ fun MeasurementDebugEntry(onBack: () -> Unit) {
 @Composable
 fun MeasurementDebugScreen(input: FrontInput, policy: FrontPolicy?, onBack: () -> Unit) {
     val context = LocalContext.current
+    val activity = context.hostActivity()
+    if (input.origin == FixtureOrigin.CONSENTED_LOCAL && activity == null) {
+        Text("Secure local measurement surface unavailable")
+        return
+    }
     DisposableEffect(context, input.origin) {
-        val window = (context as? Activity)?.window
+        val window = activity?.window
         val alreadySecure = (window?.attributes?.flags ?: 0) and WindowManager.LayoutParams.FLAG_SECURE != 0
         val sensitive = input.origin == FixtureOrigin.CONSENTED_LOCAL
         if (sensitive) window?.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
@@ -69,12 +76,22 @@ fun MeasurementDebugScreen(input: FrontInput, policy: FrontPolicy?, onBack: () -
         Text("${metric.metricId}\n${metric.value?.let { "$it ${metric.unit}" } ?: "Unavailable: ${metric.failure}"}\nMode: ${metric.mode}")
         MeasurementPointDiagram(metric.sourcePoints)
         Text("Roll-normalized isotropic points used by this formula. Select a metric below.")
+        metric.sourcePoints.forEach { (id, point) ->
+            Text("$id: (${point.x}, ${point.y}), confidence ${current.landmarks[id]?.confidence ?: "unknown"}", style = MaterialTheme.typography.bodySmall)
+        }
+        Text("Geometry: ${report.geometryVersion}\nImage: ${input.width} × ${input.height}\nResidual pose: ${input.residualPose ?: "unknown"}\nConfidence method: ${input.confidenceMethodVersion}", style = MaterialTheme.typography.bodySmall)
         report.metrics.forEach { item ->
             TextButton(onClick = { selected = item.metricId }) {
                 Text("${item.metricId.removePrefix("candidate.front.")}: ${item.value?.toString() ?: item.failure?.name}")
             }
         }
     }
+}
+
+private tailrec fun Context.hostActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> if (baseContext !== this) baseContext.hostActivity() else null
+    else -> null
 }
 
 /** Points/audit stay in memory across rotation, never in an unencrypted saved-instance bundle. */

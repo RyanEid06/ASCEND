@@ -52,6 +52,8 @@ class FrontMeasurementTest {
     @Test fun unknownGlobalConfidencePoseFaceCountAndResolutionFailExplicitly() {
         assertEquals(FrontFailure.LOW_CONFIDENCE, metric(input.copy(overallConfidence = null), "canthal_inclination").failure)
         assertEquals(FrontFailure.POSE_UNAVAILABLE, metric(input.copy(residualPose = null), "canthal_inclination").failure)
+        val poseMissing = input.copy(residualPose = null)
+        assertTrue(poseMissing.overlayImagePoints(metric(poseMissing, "canthal_inclination")).isEmpty())
         assertEquals(FrontFailure.FACE_COUNT_UNAVAILABLE, metric(input.copy(faceCount = null), "canthal_inclination").failure)
         listOf(0, 2).forEach { assertEquals(FrontFailure.NOT_ONE_FACE, metric(input.copy(faceCount = it), "canthal_inclination").failure) }
         listOf(null, 299).forEach { assertEquals(FrontFailure.INSUFFICIENT_RESOLUTION, metric(input.copy(faceShortEdgePixels = it), "canthal_inclination").failure) }
@@ -110,7 +112,19 @@ class FrontMeasurementTest {
         val points = input.landmarks
         assertEquals(FrontFailure.DEGENERATE_GEOMETRY, metric(input.copy(landmarks = points + ("zygion_left" to points.getValue("zygion_right"))), "interocular_spacing").failure)
         assertEquals(FrontFailure.DEGENERATE_GEOMETRY, metric(input.copy(landmarks = points + ("upper_eyelid_left" to points.getValue("lower_eyelid_left"))), "eye_aperture_ratio").failure)
+        assertEquals(FrontFailure.DEGENERATE_GEOMETRY, metric(input.copy(landmarks = points + ("lateral_canthus_left" to points.getValue("medial_canthus_left"))), "eye_aperture_ratio").failure)
         assertEquals(FrontFailure.DEGENERATE_GEOMETRY, metric(input.copy(landmarks = points + ("cupids_bow" to points.getValue("stomion"))), "upper_lower_vermilion_balance").failure)
+        listOf(
+            Triple("trichion", "menton", "facial_elongation"),
+            Triple("brow_level", "subnasale", "midface_height_fraction"),
+            Triple("subnasale", "stomion", "lower_face_subdivision"),
+            Triple("gonion_left", "gonion_right", "jaw_to_cheek_width"),
+            Triple("pupil_left", "pupil_right", "interocular_spacing"),
+            Triple("cupids_bow", "labrale_inferius", "vermilion_fullness"),
+            Triple("stomion", "labrale_inferius", "upper_lower_vermilion_balance"),
+        ).forEach { (collapsed, reference, name) ->
+            assertEquals(name, FrontFailure.DEGENERATE_GEOMETRY, metric(input.copy(landmarks = points + (collapsed to points.getValue(reference))), name).failure)
+        }
     }
 
     @Test fun requiredCalibrationFailsClosedInTheExistingGeometryContract() {

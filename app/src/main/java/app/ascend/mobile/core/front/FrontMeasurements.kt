@@ -18,6 +18,8 @@ class FrontMeasurements(private val policy: FrontPolicy?) {
             val points = mapping.required.mapNotNull { id -> frame?.normalizedPoint(id)?.let { id.value to it } }.toMap()
             if (gateFailure != null) FrontMetricResult(mapping.metricId, mapping.formulaId, mapping.unit,
                 null, null, gateFailure, MeasurementMode.UNSUPPORTED, points)
+            else if (collapsedRequiredSpan(mapping, points)) FrontMetricResult(mapping.metricId, mapping.formulaId,
+                mapping.unit, null, null, FrontFailure.DEGENERATE_GEOMETRY, MeasurementMode.UNSUPPORTED, points)
             else {
                 val result = requireNotNull(registry).measure(mapping.metricId, requireNotNull(mapping.formulaId), requireNotNull(frame))
                 when (result) {
@@ -38,6 +40,22 @@ class FrontMeasurements(private val policy: FrontPolicy?) {
             }
         }
         return FrontReport(FRONT_CONTRACT_VERSION, stable, policy?.version, "wp08-front-geometry-v1+$GEOMETRY_ENGINE_VERSION", results)
+    }
+
+    /** A collapsed anatomical length is unavailable even when it is the numerator of a ratio. */
+    private fun collapsedRequiredSpan(mapping: FrontMapping, points: Map<String, Point2>): Boolean {
+        fun vertical(a: LandmarkId, b: LandmarkId) = verticalDistance(points.getValue(a.value), points.getValue(b.value)) <= 1e-9
+        fun horizontal(a: LandmarkId, b: LandmarkId) = horizontalDistance(points.getValue(a.value), points.getValue(b.value)) <= 1e-9
+        return when (mapping.metricId.removePrefix("candidate.front.")) {
+            "facial_elongation" -> vertical(Landmarks.TRICHION, Landmarks.MENTON)
+            "midface_height_fraction" -> vertical(Landmarks.BROW_LEVEL, Landmarks.SUBNASALE)
+            "lower_face_subdivision" -> vertical(Landmarks.SUBNASALE, Landmarks.STOMION)
+            "jaw_to_cheek_width" -> horizontal(Landmarks.GONION_LEFT, Landmarks.GONION_RIGHT)
+            "interocular_spacing" -> horizontal(Landmarks.PUPIL_LEFT, Landmarks.PUPIL_RIGHT)
+            "vermilion_fullness" -> vertical(Landmarks.CUPIDS_BOW, Landmarks.LABRALE_INFERIUS)
+            "upper_lower_vermilion_balance" -> vertical(Landmarks.STOMION, Landmarks.LABRALE_INFERIUS)
+            else -> false // Zero clearance or inclination can be a valid geometric measurement.
+        }
     }
 
     private fun gate(input: FrontInput, mapping: FrontMapping): FrontFailure? {
