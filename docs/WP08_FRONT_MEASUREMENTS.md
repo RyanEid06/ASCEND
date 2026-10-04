@@ -1,0 +1,73 @@
+# WP08 — Front measurement set and validation harness
+
+Branch: `eddy/P03-WP08-front-measurements-validation`; target: `phase/P03-integration`.
+Exact shared baseline: `f466c4e7490204571f1f72dbb127b20dd072a063` (main, P03 integration, WP07 and WP08 all matched before coding).
+Status: draft implementation for joint review; Phase 3 sync gate **OPEN**.
+
+## Gate audit before implementation
+
+Phase 2 lanes and integration wiring are merged through [PR #15](https://github.com/RyanEid06/ASCEND/pull/15). The baseline's [main CI](https://github.com/RyanEid06/ASCEND/actions/runs/37130507601) passed, as did the final Phase 2 PR build/unit/lint and 16 KB encrypted storage/migration/separate-process restart checks. Permanent QA signing/versionCode 2 is present in the baseline. No baseline contract differences were found in WORKFLOW, MASTER_PLAN, SECURITY, DATA_LIFECYCLE, SCORING_CONTRACT or WP03_GEOMETRY_ENGINE relative to the previously read lane.
+
+Unresolved prerequisites: there is no repository evidence of both developers manually exercising the integrated offline capture/restart flow, or installing the signed P2 APK over the prior signed QA APK on a physical device and checking retained data. WP06_STATUS's original lane gate note remains open; merged capture wiring explicitly leaves face/pose hooks pending WP07. These checks are **not** claimed complete merely because PR #15 merged. This user-requested WP08 draft supplies deterministic groundwork; phase adoption/merge still requires resolving the human checkpoint. No real private face fixture or approved capture confidence/correction policy was available. WP07 had no commits beyond the shared baseline at the pre-code check.
+
+## Implementation and boundaries
+
+`core/front` adds a front-only, pure Kotlin measurement adapter, fixture codec, correction engine, overlay projection and storage seam. It consumes semantic points; it contains no detector, MediaPipe dependency/index mapping, profile extractor, scoring curve or runtime scoring constants. Existing WP03 registries, candidate records and core analysis models remain intact.
+
+The new catalogue accounts for all 22 frozen front candidates. It is an engineering mapping table, never release scoring membership. New mapped formulas use the supplied versioned policy; existing WP03 formulas retain their original additional gates. Existing WP03 thresholds are synthetic foundation constraints, not new empirical validation. No WP08 production policy/default is supplied. Missing policy fails with POLICY_REQUIRED; synthetic-only policies refuse CONSENTED_LOCAL inputs. No candidate is promoted to VALIDATED and repeated-capture tolerances remain null.
+
+| Candidate suffix | Formula/source definition | Unit / convention |
+| --- | --- | --- |
+| facial_elongation | WP03 front.facial_elongation.v1 / FQ_H_005 | vertical trichion–menton / horizontal zygion width |
+| midface_height_fraction | front.midface_height_fraction.v1 / FQ_H_002 | vertical brow-level–subnasale / trichion–menton × 100 |
+| lower_face_subdivision | WP03 front.lower_face_subdivision.v1 / FQ_H_033 | vertical subnasale–stomion / subnasale–menton × 100 |
+| jaw_to_cheek_width | WP03 front.jaw_to_cheek_width.v1 / FQ_H_032 | horizontal gonion width / zygion width × 100 |
+| interocular_spacing | front.interocular_spacing.v1 / FQ_H_009 | horizontal pupil span / zygion width × 100 |
+| eye_aperture_ratio | front.eye_aperture_ratio.v1 / FQ_H_010 | mean bilateral horizontal fissure width / mean bilateral vertical opening height; width/height direction |
+| canthal_inclination | WP03 front.canthal_inclination.v1 / FQ_H_012 | bilateral mean signed outward canthal inclination, degrees |
+| brow_eye_clearance | front.brow_eye_clearance.v1 / FQ_H_014 | mean absolute vertical pupil–inner-brow clearance / mean vertical eye opening |
+| brow_inclination | front.brow_inclination.v1 / FQ_H_013 | bilateral mean inner-brow–arch outward inclination, degrees |
+| vermilion_fullness | front.vermilion_fullness.v1 / FQ_H_023 | vertical Cupid's bow–lower lip / subnasale–menton × 100; uses Cupid's bow, not an interchangeable upper-lip proxy |
+| upper_lower_vermilion_balance | front.upper_lower_vermilion_balance.v1 / FQ_H_024 | vertical stomion–lower lip / Cupid's bow–stomion |
+
+All IDs above have prefix `candidate.front.`. Formula direction and landmarks are explicit; mapping a definition does not imply that its research benchmarks are score-eligible. These projected frontal conventions require Ryan/Eddy definition-compatibility review before release scoring.
+
+Remaining candidates return UNSUPPORTED_DEFINITION, with no invented formula or source-equivalence claim: upper_middle_facial_proportion, chin_breadth, intercanthal_spacing, eye_fissure_width, brow_peak_location, nasal_width, nasal_lateral_deviation, mouth_width, philtrum_proportion, mouth_corner_inclination, landmark_asymmetry. Their denominator, anatomical reference or paired/midline convention must be frozen first. Calibrated source definitions are not silently substituted for these candidates; WP08 publishes no millimetres. WP03's required-calibration failures remain covered by its unit tests.
+
+## WP07 coordination proposal — requires acknowledgement before integration
+
+The additive interface is `FrontInput` / `FrontMeasurementStorage`, contract `wp08-front-v1`. Ryan owns extracting these values, model-index mapping, capture hooks and photo overlay rendering. Eddy owns the catalogue, formula/fixture harness and bounds enforcement. No pipeline has been copied from Ryan's lane.
+
+- Semantic IDs use existing `Landmarks` string values; WP08 enumerates only the required subset in `FrontCatalog.semanticIds`. Proposed LEFT/RIGHT convention is anatomical subject left/right in an **unmirrored** image. Ryan must confirm adapter side labeling and which anatomical points the model can actually support (especially trichion, zygion, gonion, brow-level and Cupid's bow). Missing anatomy must stay absent.
+- Coordinates are x/imageWidth and y/imageHeight in [0,1] on the final orientation-corrected, unmirrored standardized crop. Width/height must be its actual pixel dimensions. A source revision is the opaque current encrypted front asset ID supplied by `frontSourceRevision`; neither paths nor media bytes enter the DTO. Never upscale to satisfy policy.
+- WP03 converts to isotropic short-edge units **before** rotation. `rollOrigin` is explicitly supplied and fixed through corrections. Roll is clockwise in y-down coordinates; geometry removes it once. Yaw/pitch are signed residual deviations from the frontal target; no default zero when estimation is unavailable. Adapter must convert its model's convention and avoid double normalization.
+- Global and per-required-point confidences must be explicit and finite. Null means unknown, never an implicit 1.0. Confidence method/version identifies how WP07 derives them; model detection confidence must not be misrepresented as measured per-landmark certainty. The minimum of global and required-point confidences propagates; correction never raises it. Face count, face-region usable short-edge resolution and pose must also be provided or measurements fail cleanly.
+- Store model version, SHA-256 artifact identity, extractor version, confidence-method version and image revision with the source; retain geometry/contract/policy versions in reports and immutable correction provenance in local storage.
+- `FrontMetricResult.sourcePoints` is the exact roll-normalized isotropic geometry input, ordered by semantic ID. `FrontInput.overlayImagePoints(result)` inverts that same transform for the original standardized photo. Ryan's photo renderer should use these points with the **same uniform image-fit/crop transform** as the displayed photo. Do not redraw from the detector's original mesh after correction. The debug diagram uses one scale on both axes.
+- Persist source through `installFrontInput` at LANDMARKING/MEASURING; derive metrics from `readFrontRevision().measure(policy)`. Use `correctFront` with the last read revision token. Use `completeFrontAnalysis` with the revision used to compute the analysis; stale/revisionless front completion is rejected. The existing `complete` operation remains available for analyses without this front source. Canonical scoring still fails closed until independently reviewed runtime configuration/reliability evidence exists.
+
+These additions do not replace ScanSession, AnalysisOutcome, LocalScanRepository or the schema. The front-aware completion safeguard strengthens the existing completion behavior and must be acknowledged by both lanes. Merge/adoption is paused pending Ryan's review of this proposal; no external response is presumed.
+
+## Bounded correction and invalidation
+
+Explicitly eligible IDs: medial_canthus_left/right, lateral_canthus_left/right, cupids_bow, stomion, labrale_inferius. Every eligible point still requires a supplied versioned policy with evidence, a point-specific normalized anatomical rectangle and a maximum displacement in isotropic short-edge units. There are no production bounds. Synthetic debug bounds cannot authorize a real capture.
+
+No point insertion, confidence editing, unsupported landmark correction or freehand score editing. Both the original and corrected point must lie within the zone; the displacement is always measured from the **original extraction**, preventing cumulative small drags from escaping the bound. Provenance records original/from/to, timestamp, full policy, source image/model/artifact/extractor identity, method and revision. Decoding replays and validates the chain. Only affected metrics switch to ASSISTED; low confidence/pose/resolution remains unavailable after correction.
+
+The existing SQLCipher database stores a versioned `front-input-v1` payload (source plus audit). No plaintext files, new DB columns/migration, analytics or upload path are introduced. The serialized owner-scoped repository atomically writes the revision, returns unfinished scans to MEASURING and deletes dependent measurement/scoring/coverage/extrema/advice/result payloads. `front-input-v1` and the reserved `profile-input-v1` source payload are retained; photos are untouched. This conservative invalidation removes all downstream result caches so category/overall/advice cannot use stale data. Retake/delete already removes all scan-derived payloads. COMPLETE rejects correction, extraction replacement and retake; original completed results and their local front audit remain readable across reopen. A new analysis requires a new scan, never rewriting completed history.
+
+## Fixture format and debug UI
+
+`test-fixtures/front/schema.json` is JSON Schema 2020-12 for annotation format 1. `FrontCodec` also enforces cross-field invariants: version, supported semantic/metric IDs, confidence/ranges, unique expected IDs, value/tolerance versus unavailable reason, source origin and local consent reference. Inputs have no photo/path/full-mesh field. Public CI reads only synthetic fixture filenames in this directory. Human annotations use CONSENTED_LOCAL / HUMAN_ANNOTATION, a pseudonymous annotator code, local consent record ID, annotation-method version and explicit tolerance evidence. Keep the entire real-capture annotation/consent/media bundle in ignored `private-fixtures/` or outside the repository; consent to local testing is not consent to public redistribution. Only synthetic files are committed/packageable here.
+
+The golden fixture gives independent analytically specified coordinates, expected values and absolute floating-point tolerances. Its 1e-9 tolerance checks **formula arithmetic only**, not ML repeatability, camera reliability or annotation agreement. Real same-image/repeated-capture/device-delegate tolerances remain undecided; no universal tolerance is invented.
+
+Debug menu → Front measurement inspector displays synthetic measurements, exact point diagram, model/extractor/policy identity, explicit unavailable failures and a bounded synthetic correction demonstration. `MeasurementDebugScreen(input, policy)` is a debug-source integration point for local WP07 QA; capture loading/navigation wiring awaits WP07. The real-capture surface uses FLAG_SECURE and restores prior window flags on exit. Inspector implementation/fixture assets live only in debug source sets; the release entry is inert and release navigation denies the route. No debug data is logged/exported. The UI exposes no runtime scoring or physical calibration control.
+
+## Verification and remaining gate work
+
+Local: fixture/schema validation including negative cases, dependency policy (19 pinned Android versions), local-storage privacy contract and diff whitespace checks passed. Android Gradle configuration was attempted with existing local tooling; local build/tests/lint/instrumentation require an Android SDK which this workstation lacks. CI must provide the actual executable results; see the draft PR for final run status.
+
+Added regression coverage: all 11 golden formulas, all required points missing/unknown/low confidence, global confidence/face count/pose/resolution unavailable, yaw/pitch/roll on both signs, portrait/landscape/square aspect correction with both roll signs, exact overlay transform and determinism, degenerate spans, synthetic-policy rejection on capture, correction eligibility/zone/cumulative displacement/aspect bounds/provenance replay/confidence preservation, stale revisions, encrypted reopen/cache invalidation, owner isolation, retake source invalidation and completed-history preservation. Android CI additionally runs synthetic inspector accessibility/low-confidence/correction smoke and captures an explicitly synthetic screenshot artifact.
+
+P3 remains OPEN until a real consented frontal photo produces stable WP07 landmarks, visible same-point overlays and deterministic WP08 metrics with clean low-confidence failures. Joint adapter acknowledgement, actual landmark feasibility, reviewed capture policies and point-specific bounds, missing definition conventions, empirical same-image/repeated-capture/device evidence and the P2 human/signed-update evidence remain decisions/prerequisites. No scoring model is promoted and no automatic merge is authorized.
