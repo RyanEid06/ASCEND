@@ -62,4 +62,14 @@ object FrontCodec {
         return json.decodeFromString<FrontRevision>(bytes.toString(Charsets.UTF_8))
     }
     fun encode(revision: FrontRevision): ByteArray = json.encodeToString(revision).toByteArray(Charsets.UTF_8).also { require(it.size <= MAX_BYTES) }
+    fun encode(provenance: FrontCompletedProvenance): ByteArray = json.encodeToString(provenance).toByteArray(Charsets.UTF_8).also { require(it.size <= MAX_BYTES) }
+    fun completed(bytes: ByteArray): FrontCompletedProvenance {
+        require(bytes.size <= MAX_BYTES)
+        return json.decodeFromString<FrontCompletedProvenance>(bytes.toString(Charsets.UTF_8))
+    }
+}
+
+@Serializable
+data class FrontCompletedProvenance(val formatVersion: Int, val correctionRevision: Long, val geometryVersion: String, val policy: FrontPolicy) {
+    init { require(formatVersion == 1 && correctionRevision >= 0 && geometryVersion.isNotBlank()) }
 }

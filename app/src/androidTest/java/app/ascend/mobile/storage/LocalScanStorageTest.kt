@@ -303,9 +303,9 @@ class LocalScanStorageTest {
             repository.putCapture(ScanOwner.Guest, id, capture(CaptureView.FRONT), 1)
             repository.putCapture(ScanOwner.Guest, id, capture(CaptureView.PROFILE), 2)
             repository.advance(ScanOwner.Guest, id, 3)
-            val input = FrontInput(FRONT_CONTRACT_VERSION, repository.frontSourceRevision(ScanOwner.Guest, id), 32, 32, 24,
-                FixtureOrigin.SYNTHETIC, "synthetic-model", "0".repeat(64), "synthetic-extractor", "synthetic-confidence",
-                1, .9, FrontPose(0.0, 0.0, 0.0), mapOf("lateral_canthus_left" to FrontPoint(.7, .38, .95)), FrontPoint(.5, .5, null))
+            val golden = context.assets.open("synthetic-front-v1.json").use { FrontCodec.fixture(it.readBytes()) }
+            val input = golden.input.copy(imageRevision = repository.frontSourceRevision(ScanOwner.Guest, id), width = 32, height = 32, faceShortEdgePixels = 24)
+            val measurementPolicy = golden.policy.copy(minimumImageShortEdgePixels = 3, minimumFaceShortEdgePixels = 3)
             repository.installFrontInput(ScanOwner.Guest, id, input, 4)
             assertNull(repository.readFrontRevision(ScanOwner.Account("other"), id))
             val bounds = CorrectionPolicy("synthetic-bounds", "Synthetic test only", true,
@@ -335,16 +335,23 @@ class LocalScanStorageTest {
             assertEquals(corrected, repository.readFrontRevision(ScanOwner.Guest, id))
             repository.advance(ScanOwner.Guest, id, 6)
             val initialResult = analysisFixture(id)
-            val result = initialResult.copy(versions = initialResult.versions.copy(frontLandmarkModelVersion = input.modelVersion))
+            val metricId = "candidate.front.upper_lower_vermilion_balance"
+            val measured = corrected.measure(measurementPolicy).metrics.single { it.metricId == metricId }
+            val initialMetric = initialResult.metrics.single() as MetricResult.Available
+            val result = initialResult.copy(versions = initialResult.versions.copy(frontLandmarkModelVersion = input.modelVersion),
+                enabledMetricIds = setOf(metricId), metrics = listOf(initialMetric.copy(metricId = metricId, measuredValue = measured.value!!, confidence0To1 = measured.confidence!!)))
             try { repository.complete(ScanOwner.Guest, result, 7); fail("Revisionless completion") } catch (_: IllegalArgumentException) { }
-            try { repository.completeFrontAnalysis(ScanOwner.Guest, result, 0, 7); fail("Stale analysis") } catch (_: IllegalArgumentException) { }
-            repository.completeFrontAnalysis(ScanOwner.Guest, result, 1, 7)
+            try { repository.completeFrontAnalysis(ScanOwner.Guest, result, 0, measurementPolicy, 7); fail("Stale analysis") } catch (_: IllegalArgumentException) { }
+            try { repository.completeFrontAnalysis(ScanOwner.Guest, result.copy(metrics = listOf((result.metrics.single() as MetricResult.Available).copy(measuredValue = 99.0))), 1, measurementPolicy, 7); fail("Stale/fabricated metric value") } catch (_: IllegalArgumentException) { }
+            repository.completeFrontAnalysis(ScanOwner.Guest, result, 1, measurementPolicy, 7)
             try { repository.correctFront(ScanOwner.Guest, id, 1, bounds, "lateral_canthus_left", .7, .375, 8); fail("Completed history") } catch (_: IllegalArgumentException) { }
             assertEquals(result, repository.readAnalysis(ScanOwner.Guest, id))
             assertEquals(corrected, repository.readFrontRevision(ScanOwner.Guest, id))
             repository.close(); isOpen = false
             repository = open(context); isOpen = true
             assertEquals(result, repository.readAnalysis(ScanOwner.Guest, id))
+            assertEquals(measurementPolicy, repository.readCompletedFrontProvenance(ScanOwner.Guest, id)!!.policy)
+            assertEquals(1L, repository.readCompletedFrontProvenance(ScanOwner.Guest, id)!!.correctionRevision)
             repository.deleteScan(ScanOwner.Guest, id)
             assertNull(repository.readFrontRevision(ScanOwner.Guest, id))
         } finally {

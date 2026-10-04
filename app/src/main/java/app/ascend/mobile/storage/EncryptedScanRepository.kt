@@ -132,7 +132,8 @@ class EncryptedScanRepository internal constructor(
         persistComplete(owner, outcome, atEpochMillis)
     }
 
-    private suspend fun persistComplete(owner: ScanOwner, outcome: AnalysisOutcome.Complete, atEpochMillis: Long): LocalScan {
+    private suspend fun persistComplete(owner: ScanOwner, outcome: AnalysisOutcome.Complete, atEpochMillis: Long,
+        frontProvenance: FrontCompletedProvenance? = null): LocalScan {
         val row = editable(owner, outcome.scanId, atEpochMillis)
         require(row.state == ScanState.SCORING.name && row.referenceModel == outcome.referenceModel.name)
         val photos = dao.photos(row.id)
@@ -143,20 +144,40 @@ class EncryptedScanRepository internal constructor(
         try {
             AnalysisStorageCodec.decode(bytes) // Validate the frozen snapshot even if caller collections were mutable.
             val stored = row.copy(state = completed.state.name, updatedAt = atEpochMillis, completedAt = atEpochMillis)
-            dao.complete(stored, ScanPayloadRow(row.id, "analysis-v1", bytes))
+            val analysis = ScanPayloadRow(row.id, "analysis-v1", bytes)
+            if (frontProvenance == null) dao.complete(stored, analysis)
+            else {
+                val evidence = FrontCodec.encode(frontProvenance)
+                try { dao.completeFront(stored, analysis, ScanPayloadRow(row.id, "front-completion-v1", evidence)) }
+                finally { evidence.fill(0) }
+            }
             return snapshot(stored)
         } finally { bytes.fill(0) }
     }
 
     override suspend fun completeFrontAnalysis(owner: ScanOwner, outcome: AnalysisOutcome.Complete,
-        expectedRevision: Long, atEpochMillis: Long) = serialized {
+        expectedRevision: Long, policy: FrontPolicy, atEpochMillis: Long) = serialized {
         editable(owner, outcome.scanId, atEpochMillis)
         val front = requireNotNull(readFront(outcome.scanId))
         require(front.revision == expectedRevision) { "Analysis was computed before the latest correction" }
         require(front.original.modelVersion == outcome.versions.frontLandmarkModelVersion)
         checkFrontSource(outcome.scanId, front.original)
-        persistComplete(owner, outcome, atEpochMillis)
+        val report = front.measure(policy)
+        val supplied = outcome.metrics.filterIsInstance<MetricResult.Available>().filter { it.view == MeasurementView.FRONT }
+        require(supplied.isNotEmpty())
+        supplied.forEach { metric ->
+            val measured = requireNotNull(report.metrics.singleOrNull { it.metricId == metric.metricId })
+            require(measured.failure == null && measured.value == metric.measuredValue && measured.confidence == metric.confidence0To1) { "Front result does not match the current geometry and policy" }
+        }
+        persistComplete(owner, outcome, atEpochMillis, FrontCompletedProvenance(1, front.revision, report.geometryVersion, policy))
         Unit
+    }
+
+    override suspend fun readCompletedFrontProvenance(owner: ScanOwner, scanId: String): FrontCompletedProvenance? = serialized {
+        val row = dao.get(owner.scope(), scanId) ?: return@serialized null
+        if (row.state != ScanState.COMPLETE.name) return@serialized null
+        val payload = dao.payload(scanId, "front-completion-v1") ?: return@serialized null
+        try { FrontCodec.completed(payload.payload) } finally { payload.payload.fill(0) }
     }
 
     override suspend fun readAnalysis(owner: ScanOwner, scanId: String): AnalysisOutcome.Complete? = serialized {

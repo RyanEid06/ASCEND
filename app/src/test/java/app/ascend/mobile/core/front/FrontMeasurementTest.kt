@@ -58,6 +58,14 @@ class FrontMeasurementTest {
         assertEquals(FrontFailure.INSUFFICIENT_RESOLUTION, metric(input.copy(width = 719, faceShortEdgePixels = 300), "canthal_inclination").failure)
     }
 
+    @Test fun confidenceBoundaryIsInclusiveAndMinimumConfidencePropagates() {
+        val source = input.copy(overallConfidence = policy.minimumConfidence)
+        FrontMeasurements(policy).measure(source).metrics.filter { it.formulaId != null }.forEach {
+            assertNull(it.failure)
+            assertEquals(policy.minimumConfidence, it.confidence!!, 0.0)
+        }
+    }
+
     @Test fun residualPoseLimitsRejectBothSignsAndAllAxes() {
         listOf(-1.0, 1.0).forEach { sign ->
             listOf(FrontPose(sign * 8.001, 0.0, 0.0), FrontPose(0.0, sign * 8.001, 0.0), FrontPose(0.0, 0.0, sign * 12.001)).forEach {
@@ -141,6 +149,8 @@ class FrontMeasurementTest {
 
     @Test fun cumulativeBoundsAreAnchoredToOriginalAndCannotRaiseConfidence() {
         val initial = FrontRevision(1, input, emptyList())
+        assertEquals(1L, initial.correct(bounds(), "lateral_canthus_left", .7, .4, 1).revision)
+        rejected { initial.correct(bounds(), "lateral_canthus_left", .7, .4001, 1) }
         val once = initial.correct(bounds(), "lateral_canthus_left", .7, .37, 1)
         rejected { once.correct(bounds(), "lateral_canthus_left", .7, .35, 2) }
         rejected { once.correct(bounds(), "lateral_canthus_left", .7, .375, 0) }
@@ -150,6 +160,7 @@ class FrontMeasurementTest {
         val result = FrontRevision(1, low, emptyList()).correct(bounds(low), "lateral_canthus_left", .7, .37, 1).measure(policy).metrics.single { it.metricId.endsWith("canthal_inclination") }
         assertEquals(FrontFailure.LOW_CONFIDENCE, result.failure)
         rejected { initial.copy(corrections = listOf(once.corrections.single().copy(to = once.corrections.single().to.copy(confidence = 1.0)))) }
+        rejected { once.corrections.single().copy(atEpochMillis = -1) }
     }
 
     @Test fun boundsUseIsotropicDistanceAndSyntheticBoundsRejectCapture() {

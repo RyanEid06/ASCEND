@@ -100,6 +100,12 @@ internal abstract class ScanDao {
         savePayload(payload)
         saveScan(scan)
     }
+
+    @Transaction open suspend fun completeFront(scan: ScanRow, analysis: ScanPayloadRow, provenance: ScanPayloadRow) {
+        savePayload(analysis)
+        savePayload(provenance)
+        saveScan(scan)
+    }
 }
 
 @Database(entities = [ScanRow::class, PhotoRow::class, ScanPayloadRow::class], version = 2, exportSchema = true)

@@ -8,6 +8,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -34,9 +37,11 @@ fun MeasurementDebugScreen(input: FrontInput, policy: FrontPolicy?, onBack: () -
         if (sensitive) window?.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
         onDispose { if (sensitive && !alreadySecure) window?.clearFlags(WindowManager.LayoutParams.FLAG_SECURE) }
     }
-    var revision by remember(input) { mutableStateOf(FrontRevision(1, input, emptyList())) }
-    var lowConfidence by remember(input) { mutableStateOf(false) }
-    var selected by remember { mutableStateOf("candidate.front.canthal_inclination") }
+    val state: MeasurementDebugViewModel = viewModel()
+    LaunchedEffect(input) { state.useInput(input) }
+    val revision = state.revision ?: return
+    var lowConfidence by rememberSaveable(input.imageRevision) { mutableStateOf(false) }
+    var selected by rememberSaveable { mutableStateOf("candidate.front.canthal_inclination") }
     val current = revision.current().let { if (lowConfidence) it.copy(overallConfidence = null) else it }
     val report = FrontMeasurements(policy).measure(current, revision.corrections.map { it.landmarkId }.toSet())
     val metric = report.metrics.single { it.metricId == selected }
@@ -47,7 +52,7 @@ fun MeasurementDebugScreen(input: FrontInput, policy: FrontPolicy?, onBack: () -
         Text("Model: ${input.modelVersion}\nExtractor: ${input.extractorVersion}\nPolicy: ${policy?.version ?: "missing"}\nCorrection revision: ${revision.revision}")
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             TextButton(onClick = { lowConfidence = !lowConfidence }) { Text(if (lowConfidence) "Restore confidence" else "Remove confidence") }
-            TextButton(onClick = { revision = FrontRevision(1, input, emptyList()); lowConfidence = false }) { Text("Reset fixture") }
+            TextButton(onClick = { state.reset(input); lowConfidence = false }) { Text("Reset fixture") }
         }
         // Bounds here are an explicitly synthetic demonstration, never available for real captures.
         if (input.origin == FixtureOrigin.SYNTHETIC) {
@@ -55,10 +60,10 @@ fun MeasurementDebugScreen(input: FrontInput, policy: FrontPolicy?, onBack: () -
                 val id = "lateral_canthus_left"
                 val original = input.landmarks.getValue(id)
                 val targetY = original.y - 0.01
-                if (revision.current().landmarks.getValue(id).y != targetY) revision = revision.correct(
+                if (revision.current().landmarks.getValue(id).y != targetY) state.update(revision.correct(
                     CorrectionPolicy("synthetic-debug-v1", "Synthetic movement demonstration only", true,
                         mapOf(id to CorrectionZone(original.x - 0.02, original.x + 0.02, original.y - 0.02, original.y + 0.02, 0.02))),
-                    id, original.x, targetY, revision.revision + 1)
+                    id, original.x, targetY, revision.revision + 1))
             }) { Text("Apply bounded synthetic correction") }
         }
         Text("${metric.metricId}\n${metric.value?.let { "$it ${metric.unit}" } ?: "Unavailable: ${metric.failure}"}\nMode: ${metric.mode}")
@@ -70,6 +75,15 @@ fun MeasurementDebugScreen(input: FrontInput, policy: FrontPolicy?, onBack: () -
             }
         }
     }
+}
+
+/** Points/audit stay in memory across rotation, never in an unencrypted saved-instance bundle. */
+class MeasurementDebugViewModel : ViewModel() {
+    var revision by mutableStateOf<FrontRevision?>(null)
+        private set
+    fun useInput(input: FrontInput) { if (revision?.original != input) reset(input) }
+    fun reset(input: FrontInput) { revision = FrontRevision(1, input.copy(landmarks = input.landmarks.toMap()), emptyList()) }
+    fun update(value: FrontRevision) { revision = value }
 }
 
 @Composable

@@ -11,5 +11,6 @@ interface FrontMeasurementStorage {
     suspend fun correctFront(owner: ScanOwner, scanId: String, expectedRevision: Long, policy: CorrectionPolicy,
         landmarkId: String, x: Double, y: Double, atEpochMillis: Long): FrontRevision
     suspend fun completeFrontAnalysis(owner: ScanOwner, outcome: AnalysisOutcome.Complete,
-        expectedRevision: Long, atEpochMillis: Long)
+        expectedRevision: Long, policy: FrontPolicy, atEpochMillis: Long)
+    suspend fun readCompletedFrontProvenance(owner: ScanOwner, scanId: String): FrontCompletedProvenance?
 }

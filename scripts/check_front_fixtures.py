@@ -11,6 +11,7 @@ Draft202012Validator.check_schema(schema)
 validator = Draft202012Validator(schema)
 fixtures = list(directory.glob('synthetic-*.json'))
 assert fixtures
+assert all(path.name == 'schema.json' or (path.name.startswith('synthetic-') and path.suffix == '.json') for path in directory.iterdir()), 'Public front fixture directory permits schema and synthetic JSON only'
 for path in fixtures:
     fixture = json.loads(path.read_text(encoding='utf-8'))
     validator.validate(fixture)

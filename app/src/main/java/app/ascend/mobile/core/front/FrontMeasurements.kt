@@ -7,14 +7,14 @@ import app.ascend.mobile.core.model.MeasurementView
 class FrontMeasurements(private val policy: FrontPolicy?) {
     fun measure(input: FrontInput, correctedIds: Set<String> = emptySet()): FrontReport {
         val stable = input.copy(landmarks = input.landmarks.toSortedMap())
-        val registry = policy?.let { GeometryFormulaRegistry(
+        val registry = policy?.let { activePolicy -> GeometryFormulaRegistry(
             RepresentativeFormulaRegistry.formulas.filter { it.view == MeasurementView.FRONT } +
                 FrontCatalog.mappings.filter { it.formulaId != null && it.formulaId !in RepresentativeFormulaRegistry.registry.supportedFormulaIds }
-                    .map { FrontMappedFormula(it, itPolicy = itPolicy()) }
+                    .map { FrontMappedFormula(it, activePolicy) }
         ) }
+        val frame = if (stable.residualPose != null) stable.geometryFrame() else null
         val results = FrontCatalog.mappings.map { mapping ->
             val gateFailure = gate(stable, mapping)
-            val frame = if (stable.residualPose != null) stable.geometryFrame() else null
             val points = mapping.required.mapNotNull { id -> frame?.normalizedPoint(id)?.let { id.value to it } }.toMap()
             if (gateFailure != null) FrontMetricResult(mapping.metricId, mapping.formulaId, mapping.unit,
                 null, null, gateFailure, MeasurementMode.UNSUPPORTED, points)
@@ -40,8 +40,6 @@ class FrontMeasurements(private val policy: FrontPolicy?) {
         return FrontReport(FRONT_CONTRACT_VERSION, stable, policy?.version, "wp08-front-geometry-v1+$GEOMETRY_ENGINE_VERSION", results)
     }
 
-    private fun itPolicy() = requireNotNull(policy)
-
     private fun gate(input: FrontInput, mapping: FrontMapping): FrontFailure? {
         if (mapping.formulaId == null) return FrontFailure.UNSUPPORTED_DEFINITION
         val limits = policy ?: return FrontFailure.POLICY_REQUIRED
@@ -59,15 +57,15 @@ class FrontMeasurements(private val policy: FrontPolicy?) {
     }
 }
 
-private class FrontMappedFormula(private val mapping: FrontMapping, itPolicy: FrontPolicy) : GeometryFormula {
+private class FrontMappedFormula(private val mapping: FrontMapping, policy: FrontPolicy) : GeometryFormula {
     override val formulaId = requireNotNull(mapping.formulaId)
     override val view = MeasurementView.FRONT
     override val requiredLandmarks = mapping.required
     override val mode = MeasurementMode.AUTOMATIC
     override val calibrationRequired = false
-    override val minimumShortEdgePixels = itPolicy.minimumImageShortEdgePixels
-    override val poseLimits = itPolicy.poseLimits()
-    override val confidenceRule = ConfidenceRule(itPolicy.minimumConfidence)
+    override val minimumShortEdgePixels = policy.minimumImageShortEdgePixels
+    override val poseLimits = policy.poseLimits()
+    override val confidenceRule = ConfidenceRule(policy.minimumConfidence)
 
     override fun evaluate(metricId: String, frame: GeometryFrame): GeometryMeasurementResult {
         val (prepared, failure) = prepare(metricId, frame)
@@ -81,7 +79,7 @@ private class FrontMappedFormula(private val mapping: FrontMapping, itPolicy: Fr
         val value: Double? = when (mapping.metricId.removePrefix("candidate.front.")) {
             "midface_height_fraction" -> safeRatio(h(Landmarks.BROW_LEVEL, Landmarks.SUBNASALE), h(Landmarks.TRICHION, Landmarks.MENTON))?.times(100)
             "interocular_spacing" -> safeRatio(w(Landmarks.PUPIL_LEFT, Landmarks.PUPIL_RIGHT), w(Landmarks.ZYGION_LEFT, Landmarks.ZYGION_RIGHT))?.times(100)
-            "eye_aperture_ratio" -> if (h(Landmarks.UPPER_EYELID_LEFT, Landmarks.LOWER_EYELID_LEFT) <= 1e-9 || h(Landmarks.UPPER_EYELID_RIGHT, Landmarks.LOWER_EYELID_RIGHT) <= 1e-9 || eyeWidth() <= 1e-9) null else safeRatio(eyeWidth(), eyeHeight())
+            "eye_aperture_ratio" -> if (h(Landmarks.UPPER_EYELID_LEFT, Landmarks.LOWER_EYELID_LEFT) <= 1e-9 || h(Landmarks.UPPER_EYELID_RIGHT, Landmarks.LOWER_EYELID_RIGHT) <= 1e-9 || w(Landmarks.MEDIAL_CANTHUS_LEFT, Landmarks.LATERAL_CANTHUS_LEFT) <= 1e-9 || w(Landmarks.MEDIAL_CANTHUS_RIGHT, Landmarks.LATERAL_CANTHUS_RIGHT) <= 1e-9) null else safeRatio(eyeWidth(), eyeHeight())
             "brow_eye_clearance" -> if (h(Landmarks.UPPER_EYELID_LEFT, Landmarks.LOWER_EYELID_LEFT) <= 1e-9 || h(Landmarks.UPPER_EYELID_RIGHT, Landmarks.LOWER_EYELID_RIGHT) <= 1e-9) null else safeRatio((h(Landmarks.PUPIL_LEFT, Landmarks.INNER_BROW_LEFT) + h(Landmarks.PUPIL_RIGHT, Landmarks.INNER_BROW_RIGHT)) / 2, eyeHeight())
             "brow_inclination" -> {
                 val left = outwardInclinationDegrees(p(Landmarks.INNER_BROW_LEFT), p(Landmarks.BROW_ARCH_LEFT))

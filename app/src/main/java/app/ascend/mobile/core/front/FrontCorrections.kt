@@ -36,7 +36,9 @@ data class CorrectionRecord(
     val extractorVersion: String,
     val revision: Long,
     val method: String = "bounded-human-confirmation-v1",
-)
+) {
+    init { require(atEpochMillis >= 0 && revision > 0) }
+}
 
 /** Source plus an audit chain, never an editable cached score. Completed history is read-only in storage. */
 @Serializable
@@ -82,5 +84,9 @@ private fun validateCorrection(original: FrontInput, policy: CorrectionPolicy, i
     require(zone.contains(anchor) && zone.contains(to)) { "Outside anatomical correction zone" }
     val shortEdge = minOf(original.width, original.height).toDouble()
     fun isotropic(point: FrontPoint) = Point2(point.x * original.width / shortEdge, point.y * original.height / shortEdge)
-    require(distance(isotropic(anchor), isotropic(to)) <= zone.maximumShortEdgeDisplacement) { "Outside original extraction displacement bound" }
+    val a = isotropic(anchor)
+    val b = isotropic(to)
+    // Machine-rounding allowance only, not an empirical capture or correction tolerance.
+    val rounding = 8 * Math.ulp(maxOf(1.0, kotlin.math.abs(a.x), kotlin.math.abs(a.y), kotlin.math.abs(b.x), kotlin.math.abs(b.y)))
+    require(distance(a, b) <= zone.maximumShortEdgeDisplacement + rounding) { "Outside original extraction displacement bound" }
 }
