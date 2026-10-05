@@ -44,11 +44,11 @@ a required shared packaging task before WP09 or WP10 implementation starts.
 
 Required steady-state artifacts at phase gates:
 
-- `ASCEND-PX-QA-arm64.apk` — signed `arm64-v8a` production-package build used for
+- `ASCEND-QA-arm64.apk` — signed `arm64-v8a` production-package build used for
   routine Ryan/Eddy physical-phone downloads after each phone's ABI is verified.
-- `ASCEND-PX-QA-universal.apk` — signed production-package build retaining the full
+- `ASCEND-QA-universal.apk` — signed production-package build retaining the full
   supported ABI set for compatibility/archive testing.
-- `ASCEND-PX-dev.apk` — separate developer/debug package where needed.
+- `ASCEND-dev.apk` — separate developer/debug package where needed.
 - provenance/report output containing the exact Git commit, version, certificate,
   model hashes and SHA-256 hashes for both QA APK variants.
 
