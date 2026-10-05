@@ -5,7 +5,12 @@ merged after green lane CI. WP07 PR #17 was updated with the exact WP08 integrat
 the only merge conflict was the repository imports, and both interfaces/routes were
 preserved. The merged implementation is tested together before QA delivery.
 
-This build advances `versionCode` from 2 to 3 and `versionName` to 0.3.0. The QA
+The final build uses `versionCode` 4 and `versionName` 0.3.1. It supersedes the
+version-3 candidate after APK inspection found dependency-added INTERNET and
+ACCESS_NETWORK_STATE permissions. Both are explicitly removed for the local-only
+P3 phase; CI now checks permissions in the packaged debug/release APKs rather than
+only the app source manifest. The final code advances monotonically from either
+P2 version 2 or the earlier candidate version 3. The QA
 application remains `app.ascend.mobile`; the developer inspector build remains
 `app.ascend.mobile.dev`. P03 integration pushes use the existing GitHub signing
 secrets and verify the public certificate SHA-256 from the prior P2 QA artifact:

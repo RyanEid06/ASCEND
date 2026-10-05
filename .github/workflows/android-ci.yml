@@ -69,6 +69,11 @@ jobs:
           echo "Checking release APK: $RELEASE_APK"
           python3 scripts/check_native_16k.py "$RELEASE_APK"
           python3 scripts/check_native_16k.py app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+      - name: Check packaged local-only permissions
+        run: |
+          RELEASE_APK="$(find app/build/outputs/apk/release -maxdepth 1 -type f -name '*.apk' -print -quit)"
+          test -n "$RELEASE_APK"
+          python3 scripts/check_local_storage_contract.py app/build/outputs/apk/debug/app-debug.apk "$RELEASE_APK"
       - name: Verify Phase 2 signed QA APK
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/phase/P02-integration' }}
         run: |
@@ -97,7 +102,7 @@ jobs:
           AAPT="$(find "$ANDROID_HOME/build-tools" -maxdepth 2 -type f -name aapt -print -quit)"
           test -n "$AAPT"
           "$AAPT" dump badging app/build/outputs/apk/release/app-release.apk > "$RUNNER_TEMP/p3-badging.txt"
-          grep -F "package: name='app.ascend.mobile' versionCode='3' versionName='0.3.0'" "$RUNNER_TEMP/p3-badging.txt" >> ASCEND-P3-provenance.txt
+          grep -F "package: name='app.ascend.mobile' versionCode='4' versionName='0.3.1'" "$RUNNER_TEMP/p3-badging.txt" >> ASCEND-P3-provenance.txt
           if grep -q '^application-debuggable' "$RUNNER_TEMP/p3-badging.txt"; then exit 1; fi
           printf '\nGit commit: %s\n' "$GITHUB_SHA" >> ASCEND-P3-provenance.txt
           sha256sum app/src/main/assets/face_landmarker.task >> ASCEND-P3-provenance.txt
