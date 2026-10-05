@@ -115,6 +115,7 @@ dependencies {
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
     implementation(libs.androidx.exifinterface)
+    implementation(libs.mediapipe.tasks.vision)
 
     implementation(libs.androidx.room3.runtime)
     implementation(libs.sqlcipher.android)

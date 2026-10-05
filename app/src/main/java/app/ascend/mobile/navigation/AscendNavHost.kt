@@ -45,6 +45,7 @@ fun AscendNavHost(windowWidthClass: AscendWindowWidthClass) {
                     uiState = uiState,
                     showDebugEntry = debugAvailable,
                     onStartScan = { backStack.add(CaptureFlowRoute) },
+                    onOpenFrontLandmarks = { backStack.add(FrontLandmarkRoute(it)) },
                     onToggleDetails = viewModel::onToggleFoundationDetails,
                     onOpenFoundationInfo = { backStack.add(FoundationInfoRoute) },
                     onOpenDebugMenu = {
@@ -65,8 +66,15 @@ fun AscendNavHost(windowWidthClass: AscendWindowWidthClass) {
                 CaptureRoute(
                     windowWidthClass = windowWidthClass,
                     onExit = { backStack.removeLastOrNull() },
-                    onCaptureSaved = { backStack.removeLastOrNull() },
+                    onCaptureSaved = { scanId ->
+                        backStack.removeLastOrNull()
+                        backStack.add(FrontLandmarkRoute(scanId))
+                    },
                 )
+            }
+
+            entry<FrontLandmarkRoute> { route ->
+                app.ascend.mobile.ui.vision.FrontLandmarkRoute(route.scanId, onBack = { backStack.removeLastOrNull() })
             }
 
             if (debugAvailable) {
