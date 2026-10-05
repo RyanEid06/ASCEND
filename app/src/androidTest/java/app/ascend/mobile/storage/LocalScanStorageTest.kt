@@ -8,6 +8,7 @@ import androidx.room3.*
 import androidx.test.platform.app.InstrumentationRegistry
 import app.ascend.mobile.core.data.*
 import app.ascend.mobile.core.model.*
+import app.ascend.mobile.core.front.*
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.security.KeyStore
@@ -291,6 +292,104 @@ class LocalScanStorageTest {
             repository.deleteScan(ScanOwner.Guest, id)
             assertNull(repository.readAnalysis(ScanOwner.Guest, id))
         } finally { repository.deleteAll(); repository.close() }
+    }
+
+    @Test fun frontCorrectionPersistsAuditInvalidatesDependentsAndPreservesCompletedHistory() = runBlocking {
+        val context = isolated()
+        var repository = open(context)
+        var isOpen = true
+        try {
+            val id = repository.create(ScanOwner.Guest, ReferenceModel.MALE, 0).session.id
+            repository.putCapture(ScanOwner.Guest, id, capture(CaptureView.FRONT), 1)
+            repository.putCapture(ScanOwner.Guest, id, capture(CaptureView.PROFILE), 2)
+            repository.advance(ScanOwner.Guest, id, 3)
+            val golden = context.assets.open("synthetic-front-v1.json").use { FrontCodec.fixture(it.readBytes()) }
+            val input = golden.input.copy(imageRevision = repository.frontSourceRevision(ScanOwner.Guest, id), width = 32, height = 32, faceShortEdgePixels = 24)
+            val measurementPolicy = golden.policy.copy(minimumImageShortEdgePixels = 3, minimumFaceShortEdgePixels = 3)
+            repository.installFrontInput(ScanOwner.Guest, id, input, 4)
+            assertNull(repository.readFrontRevision(ScanOwner.Account("other"), id))
+            val bounds = CorrectionPolicy("synthetic-bounds", "Synthetic test only", true,
+                mapOf("lateral_canthus_left" to CorrectionZone(.68, .72, .36, .4, .02)))
+            val before = repository.readFrontRevision(ScanOwner.Guest, id)!!
+            try { repository.correctFront(ScanOwner.Guest, id, 0, bounds, "lateral_canthus_left", .7, .3, 5); fail("Bounds") } catch (_: IllegalArgumentException) { }
+            assertEquals(before, repository.readFrontRevision(ScanOwner.Guest, id))
+            repository.close(); isOpen = false
+            val db = openPayloadDatabase(context)
+            val caches = listOf("front-measurements-v1", "scoring-v1", "analysis-v1", "coverage-v1", "extrema-v1", "advice-v1")
+            try {
+                caches.forEach { db.scans().savePayload(ScanPayloadRow(id, it, byteArrayOf(1))) }
+                db.scans().savePayload(ScanPayloadRow(id, "profile-input-v1", byteArrayOf(2)))
+                db.scans().savePayload(ScanPayloadRow(id, "front-landmarks-v1", byteArrayOf(3)))
+            } finally { db.close() }
+            repository = open(context); isOpen = true
+            val corrected = repository.correctFront(ScanOwner.Guest, id, 0, bounds, "lateral_canthus_left", .7, .37, 5)
+            assertEquals(1L, corrected.revision)
+            assertEquals(ScanState.MEASURING, repository.get(ScanOwner.Guest, id)!!.session.state)
+            try { repository.correctFront(ScanOwner.Guest, id, 0, bounds, "lateral_canthus_left", .7, .375, 6); fail("Stale revision") } catch (_: IllegalArgumentException) { }
+            repository.close(); isOpen = false
+            val verified = openPayloadDatabase(context)
+            try {
+                caches.forEach { assertNull(verified.scans().payload(id, it)) }
+                assertArrayEquals(byteArrayOf(2), verified.scans().payload(id, "profile-input-v1")!!.payload)
+                assertArrayEquals(byteArrayOf(3), verified.scans().payload(id, "front-landmarks-v1")!!.payload)
+            } finally { verified.close() }
+            repository = open(context); isOpen = true
+            assertEquals(corrected, repository.readFrontRevision(ScanOwner.Guest, id))
+            repository.advance(ScanOwner.Guest, id, 6)
+            val initialResult = analysisFixture(id)
+            val metricId = "candidate.front.upper_lower_vermilion_balance"
+            val measured = corrected.measure(measurementPolicy).metrics.single { it.metricId == metricId }
+            val initialMetric = initialResult.metrics.single() as MetricResult.Available
+            val result = initialResult.copy(versions = initialResult.versions.copy(frontLandmarkModelVersion = input.modelVersion),
+                enabledMetricIds = setOf(metricId), metrics = listOf(initialMetric.copy(metricId = metricId, measuredValue = measured.value!!, confidence0To1 = measured.confidence!!)))
+            try { repository.complete(ScanOwner.Guest, result, 7); fail("Revisionless completion") } catch (_: IllegalArgumentException) { }
+            try { repository.completeFrontAnalysis(ScanOwner.Guest, result, 0, measurementPolicy, 7); fail("Stale analysis") } catch (_: IllegalArgumentException) { }
+            try { repository.completeFrontAnalysis(ScanOwner.Guest, result.copy(metrics = listOf((result.metrics.single() as MetricResult.Available).copy(measuredValue = 99.0))), 1, measurementPolicy, 7); fail("Stale/fabricated metric value") } catch (_: IllegalArgumentException) { }
+            repository.completeFrontAnalysis(ScanOwner.Guest, result, 1, measurementPolicy, 7)
+            try { repository.correctFront(ScanOwner.Guest, id, 1, bounds, "lateral_canthus_left", .7, .375, 8); fail("Completed history") } catch (_: IllegalArgumentException) { }
+            assertEquals(result, repository.readAnalysis(ScanOwner.Guest, id))
+            assertEquals(corrected, repository.readFrontRevision(ScanOwner.Guest, id))
+            repository.close(); isOpen = false
+            repository = open(context); isOpen = true
+            assertEquals(result, repository.readAnalysis(ScanOwner.Guest, id))
+            assertEquals(measurementPolicy, repository.readCompletedFrontProvenance(ScanOwner.Guest, id)!!.policy)
+            assertEquals(1L, repository.readCompletedFrontProvenance(ScanOwner.Guest, id)!!.correctionRevision)
+            repository.deleteScan(ScanOwner.Guest, id)
+            assertNull(repository.readFrontRevision(ScanOwner.Guest, id))
+        } finally {
+            if (!isOpen) repository = open(context)
+            repository.deleteAll(); repository.close()
+        }
+    }
+
+    @Test fun retakeRemovesFrontExtractionAndRejectsStaleSource() = runBlocking {
+        val context = isolated()
+        val repository = open(context)
+        try {
+            val id = repository.create(ScanOwner.Guest, ReferenceModel.MALE, 0).session.id
+            repository.putCapture(ScanOwner.Guest, id, capture(CaptureView.FRONT), 1)
+            repository.putCapture(ScanOwner.Guest, id, capture(CaptureView.PROFILE), 2)
+            repository.advance(ScanOwner.Guest, id, 3)
+            val input = FrontInput(FRONT_CONTRACT_VERSION, repository.frontSourceRevision(ScanOwner.Guest, id), 32, 32, 24,
+                FixtureOrigin.SYNTHETIC, "synthetic-model", "0".repeat(64), "synthetic-extractor", "synthetic-confidence",
+                1, .9, FrontPose(0.0, 0.0, 0.0), mapOf("stomion" to FrontPoint(.5, .65, .95)), FrontPoint(.5, .5, null))
+            repository.installFrontInput(ScanOwner.Guest, id, input, 4)
+            repository.retake(ScanOwner.Guest, id, CaptureView.FRONT, 5)
+            assertNull(repository.readFrontRevision(ScanOwner.Guest, id))
+            repository.putCapture(ScanOwner.Guest, id, capture(CaptureView.FRONT), 6)
+            repository.advance(ScanOwner.Guest, id, 7)
+            try { repository.installFrontInput(ScanOwner.Guest, id, input, 8); fail("Stale source") } catch (_: IllegalArgumentException) { }
+        } finally { repository.deleteAll(); repository.close() }
+    }
+
+    private fun openPayloadDatabase(context: Context): ScanDatabase {
+        val root = File(context.noBackupFilesDir, "ascend-local")
+        val crypto = EncryptedFiles("${context.packageName}.local-storage.v1")
+        val secret = crypto.decrypt(EncryptedFiles.read(File(root, "database-key.enc"), 256), "database-passphrase")
+        return try {
+            Room.databaseBuilder(context, ScanDatabase::class.java, File(root, "scans.db").absolutePath)
+                .setDriver(SQLCipherDriver(secret.copyOf(), null, null)).addMigrations(ScanDatabase.MIGRATION_1_2).build()
+        } finally { secret.fill(0) }
     }
 
     companion object {

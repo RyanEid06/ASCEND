@@ -1,0 +1,239 @@
+{
+  "formatVersion": 1,
+  "fixtureId": "synthetic-front-v1",
+  "annotationMethodVersion": "analytic-coordinates-v1",
+  "annotatorCode": "synthetic-generator",
+  "consentRecordLocalId": null,
+  "evidenceKind": "SYNTHETIC_FORMULA",
+  "toleranceEvidence": "1e-9 absolute floating-point formula tolerance only; not repeated-capture or human annotation error",
+  "input": {
+    "contractVersion": "wp08-front-v1",
+    "imageRevision": "synthetic-grid-v1",
+    "width": 1200,
+    "height": 1200,
+    "faceShortEdgePixels": 800,
+    "origin": "SYNTHETIC",
+    "modelVersion": "synthetic-model-v1",
+    "modelArtifactSha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "extractorVersion": "analytic-points-v1",
+    "confidenceMethodVersion": "synthetic-confidence-v1",
+    "faceCount": 1,
+    "overallConfidence": 0.9,
+    "residualPose": {
+      "yaw": 0.0,
+      "pitch": 0.0,
+      "roll": 0.0
+    },
+    "landmarks": {
+      "trichion": {
+        "x": 0.5,
+        "y": 0.1,
+        "confidence": 0.95
+      },
+      "menton": {
+        "x": 0.5,
+        "y": 0.9,
+        "confidence": 0.95
+      },
+      "zygion_left": {
+        "x": 0.75,
+        "y": 0.45,
+        "confidence": 0.95
+      },
+      "zygion_right": {
+        "x": 0.25,
+        "y": 0.45,
+        "confidence": 0.95
+      },
+      "brow_level": {
+        "x": 0.5,
+        "y": 0.3,
+        "confidence": 0.95
+      },
+      "subnasale": {
+        "x": 0.5,
+        "y": 0.55,
+        "confidence": 0.95
+      },
+      "stomion": {
+        "x": 0.5,
+        "y": 0.65,
+        "confidence": 0.95
+      },
+      "gonion_left": {
+        "x": 0.7,
+        "y": 0.7,
+        "confidence": 0.95
+      },
+      "gonion_right": {
+        "x": 0.3,
+        "y": 0.7,
+        "confidence": 0.95
+      },
+      "pupil_left": {
+        "x": 0.64,
+        "y": 0.4,
+        "confidence": 0.95
+      },
+      "pupil_right": {
+        "x": 0.36,
+        "y": 0.4,
+        "confidence": 0.95
+      },
+      "medial_canthus_left": {
+        "x": 0.58,
+        "y": 0.4,
+        "confidence": 0.95
+      },
+      "lateral_canthus_left": {
+        "x": 0.7,
+        "y": 0.38,
+        "confidence": 0.95
+      },
+      "medial_canthus_right": {
+        "x": 0.42,
+        "y": 0.4,
+        "confidence": 0.95
+      },
+      "lateral_canthus_right": {
+        "x": 0.3,
+        "y": 0.38,
+        "confidence": 0.95
+      },
+      "upper_eyelid_left": {
+        "x": 0.64,
+        "y": 0.38,
+        "confidence": 0.95
+      },
+      "lower_eyelid_left": {
+        "x": 0.64,
+        "y": 0.42,
+        "confidence": 0.95
+      },
+      "upper_eyelid_right": {
+        "x": 0.36,
+        "y": 0.38,
+        "confidence": 0.95
+      },
+      "lower_eyelid_right": {
+        "x": 0.36,
+        "y": 0.42,
+        "confidence": 0.95
+      },
+      "inner_brow_left": {
+        "x": 0.58,
+        "y": 0.3,
+        "confidence": 0.95
+      },
+      "inner_brow_right": {
+        "x": 0.42,
+        "y": 0.3,
+        "confidence": 0.95
+      },
+      "brow_arch_left": {
+        "x": 0.68,
+        "y": 0.28,
+        "confidence": 0.95
+      },
+      "brow_arch_right": {
+        "x": 0.32,
+        "y": 0.28,
+        "confidence": 0.95
+      },
+      "cupids_bow": {
+        "x": 0.5,
+        "y": 0.61,
+        "confidence": 0.95
+      },
+      "labrale_inferius": {
+        "x": 0.5,
+        "y": 0.69,
+        "confidence": 0.95
+      }
+    },
+    "rollOrigin": {
+      "x": 0.5,
+      "y": 0.5,
+      "confidence": null
+    }
+  },
+  "policy": {
+    "version": "synthetic-front-gates-v1",
+    "evidence": "Synthetic fixtures only; no capture validation",
+    "syntheticOnly": true,
+    "minimumConfidence": 0.8,
+    "minimumImageShortEdgePixels": 720,
+    "minimumFaceShortEdgePixels": 300,
+    "maximumYaw": 8.0,
+    "maximumPitch": 8.0,
+    "maximumRoll": 12.0
+  },
+  "expected": [
+    {
+      "metricId": "candidate.front.facial_elongation",
+      "value": 1.6,
+      "absoluteTolerance": 1e-09,
+      "failure": null
+    },
+    {
+      "metricId": "candidate.front.midface_height_fraction",
+      "value": 31.25,
+      "absoluteTolerance": 1e-09,
+      "failure": null
+    },
+    {
+      "metricId": "candidate.front.lower_face_subdivision",
+      "value": 28.571428571428573,
+      "absoluteTolerance": 1e-09,
+      "failure": null
+    },
+    {
+      "metricId": "candidate.front.jaw_to_cheek_width",
+      "value": 80.0,
+      "absoluteTolerance": 1e-09,
+      "failure": null
+    },
+    {
+      "metricId": "candidate.front.interocular_spacing",
+      "value": 56.0,
+      "absoluteTolerance": 1e-09,
+      "failure": null
+    },
+    {
+      "metricId": "candidate.front.eye_aperture_ratio",
+      "value": 3.0,
+      "absoluteTolerance": 1e-09,
+      "failure": null
+    },
+    {
+      "metricId": "candidate.front.canthal_inclination",
+      "value": 9.462322208025617,
+      "absoluteTolerance": 1e-09,
+      "failure": null
+    },
+    {
+      "metricId": "candidate.front.brow_eye_clearance",
+      "value": 2.5,
+      "absoluteTolerance": 1e-09,
+      "failure": null
+    },
+    {
+      "metricId": "candidate.front.brow_inclination",
+      "value": 11.309932474020215,
+      "absoluteTolerance": 1e-09,
+      "failure": null
+    },
+    {
+      "metricId": "candidate.front.vermilion_fullness",
+      "value": 22.857142857142858,
+      "absoluteTolerance": 1e-09,
+      "failure": null
+    },
+    {
+      "metricId": "candidate.front.upper_lower_vermilion_balance",
+      "value": 1.0,
+      "absoluteTolerance": 1e-09,
+      "failure": null
+    }
+  ]
+}

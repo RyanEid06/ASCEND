@@ -55,6 +55,10 @@ jobs:
         run: python3 scripts/check_dependency_policy.py gradle/libs.versions.toml
       - name: Check local storage privacy contract
         run: python3 scripts/check_local_storage_contract.py
+      - name: Check front annotation schema and synthetic fixtures
+        run: |
+          python3 -m pip install jsonschema==4.23.0
+          python3 scripts/check_front_fixtures.py
       - name: Build and unit tests
         run: bash ./gradlew --no-daemon clean assembleDebug assembleRelease assembleDebugAndroidTest test
       - name: Check native libraries for 16 KB page support
@@ -157,6 +161,10 @@ jobs:
             # Install once, then run both fixtures directly so restart preserves data.
             adb install -r app/build/outputs/apk/debug/app-debug.apk
             adb install -r app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+            mkdir -p app/build/reports/wp08-ui
+            adb shell am instrument -w -e class app.ascend.mobile.ui.FrontMeasurementScreenTest app.ascend.mobile.dev.test/androidx.test.runner.AndroidJUnitRunner > app/build/reports/wp08-ui/smoke.txt
+            python3 scripts/check_instrumentation_result.py app/build/reports/wp08-ui/smoke.txt
+            adb exec-out run-as app.ascend.mobile.dev cat files/wp08-synthetic-debug.png > app/build/reports/wp08-ui/synthetic-debug.png
             mkdir -p app/build/reports/storage-process
             adb shell am instrument -w -e class app.ascend.mobile.storage.StorageProcessDeathTest#a_seed app.ascend.mobile.dev.test/androidx.test.runner.AndroidJUnitRunner > app/build/reports/storage-process/seed.txt
             cat app/build/reports/storage-process/seed.txt
@@ -173,4 +181,5 @@ jobs:
           path: |
             app/build/reports/androidTests/
             app/build/reports/storage-process/
+            app/build/reports/wp08-ui/
             app/build/outputs/androidTest-results/

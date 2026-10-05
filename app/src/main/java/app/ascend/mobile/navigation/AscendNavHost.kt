@@ -15,6 +15,7 @@ import app.ascend.mobile.ui.capture.CaptureRoute
 import app.ascend.mobile.ui.debug.DebugAccessPolicy
 import app.ascend.mobile.ui.debug.DebugMenuScreen
 import app.ascend.mobile.ui.debug.DebugMenuViewModel
+import app.ascend.mobile.ui.debug.MeasurementDebugEntry
 import app.ascend.mobile.ui.foundation.FoundationHomeScreen
 import app.ascend.mobile.ui.foundation.FoundationInfoScreen
 import app.ascend.mobile.ui.foundation.HomeViewModel
@@ -77,8 +78,12 @@ fun AscendNavHost(windowWidthClass: AscendWindowWidthClass) {
                         flags = flags,
                         onFlagChanged = viewModel::setFlagOverride,
                         onClearOverrides = viewModel::clearOverrides,
+                        onOpenMeasurements = { backStack.add(MeasurementDebugRoute) },
                         onBack = { backStack.removeLastOrNull() },
                     )
+                }
+                entry<MeasurementDebugRoute> {
+                    MeasurementDebugEntry(onBack = { backStack.removeLastOrNull() })
                 }
             }
         },

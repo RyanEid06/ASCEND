@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory
 import androidx.room3.Room
 import app.ascend.mobile.core.data.*
 import app.ascend.mobile.core.model.*
+import app.ascend.mobile.core.front.*
 import java.io.File
 import java.security.SecureRandom
 import java.util.UUID
@@ -24,7 +25,7 @@ class EncryptedScanRepository internal constructor(
     private val qualityPolicy: PhotoQualityPolicy,
     private val hook: FaceValidationHook,
     private val acquisitionCache: File,
-) : LocalScanRepository {
+) : LocalScanRepository, FrontMeasurementStorage {
     private val dao = database.scans()
     private val mutex = Mutex()
     @Volatile private var closed = false
@@ -127,6 +128,12 @@ class EncryptedScanRepository internal constructor(
     }
 
     override suspend fun complete(owner: ScanOwner, outcome: AnalysisOutcome.Complete, atEpochMillis: Long): LocalScan = serialized {
+        require(dao.payload(outcome.scanId, "front-input-v1") == null) { "Front analyses require a matching correction revision" }
+        persistComplete(owner, outcome, atEpochMillis)
+    }
+
+    private suspend fun persistComplete(owner: ScanOwner, outcome: AnalysisOutcome.Complete, atEpochMillis: Long,
+        frontProvenance: FrontCompletedProvenance? = null): LocalScan {
         val row = editable(owner, outcome.scanId, atEpochMillis)
         require(row.state == ScanState.SCORING.name && row.referenceModel == outcome.referenceModel.name)
         val photos = dao.photos(row.id)
@@ -137,9 +144,40 @@ class EncryptedScanRepository internal constructor(
         try {
             AnalysisStorageCodec.decode(bytes) // Validate the frozen snapshot even if caller collections were mutable.
             val stored = row.copy(state = completed.state.name, updatedAt = atEpochMillis, completedAt = atEpochMillis)
-            dao.complete(stored, ScanPayloadRow(row.id, "analysis-v1", bytes))
-            snapshot(stored)
+            val analysis = ScanPayloadRow(row.id, "analysis-v1", bytes)
+            if (frontProvenance == null) dao.complete(stored, analysis)
+            else {
+                val evidence = FrontCodec.encode(frontProvenance)
+                try { dao.completeFront(stored, analysis, ScanPayloadRow(row.id, "front-completion-v1", evidence)) }
+                finally { evidence.fill(0) }
+            }
+            return snapshot(stored)
         } finally { bytes.fill(0) }
+    }
+
+    override suspend fun completeFrontAnalysis(owner: ScanOwner, outcome: AnalysisOutcome.Complete,
+        expectedRevision: Long, policy: FrontPolicy, atEpochMillis: Long) = serialized {
+        editable(owner, outcome.scanId, atEpochMillis)
+        val front = requireNotNull(readFront(outcome.scanId))
+        require(front.revision == expectedRevision) { "Analysis was computed before the latest correction" }
+        require(front.original.modelVersion == outcome.versions.frontLandmarkModelVersion)
+        checkFrontSource(outcome.scanId, front.original)
+        val report = front.measure(policy)
+        val supplied = outcome.metrics.filterIsInstance<MetricResult.Available>().filter { it.view == MeasurementView.FRONT }
+        require(supplied.isNotEmpty())
+        supplied.forEach { metric ->
+            val measured = requireNotNull(report.metrics.singleOrNull { it.metricId == metric.metricId })
+            require(measured.failure == null && measured.value == metric.measuredValue && measured.confidence == metric.confidence0To1) { "Front result does not match the current geometry and policy" }
+        }
+        persistComplete(owner, outcome, atEpochMillis, FrontCompletedProvenance(1, front.revision, report.geometryVersion, policy))
+        Unit
+    }
+
+    override suspend fun readCompletedFrontProvenance(owner: ScanOwner, scanId: String): FrontCompletedProvenance? = serialized {
+        val row = dao.get(owner.scope(), scanId) ?: return@serialized null
+        if (row.state != ScanState.COMPLETE.name) return@serialized null
+        val payload = dao.payload(scanId, "front-completion-v1") ?: return@serialized null
+        try { FrontCodec.completed(payload.payload) } finally { payload.payload.fill(0) }
     }
 
     override suspend fun readAnalysis(owner: ScanOwner, scanId: String): AnalysisOutcome.Complete? = serialized {
@@ -152,6 +190,58 @@ class EncryptedScanRepository internal constructor(
                 }
             } finally { payload.payload.fill(0) }
         }
+    }
+
+    override suspend fun frontSourceRevision(owner: ScanOwner, scanId: String): String = serialized {
+        requireNotNull(dao.get(owner.scope(), scanId))
+        requireNotNull(dao.photos(scanId).singleOrNull { it.view == CaptureView.FRONT.name }).assetId
+    }
+
+    override suspend fun installFrontInput(owner: ScanOwner, scanId: String, input: FrontInput, atEpochMillis: Long) = serialized {
+        val row = editable(owner, scanId, atEpochMillis)
+        require(row.state in setOf(ScanState.LANDMARKING.name, ScanState.MEASURING.name))
+        require(dao.payload(scanId, "front-input-v1") == null) { "An extraction is immutable; retake creates a new source" }
+        checkFrontSource(scanId, input)
+        val bytes = FrontCodec.encode(FrontRevision(1, input, emptyList()))
+        try {
+            FrontCodec.revision(bytes)
+            dao.saveFrontRevision(row.copy(state = ScanState.MEASURING.name, updatedAt = atEpochMillis), ScanPayloadRow(scanId, "front-input-v1", bytes))
+        } finally { bytes.fill(0) }
+    }
+
+    override suspend fun readFrontRevision(owner: ScanOwner, scanId: String): FrontRevision? = serialized {
+        if (dao.get(owner.scope(), scanId) == null) return@serialized null
+        readFront(scanId)
+    }
+
+    override suspend fun correctFront(owner: ScanOwner, scanId: String, expectedRevision: Long, policy: CorrectionPolicy,
+        landmarkId: String, x: Double, y: Double, atEpochMillis: Long): FrontRevision = serialized {
+        val row = editable(owner, scanId, atEpochMillis) // COMPLETE is rejected before reading/mutating history.
+        require(row.state in setOf(ScanState.MEASURING.name, ScanState.SCORING.name))
+        val previous = requireNotNull(readFront(scanId))
+        require(previous.revision == expectedRevision) { "Stale correction revision" }
+        checkFrontSource(scanId, previous.original)
+        val next = previous.correct(policy, landmarkId, x, y, atEpochMillis)
+        val bytes = FrontCodec.encode(next)
+        try {
+            FrontCodec.revision(bytes)
+            // Atomically remove measurement/scoring/coverage/extrema/advice caches, retaining source inputs.
+            dao.saveFrontRevision(row.copy(state = ScanState.MEASURING.name, updatedAt = atEpochMillis), ScanPayloadRow(scanId, "front-input-v1", bytes))
+        } finally { bytes.fill(0) }
+        next
+    }
+
+    private suspend fun readFront(scanId: String): FrontRevision? {
+        val payload = dao.payload(scanId, "front-input-v1") ?: return null
+        return try { FrontCodec.revision(payload.payload) } finally { payload.payload.fill(0) }
+    }
+
+    private suspend fun checkFrontSource(scanId: String, input: FrontInput) {
+        val photos = dao.photos(scanId)
+        require(photos.size == 2 && photos.all { it.validation == ViewValidation.ACCEPTED.name })
+        val front = photos.single { it.view == CaptureView.FRONT.name }
+        require(front.assetId == input.imageRevision && front.width == input.width && front.height == input.height) { "Extraction does not match current standardized photo" }
+        files.read(front.assetId).fill(0)
     }
 
     override suspend fun deleteScan(owner: ScanOwner, scanId: String) = serialized {
