@@ -50,12 +50,13 @@ def main(apk: pathlib.Path) -> None:
     print(f"Native library inventory: {len(libraries)} files")
     if libraries:
         sdk = os.environ.get("ANDROID_HOME") or os.environ.get("ANDROID_SDK_ROOT", "")
-        candidates = list(pathlib.Path(sdk, "build-tools").glob("*/zipalign")) if sdk else []
+        executable = "zipalign.exe" if os.name == "nt" else "zipalign"
+        candidates = list(pathlib.Path(sdk, "build-tools").glob(f"*/{executable}")) if sdk else []
         candidates.sort(
             key=lambda path: tuple(int(part) for part in path.parent.name.split(".")),
             reverse=True,
         )
-        zipalign = shutil.which("zipalign") or (str(candidates[0]) if candidates else None)
+        zipalign = shutil.which(executable) or (str(candidates[0]) if candidates else None)
         if not zipalign:
             raise SystemExit("zipalign is required when native libraries are present")
         result = subprocess.run([zipalign, "-c", "-P", "16", "-v", "4", str(apk)], check=False)

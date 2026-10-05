@@ -66,6 +66,11 @@ android {
         buildConfig = true
     }
 
+    sourceSets {
+        getByName("debug").assets.srcDir("../test-fixtures/front")
+        getByName("test").resources.srcDir("../test-fixtures/front")
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17

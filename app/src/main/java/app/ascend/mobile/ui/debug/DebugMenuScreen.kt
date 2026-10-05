@@ -31,6 +31,7 @@ fun DebugMenuScreen(
     flags: Map<FeatureFlag, Boolean>,
     onFlagChanged: (FeatureFlag, Boolean) -> Unit,
     onClearOverrides: () -> Unit,
+    onOpenMeasurements: () -> Unit,
     onBack: () -> Unit,
 ) {
     if (!DebugAccessPolicy.isAvailable(BuildConfig.DEBUG)) {
@@ -83,7 +84,7 @@ fun DebugMenuScreen(
             }
 
             DebugToolPlaceholder("Scan-state inspection")
-            DebugToolPlaceholder("Landmark inspection")
+            TextButton(onClick = onOpenMeasurements) { Text("Front measurement inspector") }
             DebugToolPlaceholder("Scoring-config inspection")
             DebugToolPlaceholder("DEV_UNLOCK")
             DebugToolPlaceholder("Local backend selection")
