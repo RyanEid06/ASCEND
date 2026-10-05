@@ -10,13 +10,19 @@ gates; it does not supply real-photo validation or close them.
 
 The new main candidate uses versionCode 5 / versionName 0.3.2, advancing from
 P2 version 2 and the P3 version-3/version-4 candidates. The permanent production
-package and signing certificate remain unchanged. Main CI publishes the signed
-QA APK, separate developer APK and exact-commit/hash provenance, and runs the
-16 KB emulator suite as well as build, unit tests, lint and packaged privacy checks.
-The new main artifact supersedes the integration version-4 candidate for this
-handoff. Install `ASCEND-P3-QA-signed.apk` over the existing production QA install
-without uninstalling, then verify settings, history and encrypted assets remain
+package and signing certificate remain unchanged. Main CI currently publishes the
+signed universal QA APK, separate developer APK and exact-commit/hash provenance,
+and runs the 16 KB emulator suite as well as build, unit tests, lint and packaged
+privacy checks. The new main artifact supersedes the integration version-4 candidate
+for this handoff. Install `ASCEND-P3-QA-signed.apk` over the existing production QA
+install without uninstalling, then verify settings, history and encrypted assets remain
 readable. The developer APK has a separate package and synthetic inspector.
+
+The observed signed P3 universal APK is approximately 61 MB. This is not evidence
+that ASCEND's own app code is unusually large: the dominant payload is native
+MediaPipe/SQLCipher code plus the bundled face-landmark model, and the universal APK
+carries native code for multiple ABIs. Release minification/resource shrinking is already
+enabled.
 
 ## Acceptance still pending
 
@@ -30,6 +36,37 @@ readable. The developer APK has a separate package and synthetic inspector.
 Synthetic tests demonstrate arithmetic and storage behavior, not real-capture
 reliability. Draft scoring models remain non-scorable; no production constants,
 confidence thresholds or VALIDATED statuses are introduced by this handoff.
+
+## Pre-P4 QA packaging decision
+
+This capability was **not** present in the existing plan/build contract, so it is now
+a required shared packaging task before WP09 or WP10 implementation starts.
+
+Required steady-state artifacts at phase gates:
+
+- `ASCEND-QA-arm64.apk` — signed `arm64-v8a` production-package build used for
+  routine Ryan/Eddy physical-phone downloads after each phone's ABI is verified.
+- `ASCEND-QA-universal.apk` — signed production-package build retaining the full
+  supported ABI set for compatibility/archive testing.
+- `ASCEND-dev.apk` — separate developer/debug package where needed.
+- provenance/report output containing the exact Git commit, version, certificate,
+  model hashes and SHA-256 hashes for both QA APK variants.
+
+Both QA APKs must keep the same `app.ascend.mobile` identity, permanent signing
+certificate, versionCode/versionName and in-place update chain. The only intended
+difference is native ABI packaging. x86/x86_64 support stays in the project for
+CI/emulator testing; the project itself is **not** becoming ARM64-only.
+
+Ryan and Eddy currently use Honor Android phones, but the exact models/ABIs are not
+recorded here. Before the first ARM64-only install, verify that each phone reports
+`arm64-v8a`; otherwise that device uses the universal QA APK.
+
+Google Play distribution remains AAB-based later, allowing Play to deliver the
+device-appropriate native code instead of making end users install the universal APK.
+
+Because the P4 branches were created before this decision and no WP09/WP10
+implementation has started, merge this packaging baseline to green `main` first,
+then refresh/recreate all P4 branches from that new main commit before feature work.
 
 ## Fresh P4 branches
 

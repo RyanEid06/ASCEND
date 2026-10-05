@@ -59,6 +59,15 @@ android {
                 "proguard-rules.pro",
             )
         }
+        create("phoneQa") {
+            initWith(getByName("release"))
+            matchingFallbacks += listOf("release")
+            manifestPlaceholders["appLabel"] = "ASCEND"
+            ndk {
+                abiFilters.clear()
+                abiFilters.add("arm64-v8a")
+            }
+        }
     }
 
     buildFeatures {

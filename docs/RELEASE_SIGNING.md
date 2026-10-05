@@ -32,12 +32,16 @@ Once the permanent key is created, all long-lived physical-device QA APKs use th
 At every phase gate:
 1. merge the phase to green main
 2. increment versionCode
-3. build signed QA APK
-4. verify signature
-5. install over previous QA APK without uninstalling
+3. build both signed QA APK variants from the exact same commit/version:
+   - ARM64 phone QA APK (`arm64-v8a`) for routine Ryan/Eddy physical-device testing after the device ABI is verified
+   - universal QA APK containing the full supported ABI set for compatibility/archive use
+4. verify both signatures and record both hashes/provenance
+5. install the ARM64 QA APK over the previous production QA install without uninstalling when the phone reports `arm64-v8a`; otherwise use the universal QA APK
 6. launch and run migration/update smoke tests
 7. verify settings/history/encrypted assets survive
 8. only then begin the next phase
+
+Both QA variants keep the same production applicationId, versionCode/versionName and permanent signing certificate. They are the same release candidate with different native-library packaging, not separate apps or separate update chains.
 
 Debug developer builds may continue using normal debug signing, but they do not replace the signed update-chain test.
 
@@ -82,14 +86,24 @@ Release/QA candidate must verify:
 ## 7. Build outputs
 
 Development:
-- debug APK for fast local iteration
+- debug APK for fast local iteration; emulator/CI support must retain the ABIs required by the test environment, including x86/x86_64 where used
 
 Phase QA:
-- signed QA APK installable as an update over prior QA build
+- `ASCEND-QA-arm64.apk` — signed `arm64-v8a` production-package APK; this is the normal Ryan/Eddy phone download after each developer phone has been verified as ARM64
+- `ASCEND-QA-universal.apk` — signed production-package APK containing the full supported ABI set; retain it as the compatibility/archive artifact
+- both QA APKs must use the same production applicationId, versionCode/versionName, code/resources and permanent signing certificate; only native ABI packaging may differ
+- both variants must support in-place update semantics over the same QA install
+- `ASCEND-dev.apk` may remain a separate debug/developer package where needed
+- provenance must record the exact commit plus hashes for both QA APKs
+
+Do not remove x86/x86_64 support from the project merely to make the phone APK smaller. The ARM64 artifact is an additional optimized physical-device package; universal/native compatibility and emulator testing remain intact.
+
+If either developer phone does not report `arm64-v8a` as a supported primary ABI, use the universal QA artifact for that device rather than forcing ARM64.
 
 Play:
-- signed Android App Bundle (AAB) as the store artifact
-- APK may still be generated for controlled QA where appropriate
+- signed Android App Bundle (AAB) is the store artifact
+- Google Play performs device-specific delivery from the AAB so end users do not need the universal QA APK
+- APKs may still be generated for controlled QA where appropriate
 
 ## 8. Migration discipline
 
