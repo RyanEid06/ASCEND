@@ -86,7 +86,7 @@ import kotlin.math.max
 fun CaptureRoute(
     windowWidthClass: AscendWindowWidthClass,
     onExit: () -> Unit,
-    onCaptureSaved: () -> Unit,
+    onCaptureSaved: (String) -> Unit,
 ) {
     val viewModel: CaptureViewModel = viewModel()
     val state = viewModel.uiState.collectAsStateWithLifecycle().value
@@ -95,7 +95,7 @@ fun CaptureRoute(
 
     LaunchedEffect(saveState) {
         if (saveState is CaptureSaveState.Saved) {
-            onCaptureSaved()
+            onCaptureSaved(saveState.scanId)
         }
     }
 

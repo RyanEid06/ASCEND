@@ -34,6 +34,7 @@ fun FoundationHomeScreen(
     uiState: HomeUiState,
     showDebugEntry: Boolean,
     onStartScan: () -> Unit,
+    onOpenFrontLandmarks: (String) -> Unit,
     onToggleDetails: () -> Unit,
     onOpenFoundationInfo: () -> Unit,
     onOpenDebugMenu: () -> Unit,
@@ -48,6 +49,11 @@ fun FoundationHomeScreen(
                     )
                 },
                 actions = {
+                    if (uiState.frontPreviewScanIds.isNotEmpty()) {
+                        TextButton(onClick = { onOpenFrontLandmarks(uiState.frontPreviewScanIds.first()) }) {
+                            Text("Front preview")
+                        }
+                    }
                     TextButton(onClick = onStartScan) {
                         Text("New scan")
                     }

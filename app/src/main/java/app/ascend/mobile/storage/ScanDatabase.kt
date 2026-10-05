@@ -62,6 +62,8 @@ internal abstract class ScanDao {
     @Query("DELETE FROM local_photos WHERE scanId = :id AND view = :view") abstract suspend fun removePhoto(id: String, view: String)
     @Query("DELETE FROM local_photos WHERE scanId = :id") abstract suspend fun removePhotos(id: String)
     @Query("DELETE FROM scan_payloads WHERE scanId = :id") abstract suspend fun invalidateDerived(id: String)
+    @Query("DELETE FROM scan_payloads WHERE scanId = :id AND kind NOT IN ('front-input-v1', 'front-landmarks-v1', 'profile-input-v1')")
+    abstract suspend fun invalidateMeasurementDependents(id: String)
     @Query("DELETE FROM local_scans WHERE id = :id") abstract suspend fun removeScan(id: String)
     @Query("UPDATE local_scans SET deleting = 1") abstract suspend fun markAllDeleting()
 
@@ -90,6 +92,18 @@ internal abstract class ScanDao {
 
     @Transaction open suspend fun complete(scan: ScanRow, payload: ScanPayloadRow) {
         savePayload(payload)
+        saveScan(scan)
+    }
+
+    @Transaction open suspend fun saveFrontRevision(scan: ScanRow, payload: ScanPayloadRow) {
+        invalidateMeasurementDependents(scan.id)
+        savePayload(payload)
+        saveScan(scan)
+    }
+
+    @Transaction open suspend fun completeFront(scan: ScanRow, analysis: ScanPayloadRow, provenance: ScanPayloadRow) {
+        savePayload(analysis)
+        savePayload(provenance)
         saveScan(scan)
     }
 }

@@ -34,7 +34,7 @@ jobs:
         run: sdkmanager 'platforms;android-37.0' 'build-tools;37.0.0'
       - uses: gradle/actions/setup-gradle@v4
       - name: Prepare permanent ASCEND signing identity
-        if: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/phase/P02-integration' || github.ref == 'refs/heads/main') }}
+        if: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/phase/P02-integration' || github.ref == 'refs/heads/phase/P03-integration' || github.ref == 'refs/heads/main') }}
         env:
           ASCEND_KEYSTORE_BASE64: ${{ secrets.ASCEND_KEYSTORE_BASE64 }}
           ASCEND_KEYSTORE_PASSWORD: ${{ secrets.ASCEND_KEYSTORE_PASSWORD }}
@@ -55,6 +55,10 @@ jobs:
         run: python3 scripts/check_dependency_policy.py gradle/libs.versions.toml
       - name: Check local storage privacy contract
         run: python3 scripts/check_local_storage_contract.py
+      - name: Check front annotation schema and synthetic fixtures
+        run: |
+          python3 -m pip install jsonschema==4.23.0
+          python3 scripts/check_front_fixtures.py
       - name: Build and unit tests
         run: bash ./gradlew --no-daemon clean assembleDebug assembleRelease assembleDebugAndroidTest test
       - name: Check native libraries for 16 KB page support
@@ -65,6 +69,11 @@ jobs:
           echo "Checking release APK: $RELEASE_APK"
           python3 scripts/check_native_16k.py "$RELEASE_APK"
           python3 scripts/check_native_16k.py app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+      - name: Check packaged local-only permissions
+        run: |
+          RELEASE_APK="$(find app/build/outputs/apk/release -maxdepth 1 -type f -name '*.apk' -print -quit)"
+          test -n "$RELEASE_APK"
+          python3 scripts/check_local_storage_contract.py app/build/outputs/apk/debug/app-debug.apk "$RELEASE_APK"
       - name: Verify Phase 2 signed QA APK
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/phase/P02-integration' }}
         run: |
@@ -82,6 +91,35 @@ jobs:
           retention-days: 30
       - name: Android lint
         run: bash ./gradlew --no-daemon lint
+      - name: Verify and stage Phase 3 QA APKs
+        if: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/phase/P03-integration' || github.ref == 'refs/heads/main') }}
+        run: |
+          APKSIGNER="$(find "$ANDROID_HOME/build-tools" -maxdepth 2 -type f -name apksigner -print -quit)"
+          test -n "$APKSIGNER"
+          "$APKSIGNER" verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk > ASCEND-P3-provenance.txt
+          # Public certificate identity verified from the existing P2 QA artifact.
+          grep -F 'certificate SHA-256 digest: b9565110d18e91bbdd6a0cbff0b238d39771c1357646bcb6c0cb7f11a73bb9d8' ASCEND-P3-provenance.txt
+          AAPT="$(find "$ANDROID_HOME/build-tools" -maxdepth 2 -type f -name aapt -print -quit)"
+          test -n "$AAPT"
+          "$AAPT" dump badging app/build/outputs/apk/release/app-release.apk > "$RUNNER_TEMP/p3-badging.txt"
+          grep -F "package: name='app.ascend.mobile' versionCode='5' versionName='0.3.2'" "$RUNNER_TEMP/p3-badging.txt" >> ASCEND-P3-provenance.txt
+          if grep -q '^application-debuggable' "$RUNNER_TEMP/p3-badging.txt"; then exit 1; fi
+          printf '\nGit commit: %s\n' "$GITHUB_SHA" >> ASCEND-P3-provenance.txt
+          sha256sum app/src/main/assets/face_landmarker.task >> ASCEND-P3-provenance.txt
+          cp app/build/outputs/apk/release/app-release.apk ASCEND-P3-QA-signed.apk
+          cp app/build/outputs/apk/debug/app-debug.apk ASCEND-P3-dev.apk
+          sha256sum ASCEND-P3-QA-signed.apk ASCEND-P3-dev.apk >> ASCEND-P3-provenance.txt
+      - name: Upload Phase 3 QA APKs
+        if: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/phase/P03-integration' || github.ref == 'refs/heads/main') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ASCEND-P3-QA-${{ github.sha }}
+          path: |
+            ASCEND-P3-QA-signed.apk
+            ASCEND-P3-dev.apk
+            ASCEND-P3-provenance.txt
+          if-no-files-found: error
+          retention-days: 30
       - name: Upload schemas and test reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -104,7 +142,7 @@ jobs:
           retention-days: 14
 
   instrumented-storage-spike:
-    if: ${{ (github.event_name == 'push' && startsWith(github.ref, 'refs/heads/phase/')) || github.event_name == 'pull_request' }}
+    if: ${{ (github.event_name == 'push' && (startsWith(github.ref, 'refs/heads/phase/') || github.ref == 'refs/heads/main')) || github.event_name == 'pull_request' }}
     needs: build-test-lint
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -157,6 +195,10 @@ jobs:
             # Install once, then run both fixtures directly so restart preserves data.
             adb install -r app/build/outputs/apk/debug/app-debug.apk
             adb install -r app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+            mkdir -p app/build/reports/wp08-ui
+            adb shell am instrument -w -e class app.ascend.mobile.ui.FrontMeasurementScreenTest app.ascend.mobile.dev.test/androidx.test.runner.AndroidJUnitRunner > app/build/reports/wp08-ui/smoke.txt
+            python3 scripts/check_instrumentation_result.py app/build/reports/wp08-ui/smoke.txt
+            adb exec-out run-as app.ascend.mobile.dev cat files/wp08-synthetic-debug.png > app/build/reports/wp08-ui/synthetic-debug.png
             mkdir -p app/build/reports/storage-process
             adb shell am instrument -w -e class app.ascend.mobile.storage.StorageProcessDeathTest#a_seed app.ascend.mobile.dev.test/androidx.test.runner.AndroidJUnitRunner > app/build/reports/storage-process/seed.txt
             cat app/build/reports/storage-process/seed.txt
@@ -173,4 +215,5 @@ jobs:
           path: |
             app/build/reports/androidTests/
             app/build/reports/storage-process/
+            app/build/reports/wp08-ui/
             app/build/outputs/androidTest-results/

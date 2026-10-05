@@ -1,0 +1,419 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "formatVersion": {
+      "const": 1
+    },
+    "fixtureId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "annotationMethodVersion": {
+      "type": "string",
+      "minLength": 1
+    },
+    "annotatorCode": {
+      "type": "string",
+      "minLength": 1
+    },
+    "consentRecordLocalId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "evidenceKind": {
+      "enum": [
+        "SYNTHETIC_FORMULA",
+        "HUMAN_ANNOTATION"
+      ]
+    },
+    "toleranceEvidence": {
+      "type": "string",
+      "minLength": 1
+    },
+    "input": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "contractVersion": {
+          "const": "wp08-front-v1"
+        },
+        "imageRevision": {
+          "type": "string",
+          "minLength": 1
+        },
+        "width": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "faceShortEdgePixels": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "origin": {
+          "enum": [
+            "SYNTHETIC",
+            "CONSENTED_LOCAL"
+          ]
+        },
+        "modelVersion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "modelArtifactSha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "extractorVersion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "confidenceMethodVersion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "faceCount": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "overallConfidence": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "residualPose": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "yaw": {
+                  "type": "number"
+                },
+                "pitch": {
+                  "type": "number"
+                },
+                "roll": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "yaw",
+                "pitch",
+                "roll"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "landmarks": {
+          "type": "object",
+          "propertyNames": {
+            "enum": [
+              "trichion",
+              "menton",
+              "zygion_left",
+              "zygion_right",
+              "brow_level",
+              "subnasale",
+              "stomion",
+              "gonion_left",
+              "gonion_right",
+              "pupil_left",
+              "pupil_right",
+              "medial_canthus_left",
+              "lateral_canthus_left",
+              "medial_canthus_right",
+              "lateral_canthus_right",
+              "upper_eyelid_left",
+              "lower_eyelid_left",
+              "upper_eyelid_right",
+              "lower_eyelid_right",
+              "inner_brow_left",
+              "inner_brow_right",
+              "brow_arch_left",
+              "brow_arch_right",
+              "cupids_bow",
+              "labrale_inferius"
+            ]
+          },
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "x": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "y": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "confidence": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "minimum": 0,
+                "maximum": 1
+              }
+            },
+            "required": [
+              "x",
+              "y",
+              "confidence"
+            ]
+          }
+        },
+        "rollOrigin": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "x": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "y": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "confidence": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "required": [
+            "x",
+            "y",
+            "confidence"
+          ]
+        }
+      },
+      "required": [
+        "contractVersion",
+        "imageRevision",
+        "width",
+        "height",
+        "faceShortEdgePixels",
+        "origin",
+        "modelVersion",
+        "modelArtifactSha256",
+        "extractorVersion",
+        "confidenceMethodVersion",
+        "faceCount",
+        "overallConfidence",
+        "residualPose",
+        "landmarks",
+        "rollOrigin"
+      ]
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence": {
+          "type": "string",
+          "minLength": 1
+        },
+        "syntheticOnly": {
+          "type": "boolean"
+        },
+        "minimumConfidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "minimumImageShortEdgePixels": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "minimumFaceShortEdgePixels": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "maximumYaw": {
+          "type": "number",
+          "minimum": 0
+        },
+        "maximumPitch": {
+          "type": "number",
+          "minimum": 0
+        },
+        "maximumRoll": {
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "version",
+        "evidence",
+        "syntheticOnly",
+        "minimumConfidence",
+        "minimumImageShortEdgePixels",
+        "minimumFaceShortEdgePixels",
+        "maximumYaw",
+        "maximumPitch",
+        "maximumRoll"
+      ]
+    },
+    "expected": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "metricId": {
+            "type": "string",
+            "pattern": "^candidate\\.front\\.[a-z_]+$"
+          },
+          "value": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "absoluteTolerance": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "failure": {
+            "enum": [
+              null,
+              "POLICY_REQUIRED",
+              "POLICY_NOT_VALIDATED_FOR_CAPTURE",
+              "FACE_COUNT_UNAVAILABLE",
+              "NOT_ONE_FACE",
+              "POSE_UNAVAILABLE",
+              "INSUFFICIENT_RESOLUTION",
+              "POSE_OUT_OF_RANGE",
+              "MISSING_LANDMARK",
+              "LOW_CONFIDENCE",
+              "CALIBRATION_REQUIRED",
+              "DEGENERATE_GEOMETRY",
+              "UNSUPPORTED_DEFINITION"
+            ]
+          }
+        },
+        "required": [
+          "metricId",
+          "value",
+          "absoluteTolerance",
+          "failure"
+        ],
+        "oneOf": [
+          {
+            "properties": {
+              "value": {
+                "type": "number"
+              },
+              "absoluteTolerance": {
+                "type": "number",
+                "minimum": 0
+              },
+              "failure": {
+                "type": "null"
+              }
+            }
+          },
+          {
+            "properties": {
+              "value": {
+                "type": "null"
+              },
+              "absoluteTolerance": {
+                "type": "null"
+              },
+              "failure": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "required": [
+    "formatVersion",
+    "fixtureId",
+    "annotationMethodVersion",
+    "annotatorCode",
+    "consentRecordLocalId",
+    "evidenceKind",
+    "toleranceEvidence",
+    "input",
+    "policy",
+    "expected"
+  ],
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ascend.local/schemas/front-annotation-v1.json",
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "input": {
+            "properties": {
+              "origin": {
+                "const": "SYNTHETIC"
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "consentRecordLocalId": {
+            "type": "null"
+          },
+          "evidenceKind": {
+            "const": "SYNTHETIC_FORMULA"
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "consentRecordLocalId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "evidenceKind": {
+            "const": "HUMAN_ANNOTATION"
+          }
+        }
+      }
+    }
+  ]
+}

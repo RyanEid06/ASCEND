@@ -15,6 +15,7 @@ import app.ascend.mobile.ui.capture.CaptureRoute
 import app.ascend.mobile.ui.debug.DebugAccessPolicy
 import app.ascend.mobile.ui.debug.DebugMenuScreen
 import app.ascend.mobile.ui.debug.DebugMenuViewModel
+import app.ascend.mobile.ui.debug.MeasurementDebugEntry
 import app.ascend.mobile.ui.foundation.FoundationHomeScreen
 import app.ascend.mobile.ui.foundation.FoundationInfoScreen
 import app.ascend.mobile.ui.foundation.HomeViewModel
@@ -44,6 +45,7 @@ fun AscendNavHost(windowWidthClass: AscendWindowWidthClass) {
                     uiState = uiState,
                     showDebugEntry = debugAvailable,
                     onStartScan = { backStack.add(CaptureFlowRoute) },
+                    onOpenFrontLandmarks = { backStack.add(FrontLandmarkRoute(it)) },
                     onToggleDetails = viewModel::onToggleFoundationDetails,
                     onOpenFoundationInfo = { backStack.add(FoundationInfoRoute) },
                     onOpenDebugMenu = {
@@ -64,8 +66,15 @@ fun AscendNavHost(windowWidthClass: AscendWindowWidthClass) {
                 CaptureRoute(
                     windowWidthClass = windowWidthClass,
                     onExit = { backStack.removeLastOrNull() },
-                    onCaptureSaved = { backStack.removeLastOrNull() },
+                    onCaptureSaved = { scanId ->
+                        backStack.removeLastOrNull()
+                        backStack.add(FrontLandmarkRoute(scanId))
+                    },
                 )
+            }
+
+            entry<FrontLandmarkRoute> { route ->
+                app.ascend.mobile.ui.vision.FrontLandmarkRoute(route.scanId, onBack = { backStack.removeLastOrNull() })
             }
 
             if (debugAvailable) {
@@ -77,8 +86,12 @@ fun AscendNavHost(windowWidthClass: AscendWindowWidthClass) {
                         flags = flags,
                         onFlagChanged = viewModel::setFlagOverride,
                         onClearOverrides = viewModel::clearOverrides,
+                        onOpenMeasurements = { backStack.add(MeasurementDebugRoute) },
                         onBack = { backStack.removeLastOrNull() },
                     )
+                }
+                entry<MeasurementDebugRoute> {
+                    MeasurementDebugEntry(onBack = { backStack.removeLastOrNull() })
                 }
             }
         },
