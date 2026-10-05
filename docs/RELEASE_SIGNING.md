@@ -89,11 +89,11 @@ Development:
 - debug APK for fast local iteration; emulator/CI support must retain the ABIs required by the test environment, including x86/x86_64 where used
 
 Phase QA:
-- `ASCEND-PX-QA-arm64.apk` — signed `arm64-v8a` production-package APK; this is the normal Ryan/Eddy phone download after each developer phone has been verified as ARM64
-- `ASCEND-PX-QA-universal.apk` — signed production-package APK containing the full supported ABI set; retain it as the compatibility/archive artifact
+- `ASCEND-QA-arm64.apk` — signed `arm64-v8a` production-package APK; this is the normal Ryan/Eddy phone download after each developer phone has been verified as ARM64
+- `ASCEND-QA-universal.apk` — signed production-package APK containing the full supported ABI set; retain it as the compatibility/archive artifact
 - both QA APKs must use the same production applicationId, versionCode/versionName, code/resources and permanent signing certificate; only native ABI packaging may differ
 - both variants must support in-place update semantics over the same QA install
-- `ASCEND-PX-dev.apk` may remain a separate debug/developer package where needed
+- `ASCEND-dev.apk` may remain a separate debug/developer package where needed
 - provenance must record the exact commit plus hashes for both QA APKs
 
 Do not remove x86/x86_64 support from the project merely to make the phone APK smaller. The ARM64 artifact is an additional optimized physical-device package; universal/native compatibility and emulator testing remain intact.
