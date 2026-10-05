@@ -1,5 +1,10 @@
 # P3 integration QA APK
 
+The version-4 integration candidate below is superseded for the main handoff by
+versionCode 5 / versionName 0.3.2. See [P4 handoff](P04_HANDOFF.md) for the owner's
+merge authorization, new main build and acceptance checks still pending. The
+historical integration-only gate statement below describes the version-4 build.
+
 User-authorized integration and APK preparation on 2026-10-05. WP08 PR #16 was
 merged after green lane CI. WP07 PR #17 was updated with the exact WP08 integration;
 the only merge conflict was the repository imports, and both interfaces/routes were

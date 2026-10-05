@@ -92,7 +92,7 @@ jobs:
       - name: Android lint
         run: bash ./gradlew --no-daemon lint
       - name: Verify and stage Phase 3 QA APKs
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/phase/P03-integration' }}
+        if: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/phase/P03-integration' || github.ref == 'refs/heads/main') }}
         run: |
           APKSIGNER="$(find "$ANDROID_HOME/build-tools" -maxdepth 2 -type f -name apksigner -print -quit)"
           test -n "$APKSIGNER"
@@ -102,7 +102,7 @@ jobs:
           AAPT="$(find "$ANDROID_HOME/build-tools" -maxdepth 2 -type f -name aapt -print -quit)"
           test -n "$AAPT"
           "$AAPT" dump badging app/build/outputs/apk/release/app-release.apk > "$RUNNER_TEMP/p3-badging.txt"
-          grep -F "package: name='app.ascend.mobile' versionCode='4' versionName='0.3.1'" "$RUNNER_TEMP/p3-badging.txt" >> ASCEND-P3-provenance.txt
+          grep -F "package: name='app.ascend.mobile' versionCode='5' versionName='0.3.2'" "$RUNNER_TEMP/p3-badging.txt" >> ASCEND-P3-provenance.txt
           if grep -q '^application-debuggable' "$RUNNER_TEMP/p3-badging.txt"; then exit 1; fi
           printf '\nGit commit: %s\n' "$GITHUB_SHA" >> ASCEND-P3-provenance.txt
           sha256sum app/src/main/assets/face_landmarker.task >> ASCEND-P3-provenance.txt
@@ -110,7 +110,7 @@ jobs:
           cp app/build/outputs/apk/debug/app-debug.apk ASCEND-P3-dev.apk
           sha256sum ASCEND-P3-QA-signed.apk ASCEND-P3-dev.apk >> ASCEND-P3-provenance.txt
       - name: Upload Phase 3 QA APKs
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/phase/P03-integration' }}
+        if: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/phase/P03-integration' || github.ref == 'refs/heads/main') }}
         uses: actions/upload-artifact@v4
         with:
           name: ASCEND-P3-QA-${{ github.sha }}
@@ -142,7 +142,7 @@ jobs:
           retention-days: 14
 
   instrumented-storage-spike:
-    if: ${{ (github.event_name == 'push' && startsWith(github.ref, 'refs/heads/phase/')) || github.event_name == 'pull_request' }}
+    if: ${{ (github.event_name == 'push' && (startsWith(github.ref, 'refs/heads/phase/') || github.ref == 'refs/heads/main')) || github.event_name == 'pull_request' }}
     needs: build-test-lint
     runs-on: ubuntu-latest
     timeout-minutes: 60
