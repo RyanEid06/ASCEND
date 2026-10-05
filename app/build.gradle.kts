@@ -78,6 +78,10 @@ android {
     sourceSets {
         getByName("debug").assets.srcDir("../test-fixtures/front")
         getByName("test").resources.srcDir("../test-fixtures/front")
+        // phoneQa is release-derived but custom build types do not automatically
+        // compile files under src/release. Reuse the release-only inert debug entry
+        // so the production phone QA APK cannot expose debug tooling.
+        getByName("phoneQa").java.srcDir("src/release/java")
     }
 
     compileOptions {
