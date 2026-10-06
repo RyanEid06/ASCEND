@@ -53,21 +53,29 @@ class ProfileAssistScreenTest {
                 ProfileAssistScreen(state.value, {}, { _, _ -> }, {}, {}, {}, {}, { replaced = true }, {})
             } } }
             instrumentation.waitForIdleSync()
-            fun node(current: AccessibilityNodeInfo?): AccessibilityNodeInfo? {
+            fun node(text: String, current: AccessibilityNodeInfo?): AccessibilityNodeInfo? {
                 if (current == null) return null
-                if (current.text?.toString() == "Choose another profile photo") return current
-                repeat(current.childCount) { node(current.getChild(it))?.let { value -> return value } }
+                if (current.isVisibleToUser && current.text?.toString() == text) return current
+                repeat(current.childCount) { node(text, current.getChild(it))?.let { value -> return value } }
                 return null
             }
             var replacement: AccessibilityNodeInfo? = null
-            repeat(30) { if (replacement == null) { replacement = node(instrumentation.uiAutomation.rootInActiveWindow); Thread.sleep(100) } }
+            repeat(30) { if (replacement == null) { replacement = node("Choose another profile photo", instrumentation.uiAutomation.rootInActiveWindow); Thread.sleep(100) } }
             var clickable = requireNotNull(replacement)
             while (!clickable.isClickable) clickable = requireNotNull(clickable.parent)
             assertTrue(clickable.performAction(AccessibilityNodeInfo.ACTION_CLICK))
             instrumentation.waitForIdleSync(); assertTrue(replaced)
             instrumentation.runOnMainSync { state.value = ProfileAssistState.Failed("completed-scan", "Read only", false) }
             instrumentation.waitForIdleSync()
-            assertNull(node(instrumentation.uiAutomation.rootInActiveWindow))
+            var readOnlyRendered = false
+            repeat(50) {
+                if (!readOnlyRendered) {
+                    val root = instrumentation.uiAutomation.rootInActiveWindow
+                    readOnlyRendered = node("Read only", root) != null && node("Choose another profile photo", root) == null
+                    if (!readOnlyRendered) Thread.sleep(100)
+                }
+            }
+            assertTrue("Completed history must render read-only text without a replacement control", readOnlyRendered)
         } finally { instrumentation.runOnMainSync { activity.finish() } }
     }
 
