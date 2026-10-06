@@ -1,0 +1,27 @@
+{
+  "formatVersion": 1,
+  "evidence": "SYNTHETIC_FORMULA_ONLY",
+  "imageRevision": "synthetic-profile-v1",
+  "points": {
+    "glabella": [0.3, 0.2],
+    "nasion": [0.5, 0.2],
+    "supratip": [0.5, 0.4],
+    "columella": [0.4, 0.4],
+    "subnasale": [0.5, 0.5],
+    "labrale_superius": [0.6, 0.5],
+    "labrale_inferius": [0.5, 0.65],
+    "sublabiale": [0.5, 0.75],
+    "pogonion": [0.6, 0.85],
+    "ramus_reference": [0.15, 0.6],
+    "gonion_visible": [0.25, 0.8],
+    "mandibular_border_reference": [0.55, 0.8]
+  },
+  "expectedDegrees": {
+    "nasofrontal_angle": 90.0,
+    "nasolabial_angle": 135.0,
+    "mentolabial_angle": 135.0,
+    "soft_tissue_jaw_angle": 116.565051177078
+  },
+  "absoluteToleranceDegrees": 0.000000001,
+  "toleranceEvidence": "Floating-point arithmetic comparison only; not capture repeatability."
+}
