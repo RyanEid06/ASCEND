@@ -4,8 +4,11 @@
 
 The owner authorized syncing and merging both P4 lanes, then preparing a signed
 phone QA build. WP10 PR #23 and WP09 PR #22 are merged into P4 integration; the
-candidate advances to versionCode 6 / versionName 0.4.0. The signed ARM64 and
-universal artifacts must come from the same green main commit and permanent key.
+candidate advances to versionCode 6 / versionName 0.4.0. The signed ARM64 phone
+artifact must come from green main and the permanent key. The owner's subsequent
+clarification selects ARM64-only phone backups/downloads, superseding the older
+universal archive requirement below. Universal packaging is checked within CI but
+is no longer published as a QA artifact; emulator ABI support remains.
 The owner chose to perform the physical-phone test manually. Follow
 [P4 QA checks](P04_QA_BUILD.md) before declaring the phone update accepted.
 

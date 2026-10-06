@@ -184,10 +184,10 @@ At each phase boundary:
 - no raw face data leaked to logs/analytics
 - docs updated
 - both Ryan and Eddy manually exercise the integrated feature
-- build both signed production QA variants from the integrated/main baseline when an APK exists: ARM64 (`arm64-v8a`) for routine developer-phone testing and universal for compatibility/archive use
-- verify both variants use the same production package, version and permanent signing certificate; record both hashes/provenance
+- build/publish/back up the signed ARM64 (`arm64-v8a`) production phone QA APK from the integrated/main baseline; universal packaging remains a CI compatibility check only (owner clarification, 2026-10-06)
+- verify the production package, version and permanent signing certificate; record phone APK hash/size/provenance
 - if native libraries exist, verify 16 KB page-size compatibility/alignment and retain the ABI support required by CI/emulators
-- install the ARM64 QA APK over the previous signed QA APK without uninstalling when the developer phone is verified as ARM64; otherwise use the universal APK
+- install the ARM64 QA APK over the previous signed QA APK without uninstalling when the phone supports ARM64; otherwise request a compatible build
 - verify migrations/settings/history/encrypted assets survive the update
 - tag or record the phase baseline commit
 
@@ -363,9 +363,9 @@ Sync Gate P3:
 Pre-P4 packaging prerequisite:
 - before WP09/WP10 implementation starts, merge the ARM64 + universal QA packaging baseline to green main
 - routine Ryan/Eddy phone downloads use the signed `arm64-v8a` QA artifact after device ABI verification
-- the signed universal QA artifact remains the full compatibility/archive build
+- universal release packaging remains a CI compatibility check, without a published QA archive (owner clarification, 2026-10-06)
 - x86/x86_64 support remains available for emulator/CI coverage
-- both QA variants keep the same production applicationId, permanent signing identity and version/update chain
+- the ARM64 QA artifact keeps the production applicationId, permanent signing identity and version/update chain
 - refresh/recreate `phase/P04-integration`, `ryan/P04-WP09-profile-capture-assist` and `eddy/P04-WP10-profile-extractors` from that green main baseline if no lane implementation has begun
 
 Shared goal: make the profile path accurate enough for V1 without pretending a frontal mesh solves 90-degree anatomy.
@@ -626,11 +626,9 @@ At every phase that produces an installable app:
 2. green shared CI
 3. merge phase to main
 4. increment versionCode
-5. generate both signed QA APK variants from the same commit using the permanent ASCEND signing identity:
-   - ARM64 (`arm64-v8a`) phone QA APK for normal Ryan/Eddy testing after ABI verification
-   - universal compatibility/archive QA APK
-6. verify both signatures/hashes and preserve native ABI coverage required by CI/emulators
-7. install the ARM64 QA APK over the prior production QA install without uninstalling when the phone supports it; otherwise use universal
+5. generate/publish/back up the signed ARM64 (`arm64-v8a`) phone QA APK using the permanent ASCEND signing identity
+6. verify signature/hash and preserve native ABI coverage required by CI/emulators
+7. install over the prior production QA install without uninstalling when the phone supports ARM64; otherwise request a compatible build
 8. perform the phase-appropriate physical-device smoke/visual test
 9. fix migration/update regressions before starting the next phase
 

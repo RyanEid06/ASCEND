@@ -6,10 +6,13 @@ This is a QA preview, with real-photo measurement/reliability acceptance still o
 
 ## Build and update identity
 
-Main's Android CI supplies `ASCEND-QA-arm64.apk`, `ASCEND-QA-universal.apk` and
-`ASCEND-QA-provenance.txt`. Use artifacts from the same exact successful main run.
+Main's Android CI supplies `ASCEND-QA-arm64.apk` and
+`ASCEND-QA-provenance.txt`. The owner's 2026-10-06 clarification selects ARM64-only
+phone QA backups/downloads; universal QA APKs are no longer published. Universal
+release packaging still receives compatibility checks within CI, and developer
+builds retain emulator ABIs. Use the exact successful main run's ARM64 artifact.
 The production package remains `app.ascend.mobile`, versionCode 6, versionName
-0.4.0. Both APKs use certificate SHA-256
+0.4.0. The phone APK uses certificate SHA-256
 `b9565110d18e91bbdd6a0cbff0b238d39771c1357646bcb6c0cb7f11a73bb9d8`.
 CI verifies signatures, identity, ABI packaging, packaged permissions and native
 16 KB compatibility, and records commit, model hash, APK size and SHA-256.
@@ -17,8 +20,8 @@ The separate `ASCEND-dev.apk` is not the production update-chain test.
 
 ## Manual Honor phone checklist
 
-1. Record phone model, Android version and supported ABI. Use ARM64 only if the
-   phone supports `arm64-v8a`; otherwise use universal.
+1. Record phone model, Android version and supported ABI. The Honor phone must
+   support `arm64-v8a` to install this APK. Request a compatible build if it does not.
 2. Before updating, note existing settings/history and which stored front/profile
    photos open successfully. Keep real photos and personal data off GitHub.
 3. Install the signed QA APK over the existing ASCEND install. **Do not uninstall,
