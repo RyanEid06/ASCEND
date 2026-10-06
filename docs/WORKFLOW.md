@@ -112,7 +112,7 @@ For every phase:
 Flow:
 1. main must be green.
 2. Create phase/PXX-integration from main.
-3. Freeze the shared phase contract.
+3. Identify shared phase interfaces and reuse the existing models.
 4. Ryan and Eddy branch from that exact integration commit.
 5. Work in parallel.
 6. Each lane opens a PR into the phase integration branch.
@@ -122,11 +122,17 @@ Flow:
 10. PR phase/PXX-integration -> main.
 11. Only after main is green may the next phase begin.
 
+Permanent build branches (owner final clarification, 2026-10-06): `main` retains
+all four CPU ABIs; `codex/arm64-qa` stays at the same merged commit and publishes
+only the ARM64 phone APK. This is packaging selection, not a second feature fork.
+After green phase/main, fast-forward the ARM64 branch, remove verified merged phase
+and lane branches, and create the next three phase branches from exact green main.
+
 No “I already started the next WP” while the sync gate is unresolved.
 
-## Shared-contract rule
+## Shared interfaces — coordinate through the phase sync
 
-Once a phase begins, these are treated as shared API contracts:
+These are shared interfaces that both lanes should keep consistent:
 - data models
 - database schema touched by both lanes
 - scoring config schema
@@ -135,13 +141,18 @@ Once a phase begins, these are treated as shared API contracts:
 - analytics event names
 - public interfaces between geometry, scoring, storage, and UI
 
-A lane may not casually change them. If a shared contract must change:
-1. stop both lanes
-2. document the change
-3. update both branches
-4. resume
+Reuse existing types rather than create competing models. Necessary additive
+changes may proceed in the owning development branch without a separate approval
+or stop-both-lanes ceremony. Describe the interface change and dependency in the
+PR, retain compatibility where practical, and reconcile both lanes at phase sync.
 
-This prevents parallel work from becoming merge-conflict roulette.
+The owner relaxed the per-interface freeze/approval stops on 2026-10-06. Ordinary
+reversible implementation, fixes and tests should continue autonomously. Keep
+planning and documentation proportionate; do not require an extra design/spec/plan
+approval before each task. The shared phase sync and merge boundaries remain:
+integrate both lanes, run the shared checks, review the integrated behavior, then
+obtain the phase merge decision before starting the next phase. This does not
+waive photo privacy, bounded editing, honest reliability labels or branch safety.
 
 ## Ownership philosophy
 
@@ -179,10 +190,10 @@ At each phase boundary:
 - no raw face data leaked to logs/analytics
 - docs updated
 - both Ryan and Eddy manually exercise the integrated feature
-- build both signed production QA variants from the integrated/main baseline when an APK exists: ARM64 (`arm64-v8a`) for routine developer-phone testing and universal for compatibility/archive use
-- verify both variants use the same production package, version and permanent signing certificate; record both hashes/provenance
+- main publishes all-four-ABI universal QA; synchronized `codex/arm64-qa` publishes only signed ARM64 (`arm64-v8a`) for phone downloads/backups (owner final clarification, 2026-10-06)
+- verify the production package, version and permanent signing certificate; record phone APK hash/size/provenance
 - if native libraries exist, verify 16 KB page-size compatibility/alignment and retain the ABI support required by CI/emulators
-- install the ARM64 QA APK over the previous signed QA APK without uninstalling when the developer phone is verified as ARM64; otherwise use the universal APK
+- install the ARM64 QA APK over the previous signed QA APK without uninstalling when the phone supports ARM64; otherwise request a compatible build
 - verify migrations/settings/history/encrypted assets survive the update
 - tag or record the phase baseline commit
 
@@ -358,9 +369,9 @@ Sync Gate P3:
 Pre-P4 packaging prerequisite:
 - before WP09/WP10 implementation starts, merge the ARM64 + universal QA packaging baseline to green main
 - routine Ryan/Eddy phone downloads use the signed `arm64-v8a` QA artifact after device ABI verification
-- the signed universal QA artifact remains the full compatibility/archive build
+- main publishes universal QA for all four ABIs; the synchronized ARM64 branch publishes only the smaller phone APK
 - x86/x86_64 support remains available for emulator/CI coverage
-- both QA variants keep the same production applicationId, permanent signing identity and version/update chain
+- the ARM64 QA artifact keeps the production applicationId, permanent signing identity and version/update chain
 - refresh/recreate `phase/P04-integration`, `ryan/P04-WP09-profile-capture-assist` and `eddy/P04-WP10-profile-extractors` from that green main baseline if no lane implementation has begun
 
 Shared goal: make the profile path accurate enough for V1 without pretending a frontal mesh solves 90-degree anatomy.
@@ -621,11 +632,9 @@ At every phase that produces an installable app:
 2. green shared CI
 3. merge phase to main
 4. increment versionCode
-5. generate both signed QA APK variants from the same commit using the permanent ASCEND signing identity:
-   - ARM64 (`arm64-v8a`) phone QA APK for normal Ryan/Eddy testing after ABI verification
-   - universal compatibility/archive QA APK
-6. verify both signatures/hashes and preserve native ABI coverage required by CI/emulators
-7. install the ARM64 QA APK over the prior production QA install without uninstalling when the phone supports it; otherwise use universal
+5. fast-forward `codex/arm64-qa` to main; main publishes universal, the ARM64 branch publishes only the signed phone APK using the permanent ASCEND signing identity
+6. verify signature/hash and preserve native ABI coverage required by CI/emulators
+7. install over the prior production QA install without uninstalling when the phone supports ARM64; otherwise request a compatible build
 8. perform the phase-appropriate physical-device smoke/visual test
 9. fix migration/update regressions before starting the next phase
 

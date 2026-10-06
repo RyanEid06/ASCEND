@@ -2,10 +2,6 @@
 
 package app.ascend.mobile.ui.vision
 
-import android.app.Activity
-import android.content.Context
-import android.content.ContextWrapper
-import android.view.WindowManager
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -15,24 +11,18 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import app.ascend.mobile.core.vision.*
+import app.ascend.mobile.ui.privacy.ProtectSensitivePhotoWindow
 import kotlin.math.roundToInt
 
 @Composable
-fun FrontLandmarkRoute(scanId: String, onBack: () -> Unit) {
-    val activity = LocalContext.current.findActivity()
-    DisposableEffect(activity) {
-        val window = activity?.window
-        val wasSecure = window?.attributes?.flags?.and(WindowManager.LayoutParams.FLAG_SECURE) != 0
-        window?.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
-        onDispose { if (!wasSecure) window?.clearFlags(WindowManager.LayoutParams.FLAG_SECURE) }
-    }
+fun FrontLandmarkRoute(scanId: String, onBack: () -> Unit, onProfile: () -> Unit = {}) {
+    ProtectSensitivePhotoWindow()
     val viewModel: FrontLandmarkViewModel = viewModel()
     val state = viewModel.state.collectAsStateWithLifecycle().value
     LaunchedEffect(scanId) { viewModel.load(scanId) }
@@ -42,6 +32,7 @@ fun FrontLandmarkRoute(scanId: String, onBack: () -> Unit) {
     }) }) { padding ->
         Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Button(onClick = onProfile) { Text("Confirm profile points") }
             when (val current = state) {
                 FrontPreviewState.Loading -> { CircularProgressIndicator(); Text("Finding front landmarks on your device…") }
                 is FrontPreviewState.Failed -> {
@@ -60,12 +51,6 @@ fun FrontLandmarkRoute(scanId: String, onBack: () -> Unit) {
             }
         }
     }
-}
-
-private tailrec fun Context.findActivity(): Activity? = when (this) {
-    is Activity -> this
-    is ContextWrapper -> baseContext.findActivity()
-    else -> null
 }
 
 /** Image and points share the inverse geometry transform, including aspect fit and letterboxing. */

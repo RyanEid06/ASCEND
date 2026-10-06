@@ -7,6 +7,10 @@ import app.ascend.mobile.core.data.*
 import app.ascend.mobile.core.model.*
 import app.ascend.mobile.core.vision.*
 import app.ascend.mobile.core.front.*
+import app.ascend.mobile.core.profile.*
+import app.ascend.mobile.core.geometry.LandmarkId
+import app.ascend.mobile.core.geometry.PixelResolution
+import app.ascend.mobile.core.geometry.Point2
 import java.io.File
 import java.security.SecureRandom
 import java.util.UUID
@@ -164,11 +168,14 @@ class EncryptedScanRepository internal constructor(
 
     override suspend fun complete(owner: ScanOwner, outcome: AnalysisOutcome.Complete, atEpochMillis: Long): LocalScan = serialized {
         require(dao.payload(outcome.scanId, "front-input-v1") == null) { "Front analyses require a matching correction revision" }
+        require(readProfile(outcome.scanId) == null) { "Profile analyses require a reviewed revision-bound completion path" }
         persistComplete(owner, outcome, atEpochMillis)
     }
 
     private suspend fun persistComplete(owner: ScanOwner, outcome: AnalysisOutcome.Complete, atEpochMillis: Long,
         frontProvenance: FrontCompletedProvenance? = null): LocalScan {
+        // A corrupt/stale cache is a miss, as in the read path; only a valid current session binds completion.
+        require(readProfile(outcome.scanId) == null) { "Preview confirmations cannot complete a scored analysis" }
         val row = editable(owner, outcome.scanId, atEpochMillis)
         require(row.state == ScanState.SCORING.name && row.referenceModel == outcome.referenceModel.name)
         val photos = dao.photos(row.id)
@@ -269,6 +276,83 @@ class EncryptedScanRepository internal constructor(
     private suspend fun readFront(scanId: String): FrontRevision? {
         val payload = dao.payload(scanId, "front-input-v1") ?: return null
         return try { FrontCodec.revision(payload.payload) } finally { payload.payload.fill(0) }
+    }
+
+    internal suspend fun readProfilePhoto(owner: ScanOwner, scanId: String): ProfilePhoto = serialized {
+        val row = requireNotNull(dao.get(owner.scope(), scanId))
+        val photo = profilePhoto(scanId)
+        ProfilePhoto(files.read(photo.assetId), photo.assetId, PixelResolution(photo.width, photo.height),
+            photo.profileSide?.let(ProfileSide::valueOf), row.state == ScanState.COMPLETE.name)
+    }
+
+    internal suspend fun readProfileAssist(owner: ScanOwner, scanId: String): ProfileAssistSession? = serialized {
+        if (dao.get(owner.scope(), scanId) == null) return@serialized null
+        readProfile(scanId)
+    }
+
+    internal suspend fun beginProfileAssist(owner: ScanOwner, scanId: String, expectedImageRevision: String,
+        expectedRevision: Long?, side: ProfileSide, facing: ProfileFacing, atEpochMillis: Long): ProfileAssistSession = serialized {
+        val row = editable(owner, scanId, atEpochMillis)
+        val photo = profilePhoto(scanId)
+        require(photo.assetId == expectedImageRevision) { "Profile image changed" }
+        val previous = readProfile(scanId)
+        require(previous?.revisionToken == expectedRevision) { "Stale profile correction revision" }
+        val next = ProfileAssistSession.preview(photo.assetId, PixelResolution(photo.width, photo.height), side, facing)
+            .copy(revisionToken = previous?.revisionToken?.plus(1) ?: 0)
+        saveProfile(row, photo, next, atEpochMillis)
+        next
+    }
+
+    /** Adapter seam for WP10 automatic proposals; no alternative point model or extractor implementation. */
+    internal suspend fun installProfileAssist(owner: ScanOwner, scanId: String, session: ProfileAssistSession,
+        atEpochMillis: Long) = serialized {
+        val row = editable(owner, scanId, atEpochMillis)
+        val photo = profilePhoto(scanId)
+        require(readProfile(scanId) == null) { "Profile source is immutable; retake to replace it" }
+        require(session.revision.revision == 0L && session.revisionToken == 0L)
+        val input = session.revision.input
+        require(input.origin != ProfileOrigin.CONSENTED_LOCAL) { "No reviewed real-profile proposal policy" }
+        require(input.imageRevision == photo.assetId && input.resolution == PixelResolution(photo.width, photo.height))
+        saveProfile(row, photo, session, atEpochMillis)
+    }
+
+    internal suspend fun confirmProfilePoint(owner: ScanOwner, scanId: String, expectedImageRevision: String,
+        expectedRevision: Long, pointId: LandmarkId, target: Point2, atEpochMillis: Long): ProfileAssistSession = serialized {
+        val row = editable(owner, scanId, atEpochMillis)
+        val photo = profilePhoto(scanId)
+        require(photo.assetId == expectedImageRevision) { "Profile image changed" }
+        val previous = requireNotNull(readProfile(scanId)) { "Profile confirmation unavailable" }
+        require(previous.revisionToken == expectedRevision) { "Stale profile correction revision" }
+        val next = previous.confirm(pointId, target, expectedRevision, atEpochMillis)
+        saveProfile(row, photo, next, atEpochMillis)
+        next
+    }
+
+    private suspend fun profilePhoto(scanId: String): PhotoRow = requireNotNull(
+        dao.photos(scanId).singleOrNull { it.view == CaptureView.PROFILE.name && it.validation != ViewValidation.REJECTED.name }
+    ) { "Profile photo unavailable; retake required" }
+
+    private suspend fun readProfile(scanId: String): ProfileAssistSession? {
+        val photo = dao.photos(scanId).singleOrNull { it.view == CaptureView.PROFILE.name } ?: return null
+        if (photo.validation == ViewValidation.REJECTED.name) return null
+        val payload = dao.payload(scanId, "profile-input-v1") ?: return null
+        return try {
+            ProfileAssistCodec.cached(payload.payload)?.takeIf {
+                val input = it.revision.input
+                input.imageRevision == photo.assetId && input.resolution == PixelResolution(photo.width, photo.height) &&
+                    input.side?.name == photo.profileSide
+            }
+        } finally { payload.payload.fill(0) }
+    }
+
+    private suspend fun saveProfile(row: ScanRow, photo: PhotoRow, session: ProfileAssistSession, time: Long) {
+        val bytes = ProfileAssistCodec.encode(session)
+        try {
+            ProfileAssistCodec.decode(bytes)
+            val state = if (row.state in setOf(ScanState.SCORING.name, ScanState.LANDMARKING.name)) ScanState.MEASURING.name else row.state
+            dao.saveProfileRevision(row.copy(profileSide = session.revision.input.side!!.name, updatedAt = time, state = state),
+                photo.copy(profileSide = session.revision.input.side!!.name), ScanPayloadRow(row.id, "profile-input-v1", bytes))
+        } finally { bytes.fill(0) }
     }
 
     private suspend fun checkFrontSource(scanId: String, input: FrontInput) {

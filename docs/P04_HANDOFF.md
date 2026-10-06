@@ -1,5 +1,26 @@
 # P3 merge and P4 preparation
 
+## Current P4 sync / QA handoff — 2026-10-06
+
+The owner authorized syncing and merging both P4 lanes, then preparing a signed
+phone QA build. WP10 PR #23 and WP09 PR #22 are merged into P4 integration; the
+candidate advances to versionCode 6 / versionName 0.4.0. The signed ARM64 phone
+artifact must come from green main and the permanent key. The owner's final
+clarification keeps `main` for all four ABIs and a synchronized `codex/arm64-qa`
+branch for ARM64-only phone APKs. Main publishes universal; the ARM64 branch
+publishes the smaller phone APK. Phone downloads/backups use only ARM64.
+Merged P4 branches are removed and three P5 branches are prepared from green main;
+this does not begin P5 feature implementation.
+The owner chose to perform the physical-phone test manually. Follow
+[P4 QA checks](P04_QA_BUILD.md) before declaring the phone update accepted.
+
+This is an integrated preview candidate: constrained profile confirmation and
+synthetic formula coverage are implemented, while real-profile geometry, confidence,
+production correction policies and scoring remain unavailable. Merge/build readiness
+does not close those empirical acceptance items or authorize starting P5.
+
+The remainder records the earlier P3/pre-P4 packaging handoff.
+
 On 2026-10-05 the project owner explicitly authorized merging all integrated P3
 work to main, deleting obsolete merged branches, producing a fresh signed P3
 mobile QA build, and creating the P4 branches. WP09 implementation is reserved
@@ -80,6 +101,10 @@ Ryan owns orientation/side metadata, guided key-point confirmation, constrained
 draggable zones, assisted fallback and profile overlay/angle UI. Eddy owns
 profile adapters/formulas, required-point confidence, manual-confirmation rules,
 regression fixtures and soft-tissue proxy labels. Before either lane changes
-shared interfaces, freeze and jointly acknowledge the P4 profile contract.
+shared interfaces, reuse the existing profile types and document necessary
+additions for the P4 sync. On 2026-10-06 the owner removed the separate
+contract-acknowledgement stop so the lanes can continue implementing and
+reconcile their interfaces at that shared checkpoint.
 Automatic extraction is an optimization; constrained assisted fallback must
-remain usable. These branches contain no WP09/WP10 implementation yet.
+remain usable. The original refreshed baseline contained no WP09/WP10 feature
+implementation; later lane commits and their PRs record current progress.

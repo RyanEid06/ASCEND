@@ -717,9 +717,8 @@ Later:
 - emulator smoke tests
 - native-library / 16 KB page-size compatibility check for every APK/AAB containing native libraries
 - release candidate build
-- signed QA packaging via protected secrets with two production-package APKs from the same commit/version:
-  - ARM64 (`arm64-v8a`) phone QA artifact for normal Ryan/Eddy physical-device testing after ABI verification
-  - universal compatibility/archive artifact retaining the full supported ABI set
+- signed QA packaging via protected secrets with an ARM64 (`arm64-v8a`) phone QA artifact for Ryan/Eddy physical-device testing after ABI verification
+- main publishes the all-four-ABI universal APK; synchronized `codex/arm64-qa` publishes only the smaller ARM64 phone APK for developer downloads/backups (owner final clarification, 2026-10-06)
 - keep x86/x86_64 support available for CI/emulators even though the routine developer-phone artifact is ARM64
 - signed Android App Bundle (AAB) for Play distribution; Play handles device-specific ABI delivery
 - APK/AAB inspection for embedded secrets, debug flags, signing identity and unexpected endpoints
@@ -805,11 +804,11 @@ Start with WP00 architecture/security freeze from WORKFLOW.md. Only after WP00 i
 
 Before WP09 or WP10 implementation begins, land the QA packaging optimization so routine physical-device downloads no longer carry every native ABI unnecessarily:
 
-- keep the existing universal production QA APK as the full compatibility/archive artifact
+- keep main's all-four-ABI universal release artifact and a synchronized `codex/arm64-qa` branch publishing only the phone APK (owner final clarification, 2026-10-06)
 - add a signed `arm64-v8a` production QA APK as the normal Ryan/Eddy phone-test artifact after both developer phones are verified to support ARM64
-- keep the same production applicationId, permanent signing certificate, versionCode/versionName and update chain across both QA APK variants
+- preserve the production applicationId, permanent signing certificate and monotonic version/update chain in the ARM64 phone APK
 - retain x86/x86_64 native support for CI/emulator coverage; do not shrink the whole project to ARM64
-- record hashes/provenance for both QA variants
+- record hash, size and provenance for the ARM64 phone QA APK
 - retain AAB as the Play Store artifact so Play can deliver device-specific native code to end users
 - treat this as shared packaging infrastructure, not WP09 or WP10 feature scope
 - because the P4 branches were created before this packaging decision and no WP09/WP10 implementation has started, refresh/recreate the P4 integration and lane branches from the new green main baseline after this gate lands

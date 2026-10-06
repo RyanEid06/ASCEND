@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - 'codex/arm64-qa'
       - 'phase/**'
   pull_request:
     branches:
@@ -34,7 +35,7 @@ jobs:
         run: sdkmanager 'platforms;android-37.0' 'build-tools;37.0.0'
       - uses: gradle/actions/setup-gradle@v4
       - name: Prepare permanent ASCEND signing identity
-        if: ${{ github.event_name == 'push' && (startsWith(github.ref, 'refs/heads/phase/') || github.ref == 'refs/heads/main') }}
+        if: ${{ github.event_name == 'push' && (startsWith(github.ref, 'refs/heads/phase/') || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/codex/arm64-qa') }}
         env:
           ASCEND_KEYSTORE_BASE64: ${{ secrets.ASCEND_KEYSTORE_BASE64 }}
           ASCEND_KEYSTORE_PASSWORD: ${{ secrets.ASCEND_KEYSTORE_PASSWORD }}
@@ -97,8 +98,8 @@ jobs:
           retention-days: 30
       - name: Android lint
         run: bash ./gradlew --no-daemon lint
-      - name: Verify and stage QA APK variants
-        if: ${{ github.event_name == 'push' && (startsWith(github.ref, 'refs/heads/phase/') || github.ref == 'refs/heads/main') }}
+      - name: Verify and stage branch-specific QA APKs
+        if: ${{ github.event_name == 'push' && (startsWith(github.ref, 'refs/heads/phase/') || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/codex/arm64-qa') }}
         run: |
           APKSIGNER="$(find "$ANDROID_HOME/build-tools" -maxdepth 2 -type f -name apksigner -print -quit)"
           AAPT="$(find "$ANDROID_HOME/build-tools" -maxdepth 2 -type f -name aapt -print -quit)"
@@ -128,8 +129,8 @@ jobs:
           mapfile -t ARM64_ABIS < <(unzip -Z1 "$ARM64_APK" | awk -F/ '/^lib\/[^/]+\/.*\.so$/ {print $2}' | sort -u)
           test "${#ARM64_ABIS[@]}" -eq 1
           test "${ARM64_ABIS[0]}" = "arm64-v8a"
-          unzip -Z1 "$UNIVERSAL_APK" | grep -q '^lib/arm64-v8a/'
-          unzip -Z1 "$UNIVERSAL_APK" | grep -q '^lib/x86_64/'
+          mapfile -t UNIVERSAL_ABIS < <(unzip -Z1 "$UNIVERSAL_APK" | awk -F/ '/^lib\/[^/]+\/.*\.so$/ {print $2}' | sort -u)
+          test "${UNIVERSAL_ABIS[*]}" = 'arm64-v8a armeabi-v7a x86 x86_64'
 
           cp "$ARM64_APK" ASCEND-QA-arm64.apk
           cp "$UNIVERSAL_APK" ASCEND-QA-universal.apk
@@ -141,6 +142,7 @@ jobs:
             printf 'Git ref: %s\n' "$GITHUB_REF"
             printf 'Package/version: %s\n' "$UNIVERSAL_PACKAGE"
             printf 'ARM64 packaged ABIs: %s\n' "${ARM64_ABIS[*]}"
+            printf 'Universal packaged ABIs: %s\n' "${UNIVERSAL_ABIS[*]}"
             printf '\nUniversal signing:\n'
             cat "$RUNNER_TEMP/universal-signing.txt"
             printf '\nARM64 signing:\n'
@@ -153,7 +155,7 @@ jobs:
             sha256sum ASCEND-QA-arm64.apk ASCEND-QA-universal.apk ASCEND-dev.apk
           } > ASCEND-QA-provenance.txt
       - name: Upload ARM64 phone QA APK
-        if: ${{ github.event_name == 'push' && (startsWith(github.ref, 'refs/heads/phase/') || github.ref == 'refs/heads/main') }}
+        if: ${{ github.event_name == 'push' && (startsWith(github.ref, 'refs/heads/phase/') || github.ref == 'refs/heads/codex/arm64-qa') }}
         uses: actions/upload-artifact@v4
         with:
           name: ASCEND-QA-arm64-${{ github.sha }}
@@ -162,8 +164,8 @@ jobs:
             ASCEND-QA-provenance.txt
           if-no-files-found: error
           retention-days: 30
-      - name: Upload universal QA APK
-        if: ${{ github.event_name == 'push' && (startsWith(github.ref, 'refs/heads/phase/') || github.ref == 'refs/heads/main') }}
+      - name: Upload universal main QA APK
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
         uses: actions/upload-artifact@v4
         with:
           name: ASCEND-QA-universal-${{ github.sha }}
@@ -261,6 +263,10 @@ jobs:
             adb shell am instrument -w -e class app.ascend.mobile.ui.FrontMeasurementScreenTest app.ascend.mobile.dev.test/androidx.test.runner.AndroidJUnitRunner > app/build/reports/wp08-ui/smoke.txt
             python3 scripts/check_instrumentation_result.py app/build/reports/wp08-ui/smoke.txt
             adb exec-out run-as app.ascend.mobile.dev cat files/wp08-synthetic-debug.png > app/build/reports/wp08-ui/synthetic-debug.png
+            mkdir -p app/build/reports/wp09-ui
+            adb shell am instrument -w -e class app.ascend.mobile.ui.ProfileAssistScreenTest#explicitOrientationGuidesAndAccessibleConfirmationRenderWithoutScoreEditing app.ascend.mobile.dev.test/androidx.test.runner.AndroidJUnitRunner > app/build/reports/wp09-ui/smoke.txt
+            python3 scripts/check_instrumentation_result.py app/build/reports/wp09-ui/smoke.txt
+            adb exec-out run-as app.ascend.mobile.dev cat files/wp09-synthetic-profile.png > app/build/reports/wp09-ui/synthetic-profile.png
             mkdir -p app/build/reports/storage-process
             adb shell am instrument -w -e class app.ascend.mobile.storage.StorageProcessDeathTest#a_seed app.ascend.mobile.dev.test/androidx.test.runner.AndroidJUnitRunner > app/build/reports/storage-process/seed.txt
             cat app/build/reports/storage-process/seed.txt
@@ -278,4 +284,5 @@ jobs:
             app/build/reports/androidTests/
             app/build/reports/storage-process/
             app/build/reports/wp08-ui/
+            app/build/reports/wp09-ui/
             app/build/outputs/androidTest-results/

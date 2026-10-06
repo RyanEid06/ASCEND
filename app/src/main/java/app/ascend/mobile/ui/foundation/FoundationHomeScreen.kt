@@ -35,6 +35,7 @@ fun FoundationHomeScreen(
     showDebugEntry: Boolean,
     onStartScan: () -> Unit,
     onOpenFrontLandmarks: (String) -> Unit,
+    onOpenProfile: (String) -> Unit,
     onToggleDetails: () -> Unit,
     onOpenFoundationInfo: () -> Unit,
     onOpenDebugMenu: () -> Unit,
@@ -73,6 +74,8 @@ fun FoundationHomeScreen(
             bottom = scaffoldPadding.calculateBottomPadding() + 24.dp,
         )
 
+        // The profile entry belongs in scrollable content so compact top bars do not overflow.
+
         when (windowWidthClass) {
             AscendWindowWidthClass.Compact -> CompactFoundationContent(
                 contentPadding = contentPadding,
@@ -80,6 +83,7 @@ fun FoundationHomeScreen(
                 uiState = uiState,
                 onToggleDetails = onToggleDetails,
                 onOpenFoundationInfo = onOpenFoundationInfo,
+                onOpenProfile = onOpenProfile,
             )
 
             AscendWindowWidthClass.Medium,
@@ -90,6 +94,7 @@ fun FoundationHomeScreen(
                 uiState = uiState,
                 onToggleDetails = onToggleDetails,
                 onOpenFoundationInfo = onOpenFoundationInfo,
+                onOpenProfile = onOpenProfile,
             )
         }
     }
@@ -102,6 +107,7 @@ private fun CompactFoundationContent(
     uiState: HomeUiState,
     onToggleDetails: () -> Unit,
     onOpenFoundationInfo: () -> Unit,
+    onOpenProfile: (String) -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -111,6 +117,7 @@ private fun CompactFoundationContent(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         FoundationHero()
+        ProfileEntries(uiState, onOpenProfile)
         FoundationStatusCard(
             windowWidthClass = windowWidthClass,
             uiState = uiState,
@@ -127,6 +134,7 @@ private fun WideFoundationContent(
     uiState: HomeUiState,
     onToggleDetails: () -> Unit,
     onOpenFoundationInfo: () -> Unit,
+    onOpenProfile: (String) -> Unit,
 ) {
     Row(
         modifier = Modifier
@@ -139,6 +147,7 @@ private fun WideFoundationContent(
             modifier = Modifier.weight(1f),
         ) {
             FoundationHero()
+            ProfileEntries(uiState, onOpenProfile)
         }
         Spacer(modifier = Modifier.width(24.dp))
         Column(
@@ -168,6 +177,13 @@ private fun FoundationHero() {
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+    }
+}
+
+@Composable
+private fun ProfileEntries(state: HomeUiState, onOpen: (String) -> Unit) {
+    state.profileScanIds.take(5).forEachIndexed { index, scanId ->
+        TextButton(onClick = { onOpen(scanId) }) { Text(if (index == 0) "Confirm latest profile" else "Open profile ${index + 1}") }
     }
 }
 
