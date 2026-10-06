@@ -80,9 +80,8 @@ class ProfileAssistScreenTest {
         try {
             instrumentation.runOnMainSync { activity.setContent { AscendTheme {
                 ProfileAssistScreen(state.value, {}, { side, facing ->
-                    state.value = (state.value as ProfileAssistState.Ready).copy(session = ProfileAssistSession.preview(
-                        "synthetic-image", PixelResolution(180, 240), side, facing), display = ProfileAssistSession.preview(
-                        "synthetic-image", PixelResolution(180, 240), side, facing))
+                    val source = ProfileAssistSession.preview("synthetic-image", PixelResolution(180, 240), side, facing)
+                    state.value = (state.value as ProfileAssistState.Ready).copy(session = source, display = source)
                 }, { index -> state.value = (state.value as ProfileAssistState.Ready).copy(activeIndex = index) }, {}, {
                     val current = state.value as ProfileAssistState.Ready
                     val source = current.session!!
@@ -94,20 +93,22 @@ class ProfileAssistScreenTest {
             instrumentation.waitForIdleSync()
             fun node(text: String, current: AccessibilityNodeInfo?): AccessibilityNodeInfo? {
                 if (current == null) return null
-                if (current.text?.toString() == text) return current
+                if (current.text?.toString()?.contains(text) == true) return current
                 repeat(current.childCount) { node(text, current.getChild(it))?.let { value -> return value } }
                 return null
             }
-            fun scroll(current: AccessibilityNodeInfo?): Boolean {
+            fun scroll(current: AccessibilityNodeInfo?, direction: Int): Boolean {
                 if (current == null) return false
-                if (current.isScrollable && current.performAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD)) return true
-                repeat(current.childCount) { if (scroll(current.getChild(it))) return true }
+                if (current.isScrollable && current.performAction(direction)) return true
+                repeat(current.childCount) { if (scroll(current.getChild(it), direction)) return true }
                 return false
             }
             fun awaitText(text: String): AccessibilityNodeInfo {
                 repeat(60) {
                     node(text, instrumentation.uiAutomation.rootInActiveWindow)?.let { return it }
-                    if (it % 10 == 0) scroll(instrumentation.uiAutomation.rootInActiveWindow)
+                    // New content may put a caption above the old scroll offset. Search both directions.
+                    if (it % 5 == 0) scroll(instrumentation.uiAutomation.rootInActiveWindow,
+                        if ((it / 15) % 2 == 0) AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD else AccessibilityNodeInfo.ACTION_SCROLL_FORWARD)
                     Thread.sleep(100)
                 }
                 error("Expected profile text: $text")
@@ -119,12 +120,16 @@ class ProfileAssistScreenTest {
                 instrumentation.waitForIdleSync()
             }
             click("Left side"); click("Nose points right"); click("Confirm side and direction")
+            val selected = (state.value as ProfileAssistState.Ready).session!!
+            assertEquals(ProfileSide.LEFT, selected.revision.input.side)
+            assertEquals(ProfileFacing.RIGHT, selected.facing)
             awaitText("Left profile · nose points right")
-            awaitText("Confirm point")
+            awaitText("Guided profile preview")
             val screenshot = requireNotNull(instrumentation.uiAutomation.takeScreenshot())
             try { File(context.filesDir, "wp09-synthetic-profile.png").outputStream().use {
                 screenshot.compress(Bitmap.CompressFormat.PNG, 100, it) }
             } finally { screenshot.recycle() }
+            awaitText("Confirm point")
             click("Confirm point")
             assertEquals(1L, (state.value as ProfileAssistState.Ready).session!!.revisionToken)
             assertEquals(1, (state.value as ProfileAssistState.Ready).activeIndex)

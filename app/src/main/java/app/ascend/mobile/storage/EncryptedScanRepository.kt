@@ -168,13 +168,14 @@ class EncryptedScanRepository internal constructor(
 
     override suspend fun complete(owner: ScanOwner, outcome: AnalysisOutcome.Complete, atEpochMillis: Long): LocalScan = serialized {
         require(dao.payload(outcome.scanId, "front-input-v1") == null) { "Front analyses require a matching correction revision" }
-        require(dao.payload(outcome.scanId, "profile-input-v1") == null) { "Profile analyses require a reviewed revision-bound completion path" }
+        require(readProfile(outcome.scanId) == null) { "Profile analyses require a reviewed revision-bound completion path" }
         persistComplete(owner, outcome, atEpochMillis)
     }
 
     private suspend fun persistComplete(owner: ScanOwner, outcome: AnalysisOutcome.Complete, atEpochMillis: Long,
         frontProvenance: FrontCompletedProvenance? = null): LocalScan {
-        require(dao.payload(outcome.scanId, "profile-input-v1") == null) { "Preview confirmations cannot complete a scored analysis" }
+        // A corrupt/stale cache is a miss, as in the read path; only a valid current session binds completion.
+        require(readProfile(outcome.scanId) == null) { "Preview confirmations cannot complete a scored analysis" }
         val row = editable(owner, outcome.scanId, atEpochMillis)
         require(row.state == ScanState.SCORING.name && row.referenceModel == outcome.referenceModel.name)
         val photos = dao.photos(row.id)
