@@ -93,7 +93,7 @@ class ProfileAssistScreenTest {
             instrumentation.waitForIdleSync()
             fun node(text: String, current: AccessibilityNodeInfo?): AccessibilityNodeInfo? {
                 if (current == null) return null
-                if (current.text?.toString()?.contains(text) == true) return current
+                if (current.isVisibleToUser && current.text?.toString()?.contains(text) == true) return current
                 repeat(current.childCount) { node(text, current.getChild(it))?.let { value -> return value } }
                 return null
             }
@@ -114,10 +114,19 @@ class ProfileAssistScreenTest {
                 error("Expected profile text: $text")
             }
             fun click(text: String) {
-                var current = awaitText(text)
-                while (!current.isClickable) current = requireNotNull(current.parent)
-                assertTrue(current.performAction(AccessibilityNodeInfo.ACTION_CLICK))
-                instrumentation.waitForIdleSync()
+                awaitText(text)
+                repeat(50) {
+                    // Scroll/recomposition can invalidate the node returned by awaitText.
+                    var current = node(text, instrumentation.uiAutomation.rootInActiveWindow)
+                    while (current != null && !current.isClickable) current = current.parent
+                    if (current?.isEnabled == true && current.isVisibleToUser &&
+                        current.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                        instrumentation.waitForIdleSync()
+                        return
+                    }
+                    Thread.sleep(100)
+                }
+                error("Could not click enabled profile control: $text")
             }
             click("Left side"); click("Nose points right"); click("Confirm side and direction")
             val selected = (state.value as ProfileAssistState.Ready).session!!
