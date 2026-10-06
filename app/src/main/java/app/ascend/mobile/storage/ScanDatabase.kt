@@ -62,19 +62,21 @@ internal abstract class ScanDao {
     @Query("DELETE FROM local_photos WHERE scanId = :id AND view = :view") abstract suspend fun removePhoto(id: String, view: String)
     @Query("DELETE FROM local_photos WHERE scanId = :id") abstract suspend fun removePhotos(id: String)
     @Query("DELETE FROM scan_payloads WHERE scanId = :id") abstract suspend fun invalidateDerived(id: String)
+    @Query("DELETE FROM scan_payloads WHERE scanId = :id AND NOT ((:view = 'PROFILE' AND kind IN ('front-input-v1', 'front-landmarks-v1')) OR (:view = 'FRONT' AND kind = 'profile-input-v1'))")
+    abstract suspend fun invalidateCaptureDependents(id: String, view: String)
     @Query("DELETE FROM scan_payloads WHERE scanId = :id AND kind NOT IN ('front-input-v1', 'front-landmarks-v1', 'profile-input-v1')")
     abstract suspend fun invalidateMeasurementDependents(id: String)
     @Query("DELETE FROM local_scans WHERE id = :id") abstract suspend fun removeScan(id: String)
     @Query("UPDATE local_scans SET deleting = 1") abstract suspend fun markAllDeleting()
 
     @Transaction open suspend fun replaceCapture(scan: ScanRow, photo: PhotoRow) {
-        invalidateDerived(scan.id)
+        invalidateCaptureDependents(scan.id, photo.view)
         savePhoto(photo)
         saveScan(scan)
     }
 
     @Transaction open suspend fun retake(scan: ScanRow, view: String) {
-        invalidateDerived(scan.id)
+        invalidateCaptureDependents(scan.id, view)
         removePhoto(scan.id, view)
         saveScan(scan)
     }
@@ -97,6 +99,13 @@ internal abstract class ScanDao {
 
     @Transaction open suspend fun saveFrontRevision(scan: ScanRow, payload: ScanPayloadRow) {
         invalidateMeasurementDependents(scan.id)
+        savePayload(payload)
+        saveScan(scan)
+    }
+
+    @Transaction open suspend fun saveProfileRevision(scan: ScanRow, photo: PhotoRow, payload: ScanPayloadRow) {
+        invalidateMeasurementDependents(scan.id)
+        savePhoto(photo)
         savePayload(payload)
         saveScan(scan)
     }

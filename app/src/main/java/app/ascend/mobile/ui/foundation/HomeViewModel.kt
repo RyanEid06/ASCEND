@@ -33,6 +33,9 @@ class HomeViewModel @Inject constructor(
                             it.validation != app.ascend.mobile.core.data.ViewValidation.REJECTED
                     } }.map { it.session.id },
                     localStorageLoading = false,
+                    profileScanIds = scans.filter { scan -> scan.views.any {
+                        it.view == app.ascend.mobile.core.model.CaptureView.PROFILE
+                    } }.map { it.session.id },
                     localStorageError = null,
                 )
             } catch (_: Throwable) {

@@ -65,7 +65,10 @@ internal class ProfileRevision private constructor(
         methodVersion: String, atEpochMillis: Long,
     ): ProfileRevision {
         require(expectedImageRevision == originalSnapshot.imageRevision && expectedRevision == revision) { "Stale profile revision" }
-        require(originalSnapshot.origin == ProfileOrigin.SYNTHETIC) { "Synthetic guidance cannot admit real photos" }
+        require(originalSnapshot.origin == ProfileOrigin.SYNTHETIC ||
+            (originalSnapshot.origin == ProfileOrigin.DEMO_LOCAL && policy.version == PROFILE_PREVIEW_POLICY_VERSION)) {
+            "No reviewed assistance policy for this photo"
+        }
         require(originalSnapshot.orientationConfirmed && originalSnapshot.side != null) { "Confirm orientation first" }
         require(policy.imageRevision == originalSnapshot.imageRevision && policy.side == originalSnapshot.side) { "Guidance belongs to another image/side" }
         require(methodVersion.isNotBlank() && atEpochMillis >= 0)

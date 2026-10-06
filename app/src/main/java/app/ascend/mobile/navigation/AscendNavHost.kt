@@ -46,6 +46,7 @@ fun AscendNavHost(windowWidthClass: AscendWindowWidthClass) {
                     showDebugEntry = debugAvailable,
                     onStartScan = { backStack.add(CaptureFlowRoute) },
                     onOpenFrontLandmarks = { backStack.add(FrontLandmarkRoute(it)) },
+                    onOpenProfile = { backStack.add(ProfileAssistRoute(it)) },
                     onToggleDetails = viewModel::onToggleFoundationDetails,
                     onOpenFoundationInfo = { backStack.add(FoundationInfoRoute) },
                     onOpenDebugMenu = {
@@ -74,7 +75,12 @@ fun AscendNavHost(windowWidthClass: AscendWindowWidthClass) {
             }
 
             entry<FrontLandmarkRoute> { route ->
-                app.ascend.mobile.ui.vision.FrontLandmarkRoute(route.scanId, onBack = { backStack.removeLastOrNull() })
+                app.ascend.mobile.ui.vision.FrontLandmarkRoute(route.scanId, onBack = { backStack.removeLastOrNull() },
+                    onProfile = { backStack.add(ProfileAssistRoute(route.scanId)) })
+            }
+
+            entry<ProfileAssistRoute> { route ->
+                app.ascend.mobile.ui.profile.ProfileAssistRoute(route.scanId, onBack = { backStack.removeLastOrNull() })
             }
 
             if (debugAvailable) {

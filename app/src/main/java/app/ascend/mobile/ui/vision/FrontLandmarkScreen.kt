@@ -25,7 +25,7 @@ import app.ascend.mobile.core.vision.*
 import kotlin.math.roundToInt
 
 @Composable
-fun FrontLandmarkRoute(scanId: String, onBack: () -> Unit) {
+fun FrontLandmarkRoute(scanId: String, onBack: () -> Unit, onProfile: () -> Unit = {}) {
     val activity = LocalContext.current.findActivity()
     DisposableEffect(activity) {
         val window = activity?.window
@@ -42,6 +42,7 @@ fun FrontLandmarkRoute(scanId: String, onBack: () -> Unit) {
     }) }) { padding ->
         Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Button(onClick = onProfile) { Text("Confirm profile points") }
             when (val current = state) {
                 FrontPreviewState.Loading -> { CircularProgressIndicator(); Text("Finding front landmarks on your device…") }
                 is FrontPreviewState.Failed -> {

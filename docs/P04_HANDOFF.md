@@ -80,6 +80,10 @@ Ryan owns orientation/side metadata, guided key-point confirmation, constrained
 draggable zones, assisted fallback and profile overlay/angle UI. Eddy owns
 profile adapters/formulas, required-point confidence, manual-confirmation rules,
 regression fixtures and soft-tissue proxy labels. Before either lane changes
-shared interfaces, freeze and jointly acknowledge the P4 profile contract.
+shared interfaces, reuse the existing profile types and document necessary
+additions for the P4 sync. On 2026-10-06 the owner removed the separate
+contract-acknowledgement stop so the lanes can continue implementing and
+reconcile their interfaces at that shared checkpoint.
 Automatic extraction is an optimization; constrained assisted fallback must
-remain usable. These branches contain no WP09/WP10 implementation yet.
+remain usable. The original refreshed baseline contained no WP09/WP10 feature
+implementation; later lane commits and their PRs record current progress.
