@@ -1,5 +1,21 @@
 # P3 merge and P4 preparation
 
+## Current P4 sync / QA handoff — 2026-10-06
+
+The owner authorized syncing and merging both P4 lanes, then preparing a signed
+phone QA build. WP10 PR #23 and WP09 PR #22 are merged into P4 integration; the
+candidate advances to versionCode 6 / versionName 0.4.0. The signed ARM64 and
+universal artifacts must come from the same green main commit and permanent key.
+The owner chose to perform the physical-phone test manually. Follow
+[P4 QA checks](P04_QA_BUILD.md) before declaring the phone update accepted.
+
+This is an integrated preview candidate: constrained profile confirmation and
+synthetic formula coverage are implemented, while real-profile geometry, confidence,
+production correction policies and scoring remain unavailable. Merge/build readiness
+does not close those empirical acceptance items or authorize starting P5.
+
+The remainder records the earlier P3/pre-P4 packaging handoff.
+
 On 2026-10-05 the project owner explicitly authorized merging all integrated P3
 work to main, deleting obsolete merged branches, producing a fresh signed P3
 mobile QA build, and creating the P4 branches. WP09 implementation is reserved

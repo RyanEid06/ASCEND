@@ -116,7 +116,11 @@ PR #22 and the delivery report, with exact-head evidence.
 Reconcile these additive interfaces with Eddy at the P4 sync: DEMO_LOCAL preview
 origin, the UI/storage codec/write token, automatic installation, view-specific
 invalidation and revision-bound future completion. Both lanes still target the
-same integration branch; neither PR is self-merged.
+same integration branch. On 2026-10-06 the owner authorized P4 synchronization,
+merge and a signed QA build. PR #23 (WP10) and PR #22 (WP09) were merged into
+`phase/P04-integration`, preserving both lane histories. This supersedes the
+earlier delivery-only merge boundary; the physical-phone check will be performed
+manually by the owner using `P04_QA_BUILD.md`.
 
 Production capture/assistance policy evidence, automatic extraction and real-profile
 confidence remain WP10/integrated validation work. Required real-device checks are

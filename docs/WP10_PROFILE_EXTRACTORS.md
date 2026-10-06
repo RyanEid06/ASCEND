@@ -7,9 +7,13 @@ universal QA packaging commit. Main, integration and WP10 matched on preflight.
 Ryan's WP09 tip was `b6537185ea76597d96429ebae7daa9767cda083d`, containing
 `docs/WP09_PROFILE_CAPTURE_ASSIST.md` and no profile implementation.
 
-Status: **lane-private synthetic groundwork; shared P4 contract pending joint
-acknowledgement; P4 acceptance OPEN.** This is not a frozen shared API, detector,
-integrated assisted UI, production confidence policy or real-profile validation.
+Current sync status (2026-10-06): the owner authorized merging both P4 lanes and
+preparing signed QA version 0.4.0. PR #23 and WP09 PR #22 are now integrated,
+including the common profile types, bounded preview assistance, encrypted audit
+persistence and view-specific invalidation. The standalone acknowledgement stop
+below is historical and superseded by the owner's relaxed workflow. **Real-photo
+P4 acceptance remains OPEN:** no production confidence/correction policy or
+validated real-profile measurements are supplied by this synthetic groundwork.
 
 ## Scope completed
 
