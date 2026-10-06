@@ -718,7 +718,7 @@ Later:
 - native-library / 16 KB page-size compatibility check for every APK/AAB containing native libraries
 - release candidate build
 - signed QA packaging via protected secrets with an ARM64 (`arm64-v8a`) phone QA artifact for Ryan/Eddy physical-device testing after ABI verification
-- publish/back up only ARM64 phone QA; universal release packaging is a CI compatibility check, not a QA archive (owner clarification, 2026-10-06)
+- main publishes the all-four-ABI universal APK; synchronized `codex/arm64-qa` publishes only the smaller ARM64 phone APK for developer downloads/backups (owner final clarification, 2026-10-06)
 - keep x86/x86_64 support available for CI/emulators even though the routine developer-phone artifact is ARM64
 - signed Android App Bundle (AAB) for Play distribution; Play handles device-specific ABI delivery
 - APK/AAB inspection for embedded secrets, debug flags, signing identity and unexpected endpoints
@@ -804,7 +804,7 @@ Start with WP00 architecture/security freeze from WORKFLOW.md. Only after WP00 i
 
 Before WP09 or WP10 implementation begins, land the QA packaging optimization so routine physical-device downloads no longer carry every native ABI unnecessarily:
 
-- check universal release packaging in CI without publishing/backing up a universal QA artifact (owner clarification, 2026-10-06)
+- keep main's all-four-ABI universal release artifact and a synchronized `codex/arm64-qa` branch publishing only the phone APK (owner final clarification, 2026-10-06)
 - add a signed `arm64-v8a` production QA APK as the normal Ryan/Eddy phone-test artifact after both developer phones are verified to support ARM64
 - preserve the production applicationId, permanent signing certificate and monotonic version/update chain in the ARM64 phone APK
 - retain x86/x86_64 native support for CI/emulator coverage; do not shrink the whole project to ARM64

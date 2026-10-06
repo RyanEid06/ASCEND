@@ -6,11 +6,13 @@ This is a QA preview, with real-photo measurement/reliability acceptance still o
 
 ## Build and update identity
 
-Main's Android CI supplies `ASCEND-QA-arm64.apk` and
-`ASCEND-QA-provenance.txt`. The owner's 2026-10-06 clarification selects ARM64-only
-phone QA backups/downloads; universal QA APKs are no longer published. Universal
-release packaging still receives compatibility checks within CI, and developer
-builds retain emulator ABIs. Use the exact successful main run's ARM64 artifact.
+The owner's final 2026-10-06 branch layout keeps `main` for all four ABIs and
+`codex/arm64-qa` for the smaller phone APK. Both branches point to the same merged
+commit: there is no separate feature implementation or cherry-picking by CPU.
+Main CI publishes `ASCEND-QA-universal.apk` (arm64-v8a, armeabi-v7a, x86, x86_64).
+The synchronized ARM64 branch publishes only `ASCEND-QA-arm64.apk` for phone QA,
+with `ASCEND-QA-provenance.txt`. Use that ARM64 artifact for Honor downloads/backups.
+Developer builds retain emulator ABIs. The production code remains identical.
 The production package remains `app.ascend.mobile`, versionCode 6, versionName
 0.4.0. The phone APK uses certificate SHA-256
 `b9565110d18e91bbdd6a0cbff0b238d39771c1357646bcb6c0cb7f11a73bb9d8`.
@@ -50,3 +52,9 @@ installed version. A signed build and emulator CI are not physical-phone accepta
 Production capture/correction policy evidence and same-image/repeated-capture
 reliability remain separate work; this candidate does not close P4's real-profile
 measurement gate or begin P5.
+
+After green P4 main/build, remove merged P4 lane/integration branches and the merged
+pre-P4 packaging branch. Keep main and the synchronized ARM64 branch, then create
+`phase/P05-integration`, `ryan/P05-WP11-visual-feature-extraction` and
+`eddy/P05-WP12-misc-scoring-ux` from that exact main commit. Branch preparation is
+authorized; P5 feature implementation is not part of this handoff.

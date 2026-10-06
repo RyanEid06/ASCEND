@@ -32,8 +32,8 @@ Once the permanent key is created, all long-lived physical-device QA APKs use th
 At every phase gate:
 1. merge the phase to green main
 2. increment versionCode
-3. build the signed ARM64 phone QA APK (`arm64-v8a`) for Ryan/Eddy physical-device testing after the device ABI is verified
-4. verify its signature and record its hash/provenance
+3. fast-forward `codex/arm64-qa` to that same main commit; main CI publishes universal (all four ABIs), ARM64 branch CI publishes only the signed `arm64-v8a` phone APK
+4. verify signatures, matching production identity/version and record hashes/provenance
 5. install it over the previous production QA install without uninstalling when the phone reports `arm64-v8a`; request a compatible build for other devices
 6. launch and run migration/update smoke tests
 7. verify settings/history/encrypted assets survive
@@ -88,12 +88,13 @@ Development:
 
 Phase QA:
 - `ASCEND-QA-arm64.apk` — signed `arm64-v8a` production-package APK; this is the normal Ryan/Eddy phone download after each developer phone has been verified as ARM64
-- only the ARM64 phone QA APK is published/backed up; the owner's 2026-10-06 clarification supersedes the earlier universal archive requirement
+- `main` publishes `ASCEND-QA-universal.apk` containing arm64-v8a, armeabi-v7a, x86 and x86_64
+- synchronized `codex/arm64-qa` publishes only `ASCEND-QA-arm64.apk`; Ryan/Eddy phone downloads/backups use this smaller APK
 - the phone APK must preserve the production package, version/update chain and permanent signing certificate
 - `ASCEND-dev.apk` may remain a separate debug/developer package where needed
 - provenance must record the exact commit plus phone APK hash, size and signing identity
 
-Keep x86/x86_64 support for developer/emulator testing. Universal release packaging may still be built and checked inside CI, but it is not uploaded as a QA download or backup.
+Keep the same feature source on both permanent branches; CPU differences are build packaging, not separate implementations. Fast-forward the ARM64 branch after each phase merges to green main. Do not select feature commits based on CPU architecture. Keep x86/x86_64 support for developer/emulator testing.
 
 If a phone does not support `arm64-v8a`, request a compatible build rather than forcing this ARM64 APK.
 

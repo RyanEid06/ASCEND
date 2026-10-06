@@ -122,6 +122,12 @@ Flow:
 10. PR phase/PXX-integration -> main.
 11. Only after main is green may the next phase begin.
 
+Permanent build branches (owner final clarification, 2026-10-06): `main` retains
+all four CPU ABIs; `codex/arm64-qa` stays at the same merged commit and publishes
+only the ARM64 phone APK. This is packaging selection, not a second feature fork.
+After green phase/main, fast-forward the ARM64 branch, remove verified merged phase
+and lane branches, and create the next three phase branches from exact green main.
+
 No “I already started the next WP” while the sync gate is unresolved.
 
 ## Shared interfaces — coordinate through the phase sync
@@ -184,7 +190,7 @@ At each phase boundary:
 - no raw face data leaked to logs/analytics
 - docs updated
 - both Ryan and Eddy manually exercise the integrated feature
-- build/publish/back up the signed ARM64 (`arm64-v8a`) production phone QA APK from the integrated/main baseline; universal packaging remains a CI compatibility check only (owner clarification, 2026-10-06)
+- main publishes all-four-ABI universal QA; synchronized `codex/arm64-qa` publishes only signed ARM64 (`arm64-v8a`) for phone downloads/backups (owner final clarification, 2026-10-06)
 - verify the production package, version and permanent signing certificate; record phone APK hash/size/provenance
 - if native libraries exist, verify 16 KB page-size compatibility/alignment and retain the ABI support required by CI/emulators
 - install the ARM64 QA APK over the previous signed QA APK without uninstalling when the phone supports ARM64; otherwise request a compatible build
@@ -363,7 +369,7 @@ Sync Gate P3:
 Pre-P4 packaging prerequisite:
 - before WP09/WP10 implementation starts, merge the ARM64 + universal QA packaging baseline to green main
 - routine Ryan/Eddy phone downloads use the signed `arm64-v8a` QA artifact after device ABI verification
-- universal release packaging remains a CI compatibility check, without a published QA archive (owner clarification, 2026-10-06)
+- main publishes universal QA for all four ABIs; the synchronized ARM64 branch publishes only the smaller phone APK
 - x86/x86_64 support remains available for emulator/CI coverage
 - the ARM64 QA artifact keeps the production applicationId, permanent signing identity and version/update chain
 - refresh/recreate `phase/P04-integration`, `ryan/P04-WP09-profile-capture-assist` and `eddy/P04-WP10-profile-extractors` from that green main baseline if no lane implementation has begun
@@ -626,7 +632,7 @@ At every phase that produces an installable app:
 2. green shared CI
 3. merge phase to main
 4. increment versionCode
-5. generate/publish/back up the signed ARM64 (`arm64-v8a`) phone QA APK using the permanent ASCEND signing identity
+5. fast-forward `codex/arm64-qa` to main; main publishes universal, the ARM64 branch publishes only the signed phone APK using the permanent ASCEND signing identity
 6. verify signature/hash and preserve native ABI coverage required by CI/emulators
 7. install over the prior production QA install without uninstalling when the phone supports ARM64; otherwise request a compatible build
 8. perform the phase-appropriate physical-device smoke/visual test
