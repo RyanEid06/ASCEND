@@ -262,7 +262,7 @@ jobs:
             python3 scripts/check_instrumentation_result.py app/build/reports/wp08-ui/smoke.txt
             adb exec-out run-as app.ascend.mobile.dev cat files/wp08-synthetic-debug.png > app/build/reports/wp08-ui/synthetic-debug.png
             mkdir -p app/build/reports/wp09-ui
-            adb shell am instrument -w -e class app.ascend.mobile.ui.ProfileAssistScreenTest app.ascend.mobile.dev.test/androidx.test.runner.AndroidJUnitRunner > app/build/reports/wp09-ui/smoke.txt
+            adb shell am instrument -w -e class app.ascend.mobile.ui.ProfileAssistScreenTest#explicitOrientationGuidesAndAccessibleConfirmationRenderWithoutScoreEditing app.ascend.mobile.dev.test/androidx.test.runner.AndroidJUnitRunner > app/build/reports/wp09-ui/smoke.txt
             python3 scripts/check_instrumentation_result.py app/build/reports/wp09-ui/smoke.txt
             adb exec-out run-as app.ascend.mobile.dev cat files/wp09-synthetic-profile.png > app/build/reports/wp09-ui/synthetic-profile.png
             mkdir -p app/build/reports/storage-process
