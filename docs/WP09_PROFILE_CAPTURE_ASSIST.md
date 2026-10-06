@@ -41,7 +41,8 @@ added. WP10's real-photo measurement gate is unchanged.
   import path. It invalidates profile-derived state and preserves the FRONT photo,
   validation, landmark source and correction audit. FRONT replacement/retake
   preserves the unaffected profile input while combined downstream caches expire.
-- Missing/rejected photos expose retry/unavailable. Corrupt derived profile caches
+- Missing/rejected photos offer replacement in the same editable scan, preserving
+  its FRONT capture. Completed history cannot be replaced. Corrupt derived profile caches
   are recoverable misses. Historical completed analyses remain read only.
 
 ## Assistance policy and honest limits
@@ -87,7 +88,8 @@ Future profile scoring needs a reviewed completion path bound to source, correct
 and policy revisions. Completed history is never rewritten.
 
 No INTERNET permission, upload, analytics, sensitive logs, private face fixture or
-new app dependency is introduced. FLAG_SECURE is scoped to the sensitive route;
+new app dependency is introduced. Shared FLAG_SECURE leases protect overlapping
+front/profile navigation entries until the last sensitive route exits;
 bitmap/encoded buffers are released or zeroed on exit/cancellation. Backup exclusions,
 SQLCipher/Keystore architecture and owner boundaries remain intact.
 

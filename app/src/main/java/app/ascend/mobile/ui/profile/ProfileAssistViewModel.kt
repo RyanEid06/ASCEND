@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.*
 
 internal sealed interface ProfileAssistState {
     data object Loading : ProfileAssistState
-    data class Failed(val message: String) : ProfileAssistState
+    data class Failed(val scanId: String, val message: String, val canReplace: Boolean) : ProfileAssistState
     data class Ready(val scanId: String, val imageRevision: String, val bitmap: Bitmap,
         val session: ProfileAssistSession?, val display: ProfileAssistSession? = session,
         val readOnly: Boolean = false, val activeIndex: Int = 0, val busy: Boolean = false,
@@ -45,12 +45,12 @@ internal class ProfileAssistViewModel @Inject constructor(
             try {
                 val photo = store.readGuestProfilePhoto(scanId)
                 try {
-                    bitmap = withContext(Dispatchers.IO) {
+                    withContext(Dispatchers.IO) {
                         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
                         BitmapFactory.decodeByteArray(photo.bytes, 0, photo.bytes.size, bounds)
                         require(bounds.outWidth == photo.resolution.width && bounds.outHeight == photo.resolution.height)
                         require(bounds.outWidth in 1..4096 && bounds.outHeight in 1..4096 && bounds.outWidth.toLong() * bounds.outHeight <= 16_777_216)
-                        requireNotNull(BitmapFactory.decodeByteArray(photo.bytes, 0, photo.bytes.size,
+                        bitmap = requireNotNull(BitmapFactory.decodeByteArray(photo.bytes, 0, photo.bytes.size,
                             BitmapFactory.Options().apply { inPreferredConfig = Bitmap.Config.ARGB_8888; inScaled = false }))
                     }
                 } finally { photo.bytes.fill(0) }
@@ -63,7 +63,12 @@ internal class ProfileAssistViewModel @Inject constructor(
                     readOnly = photo.readOnly, activeIndex = index.coerceIn(0, 11))
                 bitmap = null
             } catch (cancelled: CancellationException) { throw cancelled }
-            catch (_: Exception) { mutableState.value = ProfileAssistState.Failed("This profile photo is unavailable. Choose another photo or start a new scan.") }
+            catch (_: Exception) {
+                val editable = try { store.getGuestScan(scanId)?.session?.state?.let { it != ScanState.COMPLETE } == true }
+                catch (cancelled: CancellationException) { throw cancelled }
+                catch (_: Exception) { false }
+                mutableState.value = ProfileAssistState.Failed(scanId, "This profile photo is unavailable.", editable)
+            }
             finally { bitmap?.recycle() }
         }
     }
@@ -100,14 +105,14 @@ internal class ProfileAssistViewModel @Inject constructor(
 
     fun cancelPreview() {
         val state = mutableState.value as? ProfileAssistState.Ready ?: return
-        mutableState.value = state.copy(display = state.session)
+        mutableState.value = state.copy(display = state.session, message = null)
     }
 
     fun confirmPoint() {
         val state = mutableState.value as? ProfileAssistState.Ready ?: return
         val source = state.session ?: return
         if (state.busy || state.readOnly) return
-        if (state.message != null) { mutableState.value = state.copy(display = source); return }
+        if (state.message != null) { mutableState.value = state.copy(display = source, message = null); return }
         val id = state.activePoint ?: return
         val target = state.display?.revision?.input?.points?.get(id)?.point ?: source.policy.zones.getValue(id).missingPointAnchor
         mutate(state, advance = true) {
@@ -134,18 +139,25 @@ internal class ProfileAssistViewModel @Inject constructor(
     }
 
     fun replacePhoto(uri: String) {
-        val state = mutableState.value as? ProfileAssistState.Ready ?: return
-        if (state.busy || state.readOnly) return
-        mutableState.value = state.copy(busy = true)
+        val state = mutableState.value
+        val scanId = when (state) {
+            is ProfileAssistState.Ready -> if (!state.busy && !state.readOnly) state.scanId else return
+            is ProfileAssistState.Failed -> if (state.canReplace && work?.isActive != true) state.scanId else return
+            ProfileAssistState.Loading -> return
+        }
+        mutableState.value = if (state is ProfileAssistState.Ready) state.copy(busy = true) else ProfileAssistState.Loading
         work = viewModelScope.launch {
             try {
-                store.persistGuestCapture(state.scanId, CaptureView.PROFILE, uri, CaptureCrop(), CaptureOrigin.GALLERY,
-                    state.session?.revision?.input?.side ?: ProfileSide.LEFT)
-                val id = state.scanId
+                store.persistGuestCapture(scanId, CaptureView.PROFILE, uri, CaptureCrop(), CaptureOrigin.GALLERY,
+                    (state as? ProfileAssistState.Ready)?.session?.revision?.input?.side ?: ProfileSide.LEFT)
                 savedState["profileActiveIndex"] = 0
-                release(); load(id)
+                release(); load(scanId)
             } catch (cancelled: CancellationException) { throw cancelled }
-            catch (_: Exception) { mutableState.value = state.copy(busy = false, message = "This photo could not be used. Try another clear side profile.") }
+            catch (_: Exception) {
+                mutableState.value = if (state is ProfileAssistState.Ready)
+                    state.copy(busy = false, message = "This photo could not be used. Try another clear side profile.")
+                else state
+            }
         }
     }
 

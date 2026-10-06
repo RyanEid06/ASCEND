@@ -13,12 +13,64 @@ import app.ascend.mobile.core.model.ProfileSide
 import app.ascend.mobile.core.profile.*
 import app.ascend.mobile.ui.profile.*
 import app.ascend.mobile.ui.theme.AscendTheme
+import app.ascend.mobile.ui.privacy.SensitivePhotoWindow
+import android.view.WindowManager
 import java.io.File
 import org.junit.Assert.*
 import org.junit.Test
 
 /** Synthetic-only visual/interaction evidence. No private face photo or screenshot. */
 class ProfileAssistScreenTest {
+    @Test fun overlappingSensitiveRoutesKeepProtectionUntilTheLastExit() {
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val activity = instrumentation.startActivitySync(Intent(instrumentation.targetContext, MainActivity::class.java)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) as MainActivity
+        try { instrumentation.runOnMainSync {
+            val window = activity.window
+            fun secure() = window.attributes.flags and WindowManager.LayoutParams.FLAG_SECURE != 0
+            window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
+            val front = SensitivePhotoWindow.acquire(window)
+            val profile = SensitivePhotoWindow.acquire(window)
+            front(); assertTrue(secure())
+            val returningFront = SensitivePhotoWindow.acquire(window)
+            profile(); assertTrue(secure())
+            returningFront(); assertFalse(secure())
+            returningFront(); assertFalse(secure())
+            window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
+            SensitivePhotoWindow.acquire(window)(); assertTrue(secure())
+            window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
+        } } finally { instrumentation.runOnMainSync { activity.finish() } }
+    }
+
+    @Test fun unavailableEditableProfileOffersReplacementAndCompletedHistoryDoesNot() {
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val activity = instrumentation.startActivitySync(Intent(instrumentation.targetContext, MainActivity::class.java)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) as MainActivity
+        val state = mutableStateOf<ProfileAssistState>(ProfileAssistState.Failed("existing-scan", "Unavailable", true))
+        var replaced = false
+        try {
+            instrumentation.runOnMainSync { activity.setContent { AscendTheme {
+                ProfileAssistScreen(state.value, {}, { _, _ -> }, {}, {}, {}, {}, { replaced = true }, {})
+            } } }
+            instrumentation.waitForIdleSync()
+            fun node(current: AccessibilityNodeInfo?): AccessibilityNodeInfo? {
+                if (current == null) return null
+                if (current.text?.toString() == "Choose another profile photo") return current
+                repeat(current.childCount) { node(current.getChild(it))?.let { value -> return value } }
+                return null
+            }
+            var replacement: AccessibilityNodeInfo? = null
+            repeat(30) { if (replacement == null) { replacement = node(instrumentation.uiAutomation.rootInActiveWindow); Thread.sleep(100) } }
+            var clickable = requireNotNull(replacement)
+            while (!clickable.isClickable) clickable = requireNotNull(clickable.parent)
+            assertTrue(clickable.performAction(AccessibilityNodeInfo.ACTION_CLICK))
+            instrumentation.waitForIdleSync(); assertTrue(replaced)
+            instrumentation.runOnMainSync { state.value = ProfileAssistState.Failed("completed-scan", "Read only", false) }
+            instrumentation.waitForIdleSync()
+            assertNull(node(instrumentation.uiAutomation.rootInActiveWindow))
+        } finally { instrumentation.runOnMainSync { activity.finish() } }
+    }
+
     @Test fun explicitOrientationGuidesAndAccessibleConfirmationRenderWithoutScoreEditing() {
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         val context = instrumentation.targetContext

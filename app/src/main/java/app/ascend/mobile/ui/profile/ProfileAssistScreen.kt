@@ -2,10 +2,6 @@
 
 package app.ascend.mobile.ui.profile
 
-import android.app.Activity
-import android.content.Context
-import android.content.ContextWrapper
-import android.view.WindowManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -24,7 +20,6 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -33,16 +28,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import app.ascend.mobile.core.geometry.*
 import app.ascend.mobile.core.model.ProfileSide
 import app.ascend.mobile.core.profile.*
+import app.ascend.mobile.ui.privacy.ProtectSensitivePhotoWindow
 
 @Composable
 internal fun ProfileAssistRoute(scanId: String, onBack: () -> Unit) {
-    val activity = LocalContext.current.activity()
-    DisposableEffect(activity) {
-        val window = activity?.window
-        val wasSecure = window?.attributes?.flags?.and(WindowManager.LayoutParams.FLAG_SECURE) != 0
-        window?.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
-        onDispose { if (!wasSecure) window?.clearFlags(WindowManager.LayoutParams.FLAG_SECURE) }
-    }
+    ProtectSensitivePhotoWindow()
     val viewModel: ProfileAssistViewModel = viewModel()
     val state = viewModel.state.collectAsStateWithLifecycle().value
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
@@ -70,6 +60,7 @@ internal fun ProfileAssistScreen(state: ProfileAssistState, onBack: () -> Unit,
                 is ProfileAssistState.Failed -> {
                     Text(state.message)
                     Button(onClick = onRetry) { Text("Try again") }
+                    if (state.canReplace) Button(onClick = onReplace) { Text("Choose another profile photo") }
                     TextButton(onClick = onBack) { Text("Return to scans") }
                 }
                 is ProfileAssistState.Ready -> {
@@ -237,10 +228,4 @@ internal fun pointName(id: LandmarkId) = when (id) {
     ProfileCatalog.visibleGonion -> "Visible jaw corner"
     Landmarks.MANDIBULAR_BORDER_REFERENCE -> "Lower edge of the jaw"
     else -> "Profile point"
-}
-
-private tailrec fun Context.activity(): Activity? = when (this) {
-    is Activity -> this
-    is ContextWrapper -> baseContext.activity()
-    else -> null
 }

@@ -85,6 +85,7 @@ class LocalScanStore @Inject constructor(
     }
 
     internal suspend fun readGuestProfilePhoto(scanId: String) = repository().readProfilePhoto(ScanOwner.Guest, scanId)
+    internal suspend fun getGuestScan(scanId: String) = repository().get(ScanOwner.Guest, scanId)
     internal suspend fun readGuestProfileAssist(scanId: String) = repository().readProfileAssist(ScanOwner.Guest, scanId)
     internal suspend fun beginGuestProfileAssist(scanId: String, imageRevision: String, expectedRevision: Long?,
         side: ProfileSide, facing: app.ascend.mobile.core.profile.ProfileFacing) =
