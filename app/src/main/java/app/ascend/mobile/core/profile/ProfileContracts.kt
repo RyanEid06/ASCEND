@@ -6,7 +6,8 @@ import app.ascend.mobile.core.model.ProfileSide
 /** Lane-private spike; not a frozen WP09/storage API or a production capture policy. */
 internal const val PROFILE_EXPERIMENT_VERSION = "wp10-profile-synthetic-v1"
 
-internal enum class ProfileOrigin { SYNTHETIC, CONSENTED_LOCAL }
+// DEMO_LOCAL permits point confirmation on a local photo, never measurement/scoring admission.
+internal enum class ProfileOrigin { SYNTHETIC, CONSENTED_LOCAL, DEMO_LOCAL }
 internal enum class ProfilePointSource { AUTOMATIC, ASSISTED }
 
 internal data class ProfilePoint(

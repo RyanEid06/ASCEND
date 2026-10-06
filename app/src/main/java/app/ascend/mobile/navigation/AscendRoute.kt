@@ -20,3 +20,6 @@ data object CaptureFlowRoute : NavKey
 
 @Serializable
 data class FrontLandmarkRoute(val scanId: String) : NavKey
+
+@Serializable
+data class ProfileAssistRoute(val scanId: String) : NavKey

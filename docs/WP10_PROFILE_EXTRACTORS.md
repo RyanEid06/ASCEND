@@ -35,6 +35,15 @@ navigation route, signing/version or ABI packaging contract changes. No dependen
 is added. Internal declarations cannot be adopted as a public WP09 seam without
 the joint contract decision. No current app flow calls this experiment.
 
+### WP09 adoption update (2026-10-06)
+
+The preceding status records the WP10 groundwork commit. The owner subsequently
+removed per-interface approval stops and authorized WP09 to reuse these internal
+types. The Ryan branch now includes the assisted profile UI/storage adapter and
+an explicitly unvalidated DEMO_LOCAL preview origin; the synthetic-only formula
+gate remains unchanged. Shared interface reconciliation and production profile
+acceptance remain at P4 sync. See `WP09_PROFILE_CAPTURE_ASSIST.md`.
+
 ## Definitions and unsupported candidates
 
 The three existing WP03 formula definitions are retained as unsigned interior

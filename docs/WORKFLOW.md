@@ -112,7 +112,7 @@ For every phase:
 Flow:
 1. main must be green.
 2. Create phase/PXX-integration from main.
-3. Freeze the shared phase contract.
+3. Identify shared phase interfaces and reuse the existing models.
 4. Ryan and Eddy branch from that exact integration commit.
 5. Work in parallel.
 6. Each lane opens a PR into the phase integration branch.
@@ -124,9 +124,9 @@ Flow:
 
 No “I already started the next WP” while the sync gate is unresolved.
 
-## Shared-contract rule
+## Shared interfaces — coordinate through the phase sync
 
-Once a phase begins, these are treated as shared API contracts:
+These are shared interfaces that both lanes should keep consistent:
 - data models
 - database schema touched by both lanes
 - scoring config schema
@@ -135,13 +135,18 @@ Once a phase begins, these are treated as shared API contracts:
 - analytics event names
 - public interfaces between geometry, scoring, storage, and UI
 
-A lane may not casually change them. If a shared contract must change:
-1. stop both lanes
-2. document the change
-3. update both branches
-4. resume
+Reuse existing types rather than create competing models. Necessary additive
+changes may proceed in the owning development branch without a separate approval
+or stop-both-lanes ceremony. Describe the interface change and dependency in the
+PR, retain compatibility where practical, and reconcile both lanes at phase sync.
 
-This prevents parallel work from becoming merge-conflict roulette.
+The owner relaxed the per-interface freeze/approval stops on 2026-10-06. Ordinary
+reversible implementation, fixes and tests should continue autonomously. Keep
+planning and documentation proportionate; do not require an extra design/spec/plan
+approval before each task. The shared phase sync and merge boundaries remain:
+integrate both lanes, run the shared checks, review the integrated behavior, then
+obtain the phase merge decision before starting the next phase. This does not
+waive photo privacy, bounded editing, honest reliability labels or branch safety.
 
 ## Ownership philosophy
 
