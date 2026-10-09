@@ -37,6 +37,8 @@ The product is based on standardized front + profile capture, deterministic faci
 
 P4 combines WP09's constrained profile confirmation UI and WP10's synthetic profile formula groundwork. The signed QA candidate is version 0.4.0 (versionCode 6); see the [P4 phone test checklist](docs/P04_QA_BUILD.md). Real-photo profile measurements and scoring remain unavailable until reviewed production policies and validation exist. The phase merge/build does not close that acceptance work. Shared phase sync and signed update checkpoints remain; ordinary implementation no longer requires a separate interface approval ceremony.
 
+P5 lane groundwork now includes [WP11 local visual-feature extraction](docs/WP11_VISUAL_FEATURE_EXTRACTION.md): image-bound ROI sampling, explicit semantic-mask signals, confidence/failure outputs and synthetic capture-sensitivity checks. Real-photo feature admission remains unavailable until reviewed providers and empirical validation exist. WP12 scoring integration and P5 acceptance remain at the phase sync boundary.
+
 Source-backed facial measurement/reference research is stored under `reference-data/v1/`, while production scoring authority is isolated under `reference-models/`. Research rows are never loaded directly as runtime scoring constants. The current Male/Female runtime files are intentionally non-scorable drafts until the explicit scoring-model freeze supplies validated enabled metrics, T1-T5 curves, hidden-score calibration, cross-metric comparability rules, measurement-uncertainty rules, coverage thresholds, weights and rank thresholds.
 
 
